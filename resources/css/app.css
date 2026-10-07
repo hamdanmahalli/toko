@@ -1,0 +1,117 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
+
+    /* Hijau emerald pekat. 600 dan 700 adalah warna yang diminta langsung
+       (#0F5342 / #135846); sisanya diturunkan dari rona yang sama. */
+    --color-brand-50: #f2f7f5;
+    --color-brand-100: #e3efea;
+    --color-brand-200: #c8dfd7;
+    --color-brand-300: #a3c8ba;
+    --color-brand-400: #74a897;
+    --color-brand-500: #3f7a6b;
+    --color-brand-600: #0F5342;
+    --color-brand-700: #135846;
+    --color-brand-800: #0e4237;
+    --color-brand-900: #0b342b;
+    --color-brand-950: #072119;
+
+    /* Merah aksen toko (identitas merah-hijau-putih). Dipakai sedikit saja:
+       terlambat, batas atas kartu hero, tombol pulang, status pengajuan.
+       Ditonem agar sejalan dengan hijau brand yang pekat. */
+    --color-merah-50: #fdf3f2;
+    --color-merah-100: #fbe4e1;
+    --color-merah-200: #f6c6c1;
+    --color-merah-300: #ee9d94;
+    --color-merah-400: #e2655b;
+    --color-merah-500: #c93a30;
+    --color-merah-600: #b3261e;
+    --color-merah-700: #962017;
+    --color-merah-800: #791913;
+    --color-merah-900: #5d110d;
+}
+
+/* Angka waktu selalu rata lebar supaya tidak "bergeser" tiap detik. */
+.tabular {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Sembunyikan tombol zoom di HP tapi tetap bisa dipakai. */
+.safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+
+/* Huruf tebal yang dirapatkan, bukan synthetic bold. */
+.font-display {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+/* Kartu: tanpa border tebal, cukup permukaan yang sedikit terangkat. */
+@utility card {
+    border-radius: 1rem;
+    background-color: #fff;
+    box-shadow:
+        0 1px 2px rgb(7 33 25 / 0.04),
+        0 1px 3px rgb(7 33 25 / 0.06);
+}
+
+/* Kartu absen: kode QR dan barcode-nya punya ukuran piksel tetap dari
+   library, jadi di layar sempit keduanya menyusut mengikuti lebar kartu.
+   Mode cetak tidak terpengaruh karena aturan ini khusus layar (screen). */
+@media screen and (max-width: 480px) {
+    .kartu-qr svg {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+/* Fokus keyboard yang jelas di atas latar hijau tua. */
+@utility ring-brand-focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--color-brand-200);
+}
+
+/* Kedip pelan agar tombol absen yang sedang aktif terlihat, tanpa efek
+   yang berlebihan. */
+@keyframes kedip {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.45;
+    }
+}
+
+.kedip {
+    animation: kedip 1.5s ease-in-out infinite;
+}
+
+/* Muncul perlahan dari bawah: kesan halaman yang terisi, bukan melompat. */
+@keyframes naik {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.masuk {
+    animation: naik 0.45s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .kedip,
+    .masuk {
+        animation: none;
+    }
+}
