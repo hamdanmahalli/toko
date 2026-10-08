@@ -1,7 +1,7 @@
 {
     "id": "/",
-    "name": "Absensi Toko",
-    "short_name": "Absensi",
+    "name": "Toko MM",
+    "short_name": "Toko MM",
     "description": "Absensi karyawan toko: datang, pulang, ubah jadwal, izin, dan riwayat.",
     "lang": "id",
     "start_url": "/masuk",
