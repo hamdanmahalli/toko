@@ -12,7 +12,8 @@ class BuatAkunPemilik extends Command
 {
     protected $signature = 'toko:buat-akun
                             {--nama= : Nama lengkap pemilik}
-                            {--email= : Email untuk login}';
+                            {--email= : Email untuk login}
+                            {--password= : Password (non-interaktif, khusus bootstrap deploy)}';
 
     protected $description = 'Membuat akun pengguna dengan peran Pemilik (password diminta secara interaktif)';
 
@@ -45,19 +46,28 @@ class BuatAkunPemilik extends Command
             return self::FAILURE;
         }
 
-        $password = (string) $this->secret('Password (min. 8 karakter)');
-        $konfirmasi = (string) $this->secret('Ulangi password');
+        $password = (string) $this->option('password');
+        if ($password !== '') {
+            if (strlen($password) < 8) {
+                $this->error('  Password minimal 8 karakter.');
 
-        if (strlen($password) < 8) {
-            $this->error('  Password minimal 8 karakter.');
+                return self::FAILURE;
+            }
+        } else {
+            $password = (string) $this->secret('Password (min. 8 karakter)');
+            $konfirmasi = (string) $this->secret('Ulangi password');
 
-            return self::FAILURE;
-        }
+            if (strlen($password) < 8) {
+                $this->error('  Password minimal 8 karakter.');
 
-        if ($password !== $konfirmasi) {
-            $this->error('  Password tidak cocok.');
+                return self::FAILURE;
+            }
 
-            return self::FAILURE;
+            if ($password !== $konfirmasi) {
+                $this->error('  Password tidak cocok.');
+
+                return self::FAILURE;
+            }
         }
 
         $user = User::create([

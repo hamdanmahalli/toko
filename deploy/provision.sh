@@ -13,6 +13,14 @@ APP_DIR="$HOME/absensi"
 cd "$APP_DIR"
 echo "== Direktori aplikasi: $APP_DIR"
 
+# 0. Perbaiki izin hasil ekstrak: ZIP buatan Windows sering menyimpan direktori
+#    tanpa bit execute (drw-r--r--) sehingga PHP menolak require vendor
+#    ("Permission denied"). Ini wajib dijalankan sekali setelah extract.
+echo "== Memperbaiki izin file (direktori 755, file 644)..."
+find . -type d -exec chmod 755 {} \;
+find . -type f -exec chmod 644 {} \;
+chmod -R 775 storage bootstrap/cache
+
 # 1. Validasi .env
 if [ ! -f .env ]; then
     echo "!! File .env tidak ditemukan. Salin dari template lalu isi:"
