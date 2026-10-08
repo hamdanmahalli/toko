@@ -4,8 +4,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Absensi">
-<link rel="icon" type="image/png" sizes="192x192" href="{{ asset('icon/icon-192.png') }}">
-<link rel="apple-touch-icon" href="{{ asset('icon/icon-192.png') }}">
+<link rel="icon" type="image/png" sizes="192x192" href="{{ asset('apple-touch-icon.png') }}">
+<link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
 @if (app()->isProduction())
 <script>
 if ('serviceWorker' in navigator) {

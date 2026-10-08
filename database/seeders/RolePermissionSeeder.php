@@ -50,6 +50,7 @@ class RolePermissionSeeder extends Seeder
         'audit.lihat',
         'pengguna.lihat',
         'pengguna.kelola',
+        'perangkat.kelola',
         'peran.kelola',
 
         'pengaturan.lihat',

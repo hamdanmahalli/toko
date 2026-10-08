@@ -13,6 +13,10 @@
                class="rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-slate-100 hover:text-brand-700">
                 Panduan
             </a>
+            <a href="{{ route('profil.index') }}"
+               class="rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-slate-100 hover:text-brand-700">
+                Profil
+            </a>
             <span class="hidden max-w-[10rem] truncate text-xs font-medium text-slate-500 sm:inline">
                 {{ auth()->user()->name }}
             </span>

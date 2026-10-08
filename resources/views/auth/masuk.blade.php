@@ -18,11 +18,12 @@
 
             <form method="POST" action="{{ route('masuk') }}" class="card space-y-4 p-6">
                 @csrf
+                <input type="hidden" name="device_id">
 
                 <div>
-                    <label for="email" class="mb-1.5 block text-[13px] font-medium text-slate-600">Email</label>
-                    <input id="email" name="email" type="email" required autofocus autocomplete="username"
-                           value="{{ old('email') }}"
+                    <label for="login" class="mb-1.5 block text-[13px] font-medium text-slate-600">Email atau Username</label>
+                    <input id="login" name="login" type="text" required autofocus autocomplete="username"
+                           value="{{ old('login') }}"
                            class="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-sm outline-none transition
                                   placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100">
                 </div>
@@ -52,9 +53,20 @@
             </form>
 
             <p class="mt-5 text-center text-[11px] text-slate-400">
-                Satu akun hanya bisa dipakai di satu perangkat.
+                Satu akun hanya bisa dipakai di perangkat yang diizinkan.
             </p>
         </div>
     </div>
+    <script>
+        // Isi device_id secepatnya dari modul identitas (resources/js/app.js)
+        document.addEventListener('DOMContentLoaded', function () {
+            var id = null;
+            try { id = window.localStorage.getItem('tokom_dev'); } catch (e) { id = null; }
+            if (id) {
+                var kolom = document.querySelector('input[name="device_id"]');
+                if (kolom && !kolom.value) kolom.value = id;
+            }
+        });
+    </script>
 </body>
 </html>

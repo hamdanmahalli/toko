@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\StatusPerangkat;
 use App\Http\Controllers\Controller;
 use App\Models\Shop;
 use App\Models\User;
+use App\Models\UserDevice;
 use App\Support\CakupanToko;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,10 +30,11 @@ class PenggunaController extends Controller
     public function index(Request $request): View
     {
         $pengguna = User::query()
-            ->with(['roles', 'shops', 'employee'])
+            ->with(['roles', 'shops', 'employee', 'devices'])
             ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w
                 ->where('name', 'ilike', "%{$request->string('q')}%")
-                ->orWhere('email', 'ilike', "%{$request->string('q')}%")))
+                ->orWhere('email', 'ilike', "%{$request->string('q')}%")
+                ->orWhere('username', 'ilike', "%{$request->string('q')}%")))
             ->when($request->filled('peran'), fn ($q) => $q->whereHas(
                 'roles',
                 fn ($r) => $r->where('name', $request->string('peran')->value),
@@ -59,6 +62,7 @@ class PenggunaController extends Controller
             'toko' => ['nullable', 'array'],
             'toko.*' => ['integer', Rule::exists('shops', 'id')],
             'aktif' => ['nullable', 'boolean'],
+            'bebas_perangkat' => ['nullable', 'boolean'],
         ]);
 
         // Menonaktifkan diri sendiri mengunci akun sendiri dari halaman ini.
@@ -74,7 +78,10 @@ class PenggunaController extends Controller
         DB::transaction(function () use ($pengguna, $data) {
             $pengguna->syncRoles($data['peran']);
             $pengguna->shops()->sync($data['toko'] ?? []);
-            $pengguna->forceFill(['aktif' => (bool) ($data['aktif'] ?? false)])->save();
+            $pengguna->forceFill([
+                'aktif' => (bool) ($data['aktif'] ?? false),
+                'bebas_perangkat' => (bool) ($data['bebas_perangkat'] ?? false),
+            ])->save();
 
             // Ganti peran atau toko = hak akses berubah total, jadi sessi lama
             // (termasuk active_session_id) tidak boleh tetap dipakai.
@@ -82,6 +89,34 @@ class PenggunaController extends Controller
         });
 
         return back()->with('sukses', 'Akun '.$pengguna->name.' berhasil diperbarui.');
+    }
+
+    /**
+     * Setujui/tolak/hapus perangkat akun. Semuanya butuh `perangkat.kelola`,
+     * dan target harus benar-benar milik akun yang disebut di URL.
+     */
+    public function perangkatSetujui(User $pengguna, UserDevice $perangkat): RedirectResponse
+    {
+        abort_unless($perangkat->user_id === $pengguna->id, 404);
+        $perangkat->update(['status' => StatusPerangkat::Disetujui, 'last_seen_at' => now()]);
+
+        return back()->with('sukses', 'Perangkat '.$pengguna->name.' diizinkan untuk login.');
+    }
+
+    public function perangkatTolak(User $pengguna, UserDevice $perangkat): RedirectResponse
+    {
+        abort_unless($perangkat->user_id === $pengguna->id, 404);
+        $perangkat->update(['status' => StatusPerangkat::Ditolak]);
+
+        return back()->with('sukses', 'Perangkat '.$pengguna->name.' ditolak untuk login.');
+    }
+
+    public function perangkatHapus(User $pengguna, UserDevice $perangkat): RedirectResponse
+    {
+        abort_unless($perangkat->user_id === $pengguna->id, 404);
+        $perangkat->delete();
+
+        return back()->with('sukses', 'Riwayat perangkat '.$pengguna->name.' dihapus.');
     }
 
     /**

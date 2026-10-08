@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'telepon', 'aktif'])]
+#[Fillable(['name', 'email', 'username', 'password', 'telepon', 'aktif', 'bebas_perangkat'])]
 #[Hidden(['password', 'remember_token', 'active_session_id'])]
 class User extends Authenticatable
 {
@@ -36,7 +37,31 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'aktif' => 'boolean',
+            'bebas_perangkat' => 'boolean',
         ];
+    }
+
+    /** Perangkat tempat akun ini diizinkan login (diatur lewat halaman Pengguna). */
+    public function devices(): HasMany
+    {
+        return $this->hasMany(UserDevice::class);
+    }
+
+    /**
+     * Peran yang tidak terikat ke perangkat tertentu: pemilik dan supervisor
+     * adalah manusia yang sudah dipercaya, dan `bebas_perangkat` memberi
+     * pengecualian per akun (mis. HP diperbaiki sementara).
+     */
+    public function perangkatBebas(): bool
+    {
+        return $this->bebas_perangkat
+            || $this->hasAnyRole((array) config('absensi.perangkat_bebas_roles', []));
+    }
+
+    /** Karyawan dengan penjagaan perangkat aktif harus login dari perangkat disetujui. */
+    public function wajibPerangkat(): bool
+    {
+        return $this->hasRole('karyawan') && ! $this->perangkatBebas();
     }
 
     /** Akun login yang tertaut ke data karyawan (null untuk Pemilik/Supervisor). */

@@ -11,9 +11,11 @@ use App\Http\Controllers\Admin\ShiftTemplateController;
 use App\Http\Controllers\Admin\ShiftWindowController;
 use App\Http\Controllers\Admin\ShopController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\KlaimController;
 use App\Http\Controllers\PanduanController;
 use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\PresensiController;
+use App\Http\Controllers\ProfilController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/beranda')->name('awal');
@@ -50,10 +52,23 @@ Route::post('/presensi/{kode}', [PresensiController::class, 'proses'])
 Route::middleware('guest')->group(function () {
     Route::get('/masuk', [AuthController::class, 'formMasuk'])->name('masuk');
     Route::post('/masuk', [AuthController::class, 'masuk'])->middleware('throttle:10,1');
+
+    // Klaim akun mandiri: NIP + email di data karyawan, pilih username sendiri.
+    Route::get('/klaim', [KlaimController::class, 'form'])->name('klaim.form');
+    Route::post('/klaim', [KlaimController::class, 'klaim'])
+        ->middleware('throttle:5,1')
+        ->name('klaim.proses');
 });
 
 Route::middleware('auth')->group(function () {
     Route::post('/keluar', [AuthController::class, 'keluar'])->name('keluar');
+
+    // Kelola akun sendiri: username, password, dan izin perangkat milik sendiri.
+    Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
+    Route::post('/profil/username', [ProfilController::class, 'gantiUsername'])->name('profil.username');
+    Route::post('/profil/password', [ProfilController::class, 'gantiPassword'])->name('profil.password');
+    Route::post('/profil/perangkat/{perangkat}/cabut', [ProfilController::class, 'cabutPerangkat'])
+        ->name('profil.perangkat-cabut');
 
     Route::get('/beranda', [AbsenController::class, 'beranda'])
         ->middleware('permission:dashboard.lihat')
@@ -185,6 +200,17 @@ Route::middleware('auth')->group(function () {
             Route::put('/pengguna/{pengguna}', [PenggunaController::class, 'update'])
                 ->middleware('permission:pengguna.kelola')
                 ->name('pengguna.update');
+        });
+
+        // Persetujuan perangkat terpisah dari `pengguna.kelola`: supervisor
+        // kepala toko boleh memberi izin login perangkat karyawannya sendiri.
+        Route::middleware('permission:perangkat.kelola')->group(function () {
+            Route::post('/pengguna/{pengguna}/perangkat/{perangkat}/setujui', [PenggunaController::class, 'perangkatSetujui'])
+                ->name('pengguna.perangkat-setujui');
+            Route::post('/pengguna/{pengguna}/perangkat/{perangkat}/tolak', [PenggunaController::class, 'perangkatTolak'])
+                ->name('pengguna.perangkat-tolak');
+            Route::delete('/pengguna/{pengguna}/perangkat/{perangkat}', [PenggunaController::class, 'perangkatHapus'])
+                ->name('pengguna.perangkat-hapus');
         });
 
         // Menonaktifkan bukan menghapus: riwayat absensi wajib aman.

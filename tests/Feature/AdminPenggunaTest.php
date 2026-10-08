@@ -25,6 +25,7 @@ class AdminPenggunaTest extends TestCase
         'pengguna.lihat',
         'pengguna.kelola',
         'peran.kelola',
+        'perangkat.kelola',
     ];
 
     protected function setUp(): void
@@ -280,5 +281,82 @@ class AdminPenggunaTest extends TestCase
             ->get('/admin/pengguna?peran=tidak-ada')
             ->assertOk()
             ->assertDontSee($supervisor->name);
+    }
+
+    public function test_bebas_perangkat_bisa_dinyalakan_dan_dimatikan(): void
+    {
+        $target = $this->dengan('karyawan');
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->put("/admin/pengguna/{$target->id}", [
+                'peran' => ['karyawan'],
+                'aktif' => '1',
+                'bebas_perangkat' => '1',
+            ])
+            ->assertRedirect();
+
+        $this->assertTrue($target->fresh()->bebas_perangkat);
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->put("/admin/pengguna/{$target->id}", [
+                'peran' => ['karyawan'],
+                'aktif' => '1',
+            ])
+            ->assertRedirect();
+
+        $this->assertFalse($target->fresh()->bebas_perangkat);
+    }
+
+    public function test_admin_menyetujui_perangkat_pending(): void
+    {
+        $target = $this->dengan('karyawan');
+        $perangkat = $target->devices()->create(['device_token' => 'hp-1', 'status' => 'pending']);
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->post("/admin/pengguna/{$target->id}/perangkat/{$perangkat->id}/setujui")
+            ->assertRedirect()
+            ->assertSessionHas('sukses');
+
+        $this->assertSame('approved', $perangkat->fresh()->status->value);
+    }
+
+    public function test_admin_menolak_perangkat(): void
+    {
+        $target = $this->dengan('karyawan');
+        $perangkat = $target->devices()->create(['device_token' => 'hp-1', 'status' => 'pending']);
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->post("/admin/pengguna/{$target->id}/perangkat/{$perangkat->id}/tolak")
+            ->assertRedirect();
+
+        $this->assertSame('rejected', $perangkat->fresh()->status->value);
+    }
+
+    public function test_akun_tanpa_perangkat_kelola_tidak_bisa_menyetujui(): void
+    {
+        $target = $this->dengan('karyawan');
+        $perangkat = $target->devices()->create(['device_token' => 'hp-1', 'status' => 'pending']);
+
+        // Boleh melihat pengguna, tapi bukan memberi izin perangkat.
+        $pengawas = $this->dengan('pengawas', ['dashboard.lihat', 'pengguna.lihat']);
+
+        $this->actingAs($pengawas)
+            ->post("/admin/pengguna/{$target->id}/perangkat/{$perangkat->id}/setujui")
+            ->assertForbidden();
+
+        $this->assertSame('pending', $perangkat->fresh()->status->value);
+    }
+
+    public function test_perangkat_di_luar_akun_target_ditolak(): void
+    {
+        $target = $this->dengan('karyawan');
+        $lain = $this->dengan('karyawan');
+        $perangkat = $lain->devices()->create(['device_token' => 'hp-lain', 'status' => 'pending']);
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->post("/admin/pengguna/{$target->id}/perangkat/{$perangkat->id}/setujui")
+            ->assertNotFound();
+
+        $this->assertSame('pending', $perangkat->fresh()->status->value);
     }
 }

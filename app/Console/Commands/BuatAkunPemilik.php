@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Support\Username;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -13,6 +14,7 @@ class BuatAkunPemilik extends Command
     protected $signature = 'toko:buat-akun
                             {--nama= : Nama lengkap pemilik}
                             {--email= : Email untuk login}
+                            {--username= : Username untuk login (dibuat otomatis dari email bila kosong)}
                             {--password= : Password (non-interaktif, khusus bootstrap deploy)}';
 
     protected $description = 'Membuat akun pengguna dengan peran Pemilik (password diminta secara interaktif)';
@@ -26,15 +28,25 @@ class BuatAkunPemilik extends Command
 
         $nama = (string) ($this->option('nama') ?: $this->ask('Nama lengkap'));
         $email = (string) ($this->option('email') ?: $this->ask('Email untuk login'));
+        $username = (new Username)->normalisasi((string) $this->option('username'));
 
         $validator = Validator::make(
-            ['nama' => $nama, 'email' => $email],
+            ['nama' => $nama, 'email' => $email, 'username' => $username],
             [
                 'nama' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
+                'username' => [
+                    'nullable',
+                    'string',
+                    'min:3',
+                    'max:50',
+                    'regex:/^[A-Za-z0-9_.-]+$/',
+                    Rule::unique('users', 'username'),
+                ],
             ],
             [
                 'email.unique' => 'Email tersebut sudah terdaftar.',
+                'username.unique' => 'Username tersebut sudah terdaftar.',
             ],
         );
 
@@ -73,6 +85,7 @@ class BuatAkunPemilik extends Command
         $user = User::create([
             'name' => $nama,
             'email' => $email,
+            'username' => $username !== '' ? $username : (new Username)->dariEmail($email),
             'password' => Hash::make($password),
             'aktif' => true,
         ]);
@@ -80,7 +93,7 @@ class BuatAkunPemilik extends Command
         $user->assignRole('pemilik');
 
         $this->newLine();
-        $this->info("  Akun {$email} dibuat dengan peran Pemilik.");
+        $this->info("  Akun {$email} (username: {$user->username}) dibuat dengan peran Pemilik.");
         $this->newLine();
 
         return self::SUCCESS;

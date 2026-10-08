@@ -36,6 +36,7 @@ class AuthTest extends TestCase
         $this->get('/masuk')
             ->assertOk()
             ->assertSee('logo-toko-mm.png', false)
+            ->assertSee('name="login"', false)
             ->assertSee('name="password"', false)
             ->assertDontSee('Masuk untuk melanjutkan');
     }
@@ -46,7 +47,7 @@ class AuthTest extends TestCase
         $this->get('/beranda')->assertRedirect(route('masuk'));
     }
 
-    public function test_bisa_login_dengan_kredensial_benar(): void
+    public function test_bisa_login_dengan_email(): void
     {
         $user = User::factory()->create([
             'email' => 'siti@toko.test',
@@ -54,11 +55,28 @@ class AuthTest extends TestCase
         ]);
 
         $response = $this->post('/masuk', [
-            'email' => 'siti@toko.test',
+            'login' => 'siti@toko.test',
             'password' => 'rahasia123',
         ]);
 
         $response->assertRedirect(route('beranda'));
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_bisa_login_dengan_username(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'siti@toko.test',
+            'username' => 'siti.kasir',
+            'password' => Hash::make('rahasia123'),
+        ]);
+
+        // Kolom tunggal: tanpa `@` diartikan sebagai username.
+        $this->post('/masuk', [
+            'login' => 'SITI.KASIR',
+            'password' => 'rahasia123',
+        ])->assertRedirect(route('beranda'));
+
         $this->assertAuthenticatedAs($user);
     }
 
@@ -67,9 +85,9 @@ class AuthTest extends TestCase
         User::factory()->create(['email' => 'siti@toko.test']);
 
         $this->post('/masuk', [
-            'email' => 'siti@toko.test',
+            'login' => 'siti@toko.test',
             'password' => 'salah',
-        ])->assertSessionHasErrors('email');
+        ])->assertSessionHasErrors('login');
 
         $this->assertGuest();
     }
@@ -82,20 +100,25 @@ class AuthTest extends TestCase
         ]);
 
         $this->post('/masuk', [
-            'email' => 'siti@toko.test',
+            'login' => 'siti@toko.test',
             'password' => 'password',
-        ])->assertSessionHasErrors('email');
+        ])->assertSessionHasErrors('login');
 
         $this->assertGuest();
     }
 
-    public function test_email_tidak_valid_ditolak(): void
+    public function test_login_tidak_dikenal_ditolak_dengan_pesan_baku(): void
     {
-        $this->post('/masuk', [
-            'email' => 'bukan-email',
+        $respons = $this->post('/masuk', [
+            'login' => 'bukan-ada',
             'password' => 'rahasia123',
-        ])->assertSessionHasErrors('email');
+        ]);
 
+        $respons->assertSessionHasErrors('login');
+        $this->assertSame(
+            'Email/username atau password salah.',
+            $respons->getSession()->get('errors')->first('login'),
+        );
         $this->assertGuest();
     }
 
@@ -119,21 +142,21 @@ class AuthTest extends TestCase
 
         for ($i = 0; $i < 5; $i++) {
             $this->post('/masuk', [
-                'email' => 'siti@toko.test',
+                'login' => 'siti@toko.test',
                 'password' => 'salah',
             ]);
         }
 
         $respons = $this->post('/masuk', [
-            'email' => 'siti@toko.test',
+            'login' => 'siti@toko.test',
             'password' => 'password',
         ]);
 
-        $respons->assertSessionHasErrors('email');
+        $respons->assertSessionHasErrors('login');
 
         $this->assertStringContainsString(
             'Terlalu banyak percobaan',
-            $respons->getSession()->get('errors')->first('email'),
+            $respons->getSession()->get('errors')->first('login'),
         );
     }
 }

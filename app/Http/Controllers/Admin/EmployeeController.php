@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\QrService;
 use App\Services\ShiftResolver;
 use App\Support\CakupanToko;
+use App\Support\Username;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -146,6 +147,7 @@ class EmployeeController extends Controller
         $user = User::create([
             'name' => $request->string('nama')->value(),
             'email' => $request->string('email')->value(),
+            'username' => (new Username)->dariEmail($request->string('email')->value()),
             'password' => Hash::make($request->string('password')->value()),
             'telepon' => $request->string('telepon')->value() ?: null,
             'aktif' => true,

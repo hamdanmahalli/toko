@@ -40,4 +40,18 @@ return [
         'idle_timeout' => (int) env('PRESENSI_IDLE_TIMEOUT', 30),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Peran yang bebas dari penjagaan perangkat
+    |--------------------------------------------------------------------------
+    |
+    | Karyawan hanya boleh login dari perangkat yang disetujui pemilik atau
+    | kepala toko (tabel `user_devices`). Peran yang disebut di sini dianggap
+    | sudah dipercaya dan tidak dibatasi, kecuali lewat `bebas_perangkat`
+    | per-akun yang tetap bisa memilih untuk mengikuti aturan.
+    |
+    */
+
+    'perangkat_bebas_roles' => ['pemilik', 'supervisor'],
+
 ];

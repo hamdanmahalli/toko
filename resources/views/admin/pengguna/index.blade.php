@@ -57,6 +57,14 @@
                                 @endif
                             </p>
                             <p class="truncate text-xs text-slate-500">{{ $u->email }}</p>
+                            @if ($u->username)
+                                <p class="truncate text-[11px] text-slate-400">
+                                    username: {{ $u->username }}
+                                    @if ($u->bebas_perangkat)
+                                        · <span class="text-brand-700">bebas perangkat</span>
+                                    @endif
+                                </p>
+                            @endif
                             @if ($u->active_session_id)
                                 <p class="mt-1 text-[11px] text-amber-600">Sedang dipakai di perangkat lain</p>
                             @endif
@@ -117,12 +125,23 @@
                     </div>
 
                     <div class="mt-3 flex items-center justify-between gap-3">
-                        <label class="flex items-center gap-2 text-sm text-slate-600">
-                            <input type="hidden" name="aktif" value="0">
-                            <input type="checkbox" name="aktif" value="1" @checked($u->aktif)
-                                   class="rounded border-slate-200 text-brand-600 focus:ring-brand-500">
-                            Akun aktif
-                        </label>
+                        <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+                            <label class="flex items-center gap-2 text-sm text-slate-600">
+                                <input type="hidden" name="aktif" value="0">
+                                <input type="checkbox" name="aktif" value="1" @checked($u->aktif)
+                                       class="rounded border-slate-200 text-brand-600 focus:ring-brand-500">
+                                Akun aktif
+                            </label>
+
+                            @can('pengguna.kelola')
+                                <label class="flex items-center gap-2 text-sm text-slate-600">
+                                    <input type="hidden" name="bebas_perangkat" value="0">
+                                    <input type="checkbox" name="bebas_perangkat" value="1" @checked($u->bebas_perangkat)
+                                           class="rounded border-slate-200 text-brand-600 focus:ring-brand-500">
+                                    Bebas perangkat
+                                </label>
+                            @endcan
+                        </div>
 
                         @can('pengguna.kelola')
                             <button class="rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700">
@@ -130,6 +149,68 @@
                             </button>
                         @endcan
                     </div>
+
+                    @if ($u->devices->isNotEmpty())
+                        <div class="mt-3 space-y-1.5 border-t border-slate-100 pt-3">
+                            <p class="text-xs font-medium text-slate-600">Perangkat yang tercatat</p>
+
+                            @foreach ($u->devices as $perangkat)
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <p class="truncate text-[12px] text-slate-600">
+                                            {{ $perangkat->label ?: 'Perangkat' }}
+                                        </p>
+                                        <p class="truncate text-[11px] text-slate-400">
+                                            {{ $perangkat->device_token }} ·
+                                            {{ $perangkat->last_seen_at?->diffForHumans() ?? 'belum pernah dicoba' }}
+                                        </p>
+                                    </div>
+
+                                    <span @class([
+                                        'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium',
+                                        'bg-brand-50 text-brand-700' => $perangkat->status->value === 'approved',
+                                        'bg-amber-50 text-amber-700' => $perangkat->status->value === 'pending',
+                                        'bg-rose-50 text-rose-700' => $perangkat->status->value === 'rejected',
+                                    ])>
+                                        {{ $perangkat->status->label() }}
+                                    </span>
+
+                                    @can('perangkat.kelola')
+                                        <span class="flex shrink-0 items-center gap-1.5">
+                                            @if ($perangkat->status->value !== 'approved')
+                                                <form method="POST"
+                                                      action="{{ route('admin.pengguna.perangkat-setujui', [$u, $perangkat]) }}">
+                                                    @csrf
+                                                    <button class="text-[11px] font-medium text-brand-700 hover:text-brand-800">
+                                                        Setujui
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            @if ($perangkat->status->value !== 'rejected')
+                                                <form method="POST"
+                                                      action="{{ route('admin.pengguna.perangkat-tolak', [$u, $perangkat]) }}">
+                                                    @csrf
+                                                    <button class="text-[11px] font-medium text-rose-600 hover:text-rose-700">
+                                                        Tolak
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            <form method="POST"
+                                                  action="{{ route('admin.pengguna.perangkat-hapus', [$u, $perangkat]) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="text-[11px] font-medium text-slate-400 hover:text-slate-600">
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        </span>
+                                    @endcan
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </form>
             @endforeach
         </div>
