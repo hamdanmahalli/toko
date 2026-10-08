@@ -4,7 +4,7 @@
 // Halaman selalu diambil segar dari server kalau ada jaringan; cache
 // dipakai hanya sebagai cadangan ketika offline. POST (absen, login, dan
 // sejenisnya) tidak pernah disentuh supaya tidak menimbulkan duplikasi.
-const VERSI = 'toko-mm-v3';
+const VERSI = 'toko-mm-v4';
 
 self.addEventListener('install', () => {
     self.skipWaiting();
