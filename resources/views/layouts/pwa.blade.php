@@ -1,11 +1,12 @@
-<link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+<link rel="manifest" href="{{ asset('manifest.webmanifest') }}?v={{ filemtime(public_path('manifest.webmanifest')) }}">
 <meta name="theme-color" content="#0F5342">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Toko MM">
-<link rel="icon" type="image/png" sizes="192x192" href="{{ asset('apple-touch-icon.png') }}">
-<link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+@php($versiIcon = filemtime(public_path('apple-touch-icon.png')))
+<link rel="icon" type="image/png" sizes="192x192" href="{{ asset('apple-touch-icon.png') }}?v={{ $versiIcon }}">
+<link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v={{ $versiIcon }}">
 @if (app()->isProduction())
 <script>
 if ('serviceWorker' in navigator) {

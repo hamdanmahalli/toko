@@ -10,6 +10,20 @@
         AddType application/manifest+json .webmanifest
     </IfModule>
 
+    # Batas waktu cache: berkas gambar biasa cukup disimpan satu jam, tetapi
+    # berkas yang menentukan tampilan aplikasi (manifest, service worker,
+    # icon utama) selalu divalidasi ulang supaya icon baru langsung terbaca.
+    <IfModule mod_headers.c>
+        <FilesMatch "\.(png|ico)$">
+            Header set Cache-Control "max-age=3600, public"
+        </FilesMatch>
+        <FilesMatch "^(sw\.js|manifest\.webmanifest|apple-touch-icon\.png|favicon\.ico)$">
+            Header set Cache-Control "no-cache, must-revalidate"
+            Header unset Expires
+            Header unset ETag
+        </FilesMatch>
+    </IfModule>
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
