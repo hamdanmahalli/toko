@@ -1,12 +1,8 @@
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "GANTI_DENGAN_PACKAGE_APP_PWA_BUILDER",
-      "sha256_cert_fingerprints": [
-        "GANTI_DENGAN_SHA256_SIDIK_JARI_PWA_BUILDER"
-      ]
-    }
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "online.tokomm.twa",
+    "sha256_cert_fingerprints": ["2A:CE:CA:3D:5B:A6:23:C6:3F:1E:24:AC:03:EE:26:DB:AC:6A:3C:7B:16:4A:C9:62:26:CF:45:86:A8:7E:38:86"]
   }
-]
+}]
