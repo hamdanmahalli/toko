@@ -58,8 +58,12 @@ Route::middleware('guest')->group(function () {
     Route::get('/masuk', [AuthController::class, 'formMasuk'])->name('masuk');
     Route::post('/masuk', [AuthController::class, 'masuk'])->middleware('throttle:10,1');
 
-    // Klaim akun mandiri: NIP + email di data karyawan, pilih username sendiri.
+    // Klaim akun mandiri: nomor ID karyawan (NIP) di data karyawan, pilih
+    // username sendiri. Email diisi otomatis dari data karyawan bila ada.
     Route::get('/klaim', [KlaimController::class, 'form'])->name('klaim.form');
+    Route::get('/klaim/cari', [KlaimController::class, 'cari'])
+        ->middleware('throttle:30,1')
+        ->name('klaim.cari');
     Route::post('/klaim', [KlaimController::class, 'klaim'])
         ->middleware('throttle:5,1')
         ->name('klaim.proses');

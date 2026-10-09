@@ -23,9 +23,12 @@
                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                 </div>
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="nip">NIP</label>
-                    <input id="nip" name="nip" value="{{ old('nip', $karyawan->nip) }}" placeholder="K-001"
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="nip">NIP / Nomor ID</label>
+                    <input id="nip" name="nip" required value="{{ old('nip', $karyawan->nip) }}" placeholder="K-001"
                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
+                    <p class="mt-1 text-xs text-slate-500">
+                        Wajib dan unik. Dipakai karyawan untuk klaim akun, jadi pastikan benar.
+                    </p>
                 </div>
             </div>
 
@@ -39,12 +42,9 @@
                     <label class="mb-1.5 block text-sm font-medium text-slate-700" for="email">Email</label>
                     <input id="email" name="email" type="email" value="{{ old('email', $karyawan->email) }}"
                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
-                    @if (! $karyawan->user)
-                        <p class="mt-1 text-xs text-slate-500">
-                            Wajib diisi bila membuat akun login di bagian bawah, dan harus unik —
-                            tidak boleh sama dengan akun lain (termasuk akun pemilik/supervisor).
-                        </p>
-                    @endif
+                    <p class="mt-1 text-xs text-slate-500">
+                        Kalau diisi, otomatis muncul saat karyawan klaim akun pakai nomor ID di atas.
+                    </p>
                 </div>
             </div>
 
@@ -163,37 +163,6 @@
             </p>
         </div>
 
-        @unless ($karyawan->user)
-            <div class="space-y-3 card p-5">
-                <h2 class="font-display text-[15px] text-slate-900">Buat akun login</h2>
-                <label class="flex items-center gap-2 text-sm text-slate-700">
-                    <input id="buat_akun" type="checkbox" name="buat_akun" value="1"
-                           class="rounded border-slate-200 text-brand-600 focus:ring-brand-500">
-                    Buat akun supaya karyawan bisa absen sendiri
-                </label>
-                <p class="text-xs leading-relaxed text-slate-500">
-                    Centang untuk memberi akun login. Akun memakai nama &amp; email yang diisi di bagian
-                    atas plus password di bawah ini, lalu otomatis mendapat peran karyawan. Tanpa centang,
-                    karyawan absen lewat perangkat presensi toko memakai kartunya, bukan dari HP.
-                </p>
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="password">Password</label>
-                        <input id="password" name="password" type="password" minlength="8" autocomplete="new-password"
-                               placeholder="Minimal 8 karakter"
-                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="password_confirmation">Ulangi password</label>
-                        <input id="password_confirmation" name="password_confirmation" type="password" minlength="8" autocomplete="new-password"
-                               placeholder="Ketik ulang password"
-                               class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
-                    </div>
-                </div>
-                <p class="text-xs text-slate-500">Akun akan mendapat peran karyawan dan ikut aturan satu akun satu perangkat.</p>
-            </div>
-        @endunless
-
         <div class="flex flex-wrap gap-2">
             <button class="rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[.99]">
                 Simpan
@@ -272,28 +241,6 @@
 
                     catatan.textContent = pakaiTemplate ? wajib : bebas;
                 });
-            }
-
-            const buatAkun = document.getElementById('buat_akun');
-            const email = document.getElementById('email');
-            const pw = document.getElementById('password');
-            const pw2 = document.getElementById('password_confirmation');
-
-            if (buatAkun && email && pw && pw2) {
-                // Saat centang "buat akun" dinyalakan, email dan password wajib
-                // lewat validasi peramban dulu, supaya tidak kena pesan error
-                // server berbahasa Inggris yang membingungkan.
-                const atur = () => {
-                    const perlu = buatAkun.checked;
-
-                    email.toggleAttribute('required', perlu);
-                    pw.toggleAttribute('required', perlu);
-                    pw.toggleAttribute('minlength', perlu);
-                    pw2.toggleAttribute('required', perlu);
-                    pw2.toggleAttribute('minlength', perlu);
-                };
-
-                buatAkun.addEventListener('change', atur);
             }
         })();
     </script>

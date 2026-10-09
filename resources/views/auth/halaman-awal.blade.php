@@ -3,7 +3,7 @@
     $panel = $panel ?? 'mulai';
     $judulPanel = match ($panel) {
         'masuk' => 'Masuk',
-        'klaim' => 'Klaim Akun',
+        'klaim' => 'Sign Up',
         default => 'Selamat Datang',
     };
 @endphp
@@ -249,21 +249,27 @@
         }
     </style>
 
-    <!-- Panel: hanya satu yang tampak, sisanya disembunyikan. -->
+    <!-- Panel: hanya satu yang tampak; perpindahan memakai animasi naik dan
+         tinggi wadah dianimasikan lewat JS agar tidak melompat. -->
     <style>
+        .panel-wadah {
+            overflow: hidden;
+            transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         .panel {
             display: none;
         }
 
         .panel.aktif {
             display: block;
-            animation: naik 0.35s ease-out both;
+            animation: naik 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
         @keyframes naik {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(6px);
             }
             to {
                 opacity: 1;
@@ -272,6 +278,10 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
+            .panel-wadah {
+                transition: none;
+            }
+
             .panel.aktif {
                 animation: none;
             }
@@ -307,9 +317,9 @@
         </div>
     </div>
 
-    <div class="relative flex min-h-dvh w-full flex-col lg:flex-row lg:items-center lg:justify-end">
+    <div class="relative flex min-h-dvh w-full flex-col lg:flex-row lg:items-start lg:justify-end lg:py-10">
         <!-- Area gambar: penuh sampai tepi. Mobile = login.png, Web = website.jpg -->
-        <div class="relative min-h-[45vh] flex-1 overflow-hidden lg:absolute lg:inset-0 lg:min-h-0">
+        <div class="relative h-[45vh] w-full shrink-0 overflow-hidden lg:absolute lg:inset-0 lg:h-auto">
             <img src="{{ asset('img/login.png') }}"
                  alt="Ilustrasi {{ $namaApp }}"
                  class="absolute inset-0 h-full w-full object-cover object-center lg:hidden">
@@ -319,8 +329,8 @@
         </div>
 
         <!-- Area putih berisi panel: menumpuk gambar di mobile, melayang di kanan saat web -->
-        <div class="relative -mt-8 flex w-full flex-col rounded-t-[2rem] bg-white px-6 pb-8 pt-7
-                    lg:my-10 lg:mr-10 lg:w-[440px] lg:shrink-0 lg:justify-center lg:rounded-[2rem] lg:px-10 lg:py-10 lg:shadow-2xl">
+        <div id="panel-wadah" class="panel-wadah relative -mt-8 flex w-full flex-col rounded-t-[2rem] bg-white px-6 pb-8 pt-7
+                    lg:my-auto lg:mr-10 lg:w-[440px] lg:shrink-0 lg:rounded-[2rem] lg:px-10 lg:py-10 lg:shadow-2xl">
             @include('layouts.pesan')
 
             {{-- PANEL: GET STARTED --}}
@@ -395,9 +405,9 @@
                 </form>
             </section>
 
-            {{-- PANEL: KLAIM --}}
+            {{-- PANEL: SIGN UP --}}
             <section id="panel-klaim" class="panel {{ $panel === 'klaim' ? 'aktif' : '' }}">
-                <h2 class="text-center text-[26px] font-extrabold tracking-tight text-slate-800">Klaim Akun</h2>
+                <h2 class="text-center text-[26px] font-extrabold tracking-tight text-slate-800">Sign Up</h2>
                 <p class="mt-2 text-center text-[13px] text-slate-500">
                     Sudah punya akun?
                     <button type="button" data-ke="masuk" class="font-medium text-brand-700 hover:text-brand-800">Login</button>
@@ -445,7 +455,7 @@
                     </div>
 
                     <button class="w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.99]">
-                        Klaim akun
+                        Sign Up
                     </button>
                 </form>
             </section>
@@ -453,14 +463,30 @@
     </div>
 
     <script>
-        // Pindah antar panel (Get Started / Login / Klaim) tanpa muat ulang.
+        // Pindah antar panel (Get Started / Login / Sign Up) tanpa muat ulang.
+        // Tinggi wadah dianimasikan agar perpindahan mulus, bukan melompat.
         document.addEventListener('click', function (e) {
             var tombol = e.target.closest('[data-ke]');
             if (!tombol) return;
+
             var tujuan = tombol.getAttribute('data-ke');
-            document.querySelectorAll('.panel').forEach(function (p) {
-                p.classList.toggle('aktif', p.id === 'panel-' + tujuan);
-            });
+            var wadah = document.getElementById('panel-wadah');
+            var sekarang = wadah.querySelector('.panel.aktif');
+            var berikut = document.getElementById('panel-' + tujuan);
+            if (!berikut || berikut === sekarang) return;
+
+            wadah.style.height = wadah.getBoundingClientRect().height + 'px';
+            void wadah.offsetHeight;
+
+            if (sekarang) sekarang.classList.remove('aktif');
+            berikut.classList.add('aktif');
+
+            wadah.style.height = berikut.getBoundingClientRect().height + 'px';
+
+            clearTimeout(wadah._timer);
+            wadah._timer = setTimeout(function () {
+                wadah.style.height = '';
+            }, 380);
         });
     </script>
     <script>
@@ -472,6 +498,34 @@
             document.querySelectorAll('input[name="device_id"]').forEach(function (kolom) {
                 if (!kolom.value) kolom.value = id;
             });
+        });
+    </script>
+    <script>
+        // Isi email otomatis dari data karyawan saat nomor ID (NIP) diisi di
+        // form klaim. Kolom email tetap bisa diubah kalau karyawan ingin memakai
+        // alamat lain.
+        document.addEventListener('DOMContentLoaded', function () {
+            var nip = document.getElementById('nip');
+            var email = document.getElementById('email');
+            if (!nip || !email) return;
+
+            var terakhir = '';
+            var ambilEmail = function () {
+                var nilai = nip.value.trim();
+                if (nilai === '' || nilai === terakhir) return;
+                terakhir = nilai;
+
+                fetch('{{ route('klaim.cari') }}?nip=' + encodeURIComponent(nilai), {
+                    headers: { 'Accept': 'application/json' },
+                })
+                    .then(function (r) { return r.ok ? r.json() : { email: null }; })
+                    .then(function (data) {
+                        if (data && data.email && !email.value) email.value = data.email;
+                    })
+                    .catch(function () {});
+            };
+
+            nip.addEventListener('blur', ambilEmail);
         });
     </script>
     <script>

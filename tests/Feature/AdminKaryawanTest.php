@@ -83,30 +83,15 @@ class AdminKaryawanTest extends TestCase
         $this->actingAs($user)->get('/admin/karyawan')->assertForbidden();
     }
 
-    public function test_bisa_menambah_karyawan_dengan_akun(): void
+    public function test_nip_wajib_diisi(): void
     {
         $toko = Shop::factory()->create();
 
         $this->actingAs($this->pemilik())
-            ->post('/admin/karyawan', $this->dataKaryawan($toko, [
-                'buat_akun' => 1,
-                'password' => 'rahasia123',
-                'password_confirmation' => 'rahasia123',
-            ]))
-            ->assertRedirect(route('admin.karyawan.index'));
+            ->post('/admin/karyawan', $this->dataKaryawan($toko, ['nip' => '']))
+            ->assertSessionHasErrors('nip');
 
-        $this->assertDatabaseHas('employees', ['nama' => 'Budi Santoso', 'shop_id' => $toko->id]);
-
-        $user = User::where('email', 'budi@toko.test')->first();
-        $this->assertNotNull($user);
-        $this->assertTrue($user->aktif);
-        $this->assertTrue($user->hasRole('karyawan'));
-        $this->assertTrue(Hash::check('rahasia123', $user->password));
-
-        $this->assertDatabaseHas('employees', [
-            'user_id' => $user->id,
-            'qr_version' => 1,
-        ]);
+        $this->assertDatabaseMissing('employees', ['nama' => 'Budi Santoso']);
     }
 
     public function test_bisa_menambah_karyawan_tanpa_akun(): void
@@ -145,6 +130,7 @@ class AdminKaryawanTest extends TestCase
         $this->actingAs($this->pemilik())
             ->put("/admin/karyawan/{$karyawan->id}", [
                 'nama' => $karyawan->nama,
+                'nip' => $karyawan->nip,
                 'shop_id' => $toko->id,
                 'tipe_payroll' => PayrollType::Harian->value,
                 'aktif' => 1,
@@ -163,6 +149,7 @@ class AdminKaryawanTest extends TestCase
         $this->actingAs($this->pemilik())
             ->put("/admin/karyawan/{$karyawan->id}", [
                 'nama' => $karyawan->nama,
+                'nip' => $karyawan->nip,
                 'shop_id' => $toko->id,
                 'tipe_payroll' => PayrollType::Harian->value,
                 'aktif' => 1,
@@ -171,15 +158,6 @@ class AdminKaryawanTest extends TestCase
             ->assertRedirect(route('admin.karyawan.index'));
 
         $this->assertTrue($karyawan->fresh()->boleh_presensi);
-    }
-
-    public function test_password_waajib_diisi_jika_membuat_akun(): void
-    {
-        $toko = Shop::factory()->create();
-
-        $this->actingAs($this->pemilik())
-            ->post('/admin/karyawan', $this->dataKaryawan($toko, ['buat_akun' => 1]))
-            ->assertSessionHasErrors('password');
     }
 
     public function test_nip_karyawan_unik(): void
@@ -196,74 +174,11 @@ class AdminKaryawanTest extends TestCase
         $this->assertSame(1, Employee::where('nip', 'K-100')->count());
     }
 
-    public function test_email_akun_karyawan_unik(): void
-    {
-        $toko = Shop::factory()->create();
-
-        Employee::factory()->denganAkun()->create([
-            'shop_id' => $toko->id,
-            'nip' => 'K-300',
-            'email' => 'budi@toko.test',
-        ]);
-
-        $this->actingAs($this->pemilik())
-            ->post('/admin/karyawan', $this->dataKaryawan($toko, [
-                'buat_akun' => 1,
-                'password' => 'rahasia123',
-                'password_confirmation' => 'rahasia123',
-            ]))
-            ->assertSessionHasErrors('email');
-    }
-
     public function test_hanya_toko_yang_valid_diterima(): void
     {
         $this->actingAs($this->pemilik())
             ->post('/admin/karyawan', $this->dataKaryawan(Shop::factory()->create(), ['shop_id' => 99999]))
             ->assertSessionHasErrors('shop_id');
-    }
-
-    public function test_mengubah_email_ikut_memperbarui_akun(): void
-    {
-        $toko = Shop::factory()->create();
-        $karyawan = Employee::factory()->denganAkun()->create(['shop_id' => $toko->id]);
-
-        $this->actingAs($this->pemilik())
-            ->put("/admin/karyawan/{$karyawan->id}", [
-                'nama' => 'Nama Baru',
-                'shop_id' => $toko->id,
-                'email' => 'baru@toko.test',
-                'tipe_payroll' => PayrollType::Harian->value,
-                'aktif' => 1,
-            ])
-            ->assertRedirect(route('admin.karyawan.index'));
-
-        $this->assertSame('baru@toko.test', $karyawan->user->fresh()->email);
-    }
-
-    public function test_membuat_akun_ketika_mengubah_karyawan(): void
-    {
-        $toko = Shop::factory()->create();
-        $karyawan = Employee::factory()->create([
-            'shop_id' => $toko->id,
-            'nip' => 'K-100',
-            'email' => 'budi@toko.test',
-        ]);
-
-        $this->assertNull($karyawan->user_id);
-
-        $this->actingAs($this->pemilik())
-            ->put("/admin/karyawan/{$karyawan->id}", $this->dataKaryawan($toko, [
-                'buat_akun' => 1,
-                'password' => 'rahasia123',
-                'password_confirmation' => 'rahasia123',
-            ]))
-            ->assertRedirect(route('admin.karyawan.index'));
-
-        $user = User::where('email', 'budi@toko.test')->first();
-        $this->assertNotNull($user);
-        $this->assertTrue($user->hasRole('karyawan'));
-        $this->assertTrue(Hash::check('rahasia123', $user->password));
-        $this->assertSame($user->id, $karyawan->fresh()->user_id);
     }
 
     public function test_menonaktifkan_karyawan_juga_menonaktifkan_akun(): void

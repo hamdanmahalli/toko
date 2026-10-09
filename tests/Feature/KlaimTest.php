@@ -14,9 +14,10 @@ use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 /**
- * Klaim akun mandiri: admin membuat data karyawan (NIP + email), karyawan
- * mengklaim sendiri dengan memilih username, password awal dikirim email,
- * dan perangkat tempat klaim langsung diizinkan.
+ * Klaim akun mandiri: admin membuat data karyawan dengan nomor ID (NIP),
+ * karyawan mengklaim sendiri memakai nomor itu, email diisi otomatis dari data
+ * karyawan bila ada, lalu password awal dikirim ke email tersebut dan perangkat
+ * tempat klaim langsung diizinkan.
  */
 class KlaimTest extends TestCase
 {
@@ -134,17 +135,49 @@ class KlaimTest extends TestCase
         $this->assertDatabaseMissing('users', ['username' => 'budikasir']);
     }
 
-    public function test_email_tidak_cocok_ditolak(): void
+    public function test_email_berbeda_dari_data_tetap_diterima(): void
     {
         $this->karyawan();
 
         $this->post('/klaim', [
             'nip' => 'K-1001',
-            'email' => 'oranglain@toko.test',
+            'email' => 'email.baru@toko.test',
             'username' => 'budikasir',
-        ])->assertRedirect()->assertSessionHas('galat');
+        ])->assertRedirect(route('masuk'))->assertSessionHas('sukses');
+
+        $akun = User::where('username', 'budikasir')->firstOrFail();
+
+        $this->assertSame('email.baru@toko.test', $akun->email);
+    }
+
+    public function test_email_sudah_dipakai_ditolak(): void
+    {
+        $this->karyawan();
+        User::factory()->create(['email' => 'sudah@toko.test']);
+
+        $this->post('/klaim', [
+            'nip' => 'K-1001',
+            'email' => 'sudah@toko.test',
+            'username' => 'budikasir',
+        ])->assertSessionHasErrors('email');
 
         $this->assertDatabaseMissing('users', ['username' => 'budikasir']);
+    }
+
+    public function test_cari_email_mengembalikan_email_karyawan(): void
+    {
+        $this->karyawan();
+
+        $this->getJson('/klaim/cari?nip=K-1001')
+            ->assertOk()
+            ->assertJson(['email' => 'budi@toko.test']);
+    }
+
+    public function test_cari_email_kosong_bila_karyawan_tidak_ada(): void
+    {
+        $this->getJson('/klaim/cari?nip=K-9999')
+            ->assertOk()
+            ->assertJson(['email' => null]);
     }
 
     public function test_karyawan_sudah_punya_akun_tidak_bisa_diklaim_ulang(): void

@@ -6,18 +6,22 @@ use App\Mail\KirimAkunBaru;
 use App\Models\Employee;
 use App\Models\User;
 use App\Support\Username;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
- * Klaim akun untuk karyawan: admin cukup membuat data karyawan berisi NIP +
- * email, lalu karyawan mengklaim akunnya sendiri dengan memilih username.
- * Password awal dikirim lewat email, dan perangkat yang dipakai untuk klaim
- * otomatis dipercaya supaya langsung bisa masuk.
+ * Klaim akun untuk karyawan: admin cukup membuat data karyawan dengan nomor ID
+ * (NIP), lalu karyawan mengklaim akunnya sendiri memakai nomor itu dan memilih
+ * username. Kalau admin sudah mengisi email, kolom email di form otomatis
+ * terisi dari data karyawan. Password awal dikirim ke email tersebut, dan
+ * perangkat yang dipakai untuk klaim otomatis dipercaya supaya langsung bisa
+ * masuk.
  */
 class KlaimController extends Controller
 {
@@ -30,18 +34,40 @@ class KlaimController extends Controller
         return view('auth.halaman-awal', ['panel' => 'klaim']);
     }
 
+    /**
+     * Email karyawan untuk auto-isi form klaim berdasarkan nomor ID.
+     *
+     * Hanya mengembalikan email karyawan yang belum punya akun dan masih aktif,
+     * supaya nomor ID yang sudah diklaim atau nonaktif tidak membocorkan apa pun.
+     */
+    public function cari(Request $request): JsonResponse
+    {
+        $nip = trim((string) $request->string('nip')->value());
+
+        if ($nip === '') {
+            return response()->json(['email' => null]);
+        }
+
+        $email = Employee::query()
+            ->where('nip', $nip)
+            ->whereNull('user_id')
+            ->where('aktif', true)
+            ->value('email');
+
+        return response()->json(['email' => $email]);
+    }
+
     public function klaim(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'nip' => ['required', 'string', 'max:30'],
-            'email' => ['required', 'email', 'max:120'],
+            'email' => ['required', 'email', 'max:120', Rule::unique('users', 'email')],
             'username' => ['required', 'string', 'min:3', 'max:50', 'regex:/^[A-Za-z0-9_.-]+$/'],
             'device_id' => ['nullable', 'string', 'max:64'],
         ]);
 
         $karyawan = Employee::query()
             ->where('nip', $data['nip'])
-            ->where('email', $data['email'])
             ->whereNull('user_id')
             ->where('aktif', true)
             ->first();
@@ -49,7 +75,7 @@ class KlaimController extends Controller
         if (! $karyawan) {
             return back()->with(
                 'galat',
-                'Data karyawan dengan NIP dan email tersebut tidak ditemukan, atau akunnya sudah pernah dibuat.',
+                'Data karyawan dengan nomor ID tersebut tidak ditemukan, atau akunnya sudah pernah dibuat.',
             );
         }
 
@@ -63,7 +89,7 @@ class KlaimController extends Controller
 
         $akun = User::create([
             'name' => $karyawan->nama,
-            'email' => $karyawan->email,
+            'email' => $data['email'],
             'username' => $username,
             'password' => Hash::make($passwordAwal),
             'telepon' => $karyawan->telepon,

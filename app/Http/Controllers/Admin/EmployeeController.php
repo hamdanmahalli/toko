@@ -8,11 +8,9 @@ use App\Models\Employee;
 use App\Models\Position;
 use App\Models\ShiftTemplate;
 use App\Models\Shop;
-use App\Models\User;
 use App\Services\QrService;
 use App\Services\ShiftResolver;
 use App\Support\CakupanToko;
-use App\Support\Username;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -75,10 +73,7 @@ class EmployeeController extends Controller
     {
         $data = $this->validasi($request);
 
-        $user = $this->buatAkun($request);
-
         $karyawan = Employee::create($data + [
-            'user_id' => $user?->id,
             'qr_version' => 1,
         ]);
 
@@ -105,16 +100,6 @@ class EmployeeController extends Controller
     {
         $data = $this->validasi($request, $karyawan);
 
-        // Akun login yang belum ada bisa dibuat dari halaman ubah ini. Untuk
-        // akun yang sudah ada, emailnya tetap mengikuti perubahan email karyawan.
-        if ($karyawan->user) {
-            if (isset($data['email'])) {
-                $karyawan->user->update(['email' => $data['email']]);
-            }
-        } elseif ($request->filled('buat_akun')) {
-            $karyawan->forceFill(['user_id' => $this->buatAkun($request)?->id]);
-        }
-
         $karyawan->update($data);
 
         $this->pasangShift($request, $karyawan);
@@ -135,27 +120,6 @@ class EmployeeController extends Controller
         return redirect()
             ->route('admin.karyawan.index')
             ->with('sukses', 'Karyawan '.$karyawan->nama.' dinonaktifkan. Riwayat absensi tetap tersimpan.');
-    }
-
-    /** Buat akun login untuk karyawan (opsional saat menyimpan). */
-    public function buatAkun(Request $request): ?User
-    {
-        if (! $request->filled('buat_akun')) {
-            return null;
-        }
-
-        $user = User::create([
-            'name' => $request->string('nama')->value(),
-            'email' => $request->string('email')->value(),
-            'username' => (new Username)->dariEmail($request->string('email')->value()),
-            'password' => Hash::make($request->string('password')->value()),
-            'telepon' => $request->string('telepon')->value() ?: null,
-            'aktif' => true,
-        ]);
-
-        $user->assignRole('karyawan');
-
-        return $user;
     }
 
     public function resetPassword(Request $request, Employee $karyawan): RedirectResponse
@@ -254,19 +218,11 @@ class EmployeeController extends Controller
     {
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:120'],
-            'nip' => ['nullable', 'string', 'max:30', Rule::unique('employees', 'nip')->ignore($karyawan?->id)],
+            'nip' => ['required', 'string', 'max:30', Rule::unique('employees', 'nip')->ignore($karyawan?->id)],
             'telepon' => ['nullable', 'string', 'max:30'],
-            'email' => [
-                // Wajib kalau sekalian membuat akun login.
-                'nullable',
-                'required_if:buat_akun,1',
-                'email',
-                'max:120',
-                Rule::unique('employees', 'email')->ignore($karyawan?->id),
-                // Akun login memakai email yang sama, jadi harus bebas dari tabel user.
-                // Saat mengubah, email user lama ikut diperbarui oleh pemanggil.
-                $karyawan === null ? Rule::unique('users', 'email') : Rule::unique('users', 'email')->ignore($karyawan->user_id),
-            ],
+            // Email dipakai untuk mengisi otomatis form klaim. Karyawan boleh
+            // memakai email lain saat klaim, jadi di sini tidak mengikat akun.
+            'email' => ['nullable', 'email', 'max:120', Rule::unique('employees', 'email')->ignore($karyawan?->id)],
             'shop_id' => ['required', Rule::exists('shops', 'id')],
             'position_id' => ['nullable', Rule::exists('positions', 'id')],
             'shift_template_id' => ['nullable', Rule::exists('shift_templates', 'id')],
@@ -278,9 +234,6 @@ class EmployeeController extends Controller
             'aktif' => ['nullable', 'boolean'],
             'boleh_presensi' => ['nullable', 'boolean'],
             'catatan' => ['nullable', 'string', 'max:255'],
-
-            'buat_akun' => ['nullable', 'boolean'],
-            'password' => ['nullable', 'required_if:buat_akun,1', 'string', 'min:8', 'confirmed'],
         ]);
 
         // Supervisor tidak boleh memindahkan karyawan ke luar tokonya.
@@ -295,8 +248,6 @@ class EmployeeController extends Controller
         $validated['boleh_presensi'] = $request->boolean('boleh_presensi');
 
         unset(
-            $validated['buat_akun'],
-            $validated['password'],
             $validated['shift_template_id'],
             $validated['shift_mulai_berlaku'],
         );
