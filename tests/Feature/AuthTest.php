@@ -47,8 +47,7 @@ class AuthTest extends TestCase
             ->assertOk()
             ->assertSee('Let&rsquo;s Get You Set Up<br>for Success', false)
             ->assertSee('img/login.png', false)
-            ->assertSee(route('masuk'), false)
-            ->assertSee(route('klaim.proses'), false);
+            ->assertSee(route('masuk'), false);
 
         $this->get('/beranda')->assertRedirect(route('masuk'));
     }

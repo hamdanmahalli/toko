@@ -27,7 +27,7 @@
                     <input id="nip" name="nip" required value="{{ old('nip', $karyawan->nip) }}" placeholder="K-001"
                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                     <p class="mt-1 text-xs text-slate-500">
-                        Wajib dan unik. Dipakai karyawan untuk klaim akun, jadi pastikan benar.
+                        Wajib dan unik. Dipakai untuk menautkan akun login karyawan.
                     </p>
                 </div>
             </div>
@@ -43,7 +43,7 @@
                     <input id="email" name="email" type="email" value="{{ old('email', $karyawan->email) }}"
                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                     <p class="mt-1 text-xs text-slate-500">
-                        Kalau diisi, otomatis muncul saat karyawan klaim akun pakai nomor ID di atas.
+                        Kalau diisi, dipakai sebagai alamat login saat admin membuatkan akun.
                     </p>
                 </div>
             </div>

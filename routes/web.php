@@ -11,7 +11,6 @@ use App\Http\Controllers\Admin\ShiftTemplateController;
 use App\Http\Controllers\Admin\ShiftWindowController;
 use App\Http\Controllers\Admin\ShopController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\KlaimController;
 use App\Http\Controllers\PanduanController;
 use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\PresensiController;
@@ -19,7 +18,7 @@ use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\PushController;
 use Illuminate\Support\Facades\Route;
 
-// Halaman sambutan (Get Started). Tamu melihat pengantar masuk/klaim akun;
+// Halaman sambutan (Get Started). Tamu melihat pengantar masuk;
 // karyawan yang sudah login langsung diarahkan ke beranda.
 Route::get('/', function () {
     return auth()->check() ? redirect()->route('beranda') : view('auth.halaman-awal', ['panel' => 'mulai']);
@@ -57,16 +56,6 @@ Route::post('/presensi/{kode}', [PresensiController::class, 'proses'])
 Route::middleware('guest')->group(function () {
     Route::get('/masuk', [AuthController::class, 'formMasuk'])->name('masuk');
     Route::post('/masuk', [AuthController::class, 'masuk'])->middleware('throttle:10,1');
-
-    // Klaim akun mandiri: nomor ID karyawan (NIP) di data karyawan, pilih
-    // username sendiri. Email diisi otomatis dari data karyawan bila ada.
-    Route::get('/klaim', [KlaimController::class, 'form'])->name('klaim.form');
-    Route::get('/klaim/cari', [KlaimController::class, 'cari'])
-        ->middleware('throttle:30,1')
-        ->name('klaim.cari');
-    Route::post('/klaim', [KlaimController::class, 'klaim'])
-        ->middleware('throttle:5,1')
-        ->name('klaim.proses');
 });
 
 Route::middleware('auth')->group(function () {

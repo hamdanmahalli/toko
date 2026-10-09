@@ -25,11 +25,7 @@ class AuthController extends Controller
             return redirect()->route('beranda');
         }
 
-        // Setelah pendaftaran berhasil, tampilkan layar sukses khusus, bukan
-        // langsung form login (pesan sukses dibawa sebagai flash session).
-        return view('auth.halaman-awal', [
-            'panel' => session('sukses') ? 'sukses' : 'masuk',
-        ]);
+        return view('auth.halaman-awal', ['panel' => 'masuk']);
     }
 
     public function masuk(Request $request): RedirectResponse

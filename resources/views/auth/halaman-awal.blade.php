@@ -3,7 +3,6 @@
     $panel = $panel ?? 'mulai';
     $judulPanel = match ($panel) {
         'masuk' => 'Masuk',
-        'klaim' => 'Sign Up',
         default => 'Selamat Datang',
     };
 @endphp
@@ -290,10 +289,7 @@
 
     <script>
         // Splash selalu tampil tiap muat ulang: pasang kelas sebelum konten dirender.
-        // Layar sukses setelah pendaftaran tampil langsung tanpa splash.
-        @if ($panel !== 'sukses')
-            document.documentElement.classList.add('splash-aktif');
-        @endif
+        document.documentElement.classList.add('splash-aktif');
     </script>
 
     @include('layouts.pwa')
@@ -335,30 +331,9 @@
         <!-- Area putih berisi panel: menumpuk gambar di mobile, melayang di kanan saat web -->
         <div class="relative flex w-full flex-col rounded-t-[2rem] bg-white px-6 pb-8 pt-7
                     lg:mb-10 lg:mr-10 lg:w-[440px] lg:shrink-0 lg:rounded-[2rem] lg:px-10 lg:py-10 lg:shadow-2xl">
-            @if ($panel !== 'sukses')
-                @include('layouts.pesan')
-            @endif
+            @include('layouts.pesan')
 
             <div id="panel-wadah" class="panel-wadah">
-            {{-- PANEL: SUKSES (setelah pendaftaran) --}}
-            <section id="panel-sukses" class="panel {{ $panel === 'sukses' ? 'aktif' : '' }}">
-                <div class="text-center">
-                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 ring-1 ring-brand-100">
-                        <svg class="h-7 w-7 text-brand-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                        </svg>
-                    </div>
-                    <h2 class="mt-5 text-[26px] font-extrabold tracking-tight text-slate-800">Akun berhasil dibuat</h2>
-                    <p class="mx-auto mt-3 max-w-xs text-[13px] leading-relaxed text-slate-500">
-                        {{ session('sukses') }}
-                    </p>
-                </div>
-                <button type="button" data-ke="masuk"
-                        class="mt-7 w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.99]">
-                    Ke Login
-                </button>
-            </section>
-
             {{-- PANEL: GET STARTED --}}
             <section id="panel-mulai" class="panel {{ $panel === 'mulai' ? 'aktif' : '' }}">
                 <div class="text-center">
@@ -380,10 +355,6 @@
             {{-- PANEL: LOGIN --}}
             <section id="panel-masuk" class="panel {{ $panel === 'masuk' ? 'aktif' : '' }}">
                 <h2 class="text-center text-[26px] font-extrabold tracking-tight text-slate-800">Login</h2>
-                <p class="mt-2 text-center text-[13px] text-slate-500">
-                    Don&rsquo;t Have An Account?
-                    <button type="button" data-ke="klaim" class="font-medium text-brand-700 hover:text-brand-800">Sign Up</button>
-                </p>
 
                 <form method="POST" action="{{ route('masuk') }}" class="mt-6 space-y-4">
                     @csrf
@@ -431,66 +402,12 @@
                 </form>
             </section>
 
-            {{-- PANEL: SIGN UP --}}
-            <section id="panel-klaim" class="panel {{ $panel === 'klaim' ? 'aktif' : '' }}">
-                <h2 class="text-center text-[26px] font-extrabold tracking-tight text-slate-800">Sign Up</h2>
-                <p class="mt-2 text-center text-[13px] text-slate-500">
-                    Sudah punya akun?
-                    <button type="button" data-ke="masuk" class="font-medium text-brand-700 hover:text-brand-800">Login</button>
-                </p>
-
-                <form method="POST" action="{{ route('klaim.proses') }}" class="mt-6 space-y-4">
-                    @csrf
-                    <input type="hidden" name="device_id">
-
-                    <div>
-                        <label for="nip" class="sr-only">NIP</label>
-                        <div class="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 transition focus-within:border-brand-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-brand-100">
-                            <svg class="h-[18px] w-[18px] shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5a2.25 2.25 0 0 0 2.25 2.25Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0ZM6.75 18.375a3.75 3.75 0 0 1 5.25-3.456 3.75 3.75 0 0 1 2.25 3.456H6.75Z"/>
-                            </svg>
-                            <input id="nip" name="nip" type="text" required autocomplete="off"
-                                   value="{{ old('nip') }}" placeholder="NIP"
-                                   class="w-full bg-transparent py-2.5 text-sm outline-none placeholder:text-slate-400">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="email" class="sr-only">Email</label>
-                        <div class="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 transition focus-within:border-brand-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-brand-100">
-                            <svg class="h-[18px] w-[18px] shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
-                            </svg>
-                            <input id="email" name="email" type="email" required autocomplete="email"
-                                   value="{{ old('email') }}" placeholder="Email"
-                                   class="w-full bg-transparent py-2.5 text-sm outline-none placeholder:text-slate-400">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="username" class="sr-only">Username</label>
-                        <div class="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 transition focus-within:border-brand-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-brand-100">
-                            <svg class="h-[18px] w-[18px] shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.1a7.5 7.5 0 0 1 15 0v.15H4.5V20.1Z"/>
-                            </svg>
-                            <input id="username" name="username" type="text" required minlength="3" maxlength="50" autocomplete="off"
-                                   value="{{ old('username') }}" placeholder="Username"
-                                   class="w-full bg-transparent py-2.5 text-sm outline-none placeholder:text-slate-400">
-                        </div>
-                        <span class="mt-1.5 block text-[11px] text-slate-400">Huruf kecil, angka, titik, strip, atau garis bawah (3&ndash;50 karakter).</span>
-                    </div>
-
-                    <button class="w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.99]">
-                        Sign Up
-                    </button>
-                </form>
-            </section>
             </div>
         </div>
     </div>
 
     <script>
-        // Pindah antar panel (Get Started / Login / Sign Up) tanpa muat ulang.
+        // Pindah antar panel (Get Started / Login) tanpa muat ulang.
         // Tinggi wadah dianimasikan supaya kartu tumbuh/memendek mulus dari atas.
         document.addEventListener('click', function (e) {
             var tombol = e.target.closest('[data-ke]');
@@ -517,7 +434,7 @@
         });
     </script>
     <script>
-        // Isi device_id di semua form (login & klaim) dari modul identitas.
+        // Isi device_id di form login dari modul identitas.
         document.addEventListener('DOMContentLoaded', function () {
             var id = null;
             try { id = window.localStorage.getItem('tokom_dev'); } catch (e) { id = null; }
@@ -525,34 +442,6 @@
             document.querySelectorAll('input[name="device_id"]').forEach(function (kolom) {
                 if (!kolom.value) kolom.value = id;
             });
-        });
-    </script>
-    <script>
-        // Isi email otomatis dari data karyawan saat nomor ID (NIP) diisi di
-        // form klaim. Kolom email tetap bisa diubah kalau karyawan ingin memakai
-        // alamat lain.
-        document.addEventListener('DOMContentLoaded', function () {
-            var nip = document.getElementById('nip');
-            var email = document.getElementById('email');
-            if (!nip || !email) return;
-
-            var terakhir = '';
-            var ambilEmail = function () {
-                var nilai = nip.value.trim();
-                if (nilai === '' || nilai === terakhir) return;
-                terakhir = nilai;
-
-                fetch('{{ route('klaim.cari') }}?nip=' + encodeURIComponent(nilai), {
-                    headers: { 'Accept': 'application/json' },
-                })
-                    .then(function (r) { return r.ok ? r.json() : { email: null }; })
-                    .then(function (data) {
-                        if (data && data.email && !email.value) email.value = data.email;
-                    })
-                    .catch(function () {});
-            };
-
-            nip.addEventListener('blur', ambilEmail);
         });
     </script>
     <script>
