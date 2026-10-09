@@ -13,6 +13,96 @@
         </p>
     </div>
 
+    @can('pengguna.kelola')
+        <details class="card mb-4">
+            <summary class="cursor-pointer select-none px-4 py-3 text-sm font-medium text-slate-700">
+                Tambah akun
+            </summary>
+
+            <form method="POST" action="{{ route('admin.pengguna.store') }}"
+                  class="grid gap-3 border-t border-slate-100 p-4">
+                @csrf
+
+                <fieldset class="grid gap-1.5">
+                    <legend class="mb-1 text-xs font-medium text-slate-600">Sumber akun</legend>
+                    <label class="flex items-center gap-2 text-sm text-slate-600">
+                        <input type="radio" name="mode" value="karyawan" checked
+                               class="text-brand-600 focus:ring-brand-500">
+                        Dari data karyawan (email karyawan)
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-slate-600">
+                        <input type="radio" name="mode" value="bebas"
+                               class="text-brand-600 focus:ring-brand-500">
+                        Akun baru tanpa data karyawan
+                    </label>
+                </fieldset>
+
+                <label data-mode="karyawan" class="grid gap-1">
+                    <span class="text-xs font-medium text-slate-600">Karyawan</span>
+                    <select name="nip"
+                            class="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
+                        <option value="">Pilih karyawan…</option>
+                        @foreach ($tanpaAkun as $k)
+                            <option value="{{ $k->nip }}">{{ $k->nip }} — {{ $k->nama }} ({{ $k->shop->nama }})</option>
+                        @endforeach
+                    </select>
+                    <span class="text-[11px] text-slate-400">
+                        Hanya karyawan aktif yang sudah punya email dan belum punya akun.
+                    </span>
+                </label>
+
+                <div data-mode="bebas" class="hidden grid gap-3 sm:grid-cols-2">
+                    <label class="grid gap-1">
+                        <span class="text-xs font-medium text-slate-600">Nama</span>
+                        <input type="text" name="nama"
+                               class="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
+                    </label>
+                    <label class="grid gap-1">
+                        <span class="text-xs font-medium text-slate-600">Email</span>
+                        <input type="email" name="email"
+                               class="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
+                    </label>
+                </div>
+
+                <label class="grid gap-1">
+                    <span class="text-xs font-medium text-slate-600">Peran</span>
+                    <select name="peran[]" multiple size="3"
+                            class="rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-brand-500">
+                        @foreach ($peran as $r)
+                            <option value="{{ $r->name }}">{{ $r->name }}</option>
+                        @endforeach
+                    </select>
+                    <span class="text-[11px] text-slate-400">
+                        Tahan Ctrl/Cmd untuk memilih lebih dari satu. Username dibuat otomatis dari email.
+                    </span>
+                </label>
+
+                <div>
+                    <button class="rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700">
+                        Buat akun &amp; kirim password
+                    </button>
+                </div>
+            </form>
+
+            <script>
+                (function () {
+                    const form = document.currentScript.closest('details');
+                    const radios = form.querySelectorAll('input[name="mode"]');
+
+                    function toggle() {
+                        const mode = form.querySelector('input[name="mode"]:checked').value;
+                        form.querySelectorAll('[data-mode]').forEach(function (el) {
+                            el.classList.toggle('hidden', el.dataset.mode !== mode);
+                        });
+                    }
+
+                    radios.forEach(function (r) { r.addEventListener('change', toggle); });
+                    toggle();
+                })();
+            </script>
+        </details>
+    @endcan
+
     <form method="GET" class="mb-4 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
         <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari nama atau email"
                class="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">

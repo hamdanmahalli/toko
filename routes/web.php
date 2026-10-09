@@ -210,6 +210,12 @@ Route::middleware('auth')->group(function () {
         Route::middleware('permission:pengguna.lihat')->group(function () {
             Route::get('/pengguna', [PenggunaController::class, 'index'])->name('pengguna.index');
 
+            // Membuat akun dari halaman ini sama-sama butuh `pengguna.kelola`,
+            // jadi supervisor yang cuma boleh membaca tidak bisa menambah akun.
+            Route::post('/pengguna', [PenggunaController::class, 'store'])
+                ->middleware('permission:pengguna.kelola')
+                ->name('pengguna.store');
+
             Route::put('/pengguna/{pengguna}', [PenggunaController::class, 'update'])
                 ->middleware('permission:pengguna.kelola')
                 ->name('pengguna.update');

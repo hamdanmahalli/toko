@@ -2,9 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Mail\KirimAkunBaru;
+use App\Models\Employee;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -358,5 +361,188 @@ class AdminPenggunaTest extends TestCase
             ->assertNotFound();
 
         $this->assertSame('pending', $perangkat->fresh()->status->value);
+    }
+
+    private function karyawan(array $atribut = []): Employee
+    {
+        return Employee::factory()->create($atribut + [
+            'shop_id' => Shop::factory()->create()->id,
+            'nip' => 'K-2001',
+            'email' => 'baru@toko.test',
+            'user_id' => null,
+            'aktif' => true,
+        ]);
+    }
+
+    public function test_form_tambah_akun_tampil_untuk_pengguna_kelola(): void
+    {
+        $this->actingAs($this->dengan('pemilik'))
+            ->get('/admin/pengguna')
+            ->assertOk()
+            ->assertSee('Tambah akun')
+            ->assertSee('name="mode"', false);
+    }
+
+    public function test_admin_membuat_akun_dari_data_karyawan(): void
+    {
+        Mail::fake();
+        $karyawan = $this->karyawan();
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->post('/admin/pengguna', [
+                'mode' => 'karyawan',
+                'nip' => 'K-2001',
+                'peran' => ['karyawan'],
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('sukses');
+
+        $akun = User::where('email', 'baru@toko.test')->firstOrFail();
+
+        $this->assertSame($karyawan->nama, $akun->name);
+        $this->assertSame('baru', $akun->username);
+        $this->assertTrue($akun->hasRole('karyawan'));
+        $this->assertSame($akun->id, $karyawan->fresh()->user_id);
+
+        // Akun tertaut mewarisi toko karyawannya.
+        $this->assertSame(
+            [$karyawan->shop_id],
+            $akun->shops()->pluck('shops.id')->all(),
+        );
+
+        Mail::assertSent(KirimAkunBaru::class, fn (KirimAkunBaru $mail) => $mail->hasTo('baru@toko.test')
+            && $mail->akun->is($akun)
+            && $mail->passwordAwal !== '');
+    }
+
+    public function test_akun_bebas_dibuat_tanpa_data_karyawan(): void
+    {
+        Mail::fake();
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->post('/admin/pengguna', [
+                'mode' => 'bebas',
+                'nama' => 'Pak Bos',
+                'email' => 'bos@toko.test',
+                'peran' => ['supervisor'],
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('sukses');
+
+        $akun = User::where('email', 'bos@toko.test')->firstOrFail();
+
+        $this->assertSame('Pak Bos', $akun->name);
+        $this->assertTrue($akun->hasRole('supervisor'));
+        $this->assertNull($akun->employee);
+    }
+
+    public function test_karyawan_tanpa_email_tidak_bisa_dibuatkan_akun(): void
+    {
+        Mail::fake();
+        $this->karyawan(['email' => null]);
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->post('/admin/pengguna', [
+                'mode' => 'karyawan',
+                'nip' => 'K-2001',
+                'peran' => ['karyawan'],
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('galat');
+
+        $this->assertSame(1, User::count());
+    }
+
+    public function test_karyawan_yang_sudah_punya_akun_tidak_bisa_dibuat_lagi(): void
+    {
+        Mail::fake();
+        $lama = User::factory()->create();
+        $this->karyawan(['user_id' => $lama->id]);
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->post('/admin/pengguna', [
+                'mode' => 'karyawan',
+                'nip' => 'K-2001',
+                'peran' => ['karyawan'],
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('galat');
+
+        $this->assertDatabaseMissing('users', ['email' => 'baru@toko.test']);
+    }
+
+    public function test_kegagalan_email_membatalkan_pembuatan_akun(): void
+    {
+        $karyawan = $this->karyawan();
+
+        Mail::shouldReceive('to')->andThrow(new \RuntimeException('smtp mati'));
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->post('/admin/pengguna', [
+                'mode' => 'karyawan',
+                'nip' => 'K-2001',
+                'peran' => ['karyawan'],
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('galat');
+
+        $this->assertSame(1, User::count());
+        $this->assertNull($karyawan->fresh()->user_id);
+    }
+
+    public function test_tanpa_permission_kelola_tidak_bisa_membuat_akun(): void
+    {
+        Mail::fake();
+        $this->karyawan();
+
+        $this->actingAs($this->dengan('pengguna-baca', ['dashboard.lihat', 'pengguna.lihat']))
+            ->post('/admin/pengguna', [
+                'mode' => 'karyawan',
+                'nip' => 'K-2001',
+                'peran' => ['karyawan'],
+            ])
+            ->assertForbidden();
+
+        $this->assertSame(1, User::count());
+    }
+
+    public function test_karyawan_di_luar_jangkauan_toko_ditolak(): void
+    {
+        Mail::fake();
+        $milik = Shop::factory()->create();
+        $orangLain = Shop::factory()->create();
+        $this->karyawan(['shop_id' => $orangLain->id]);
+
+        $user = $this->dengan('pengguna-baca', ['dashboard.lihat', 'pengguna.lihat', 'pengguna.kelola']);
+        $user->shops()->attach($milik);
+
+        $this->actingAs($user->fresh())
+            ->post('/admin/pengguna', [
+                'mode' => 'karyawan',
+                'nip' => 'K-2001',
+                'peran' => ['karyawan'],
+            ])
+            ->assertForbidden();
+
+        $this->assertSame(1, User::count());
+    }
+
+    public function test_peran_di_luar_wewenang_ditolak(): void
+    {
+        Mail::fake();
+
+        // Punya `pengguna.kelola` tetapi bukan `peran.kelola`, jadi tidak boleh
+        // memberi peran pemilik walau dikirim lewat POST langsung.
+        $this->actingAs($this->dengan('pengguna-baca', ['dashboard.lihat', 'pengguna.lihat', 'pengguna.kelola']))
+            ->post('/admin/pengguna', [
+                'mode' => 'bebas',
+                'nama' => 'Nakal',
+                'email' => 'nakal@toko.test',
+                'peran' => ['pemilik'],
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('galat');
+
+        $this->assertDatabaseMissing('users', ['email' => 'nakal@toko.test']);
     }
 }
