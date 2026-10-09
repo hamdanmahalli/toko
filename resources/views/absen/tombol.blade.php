@@ -70,6 +70,16 @@
      * tetapi membaik setelah beberapa detik.
      */
     function posisi(salkan) {
+        // Di dalam APK, pakai GPS native (lebih akurat dan tidak bergantung
+        // pada kebijakan lokasi WebView). Bentuk hasil disamakan dengan
+        // Position browser supaya pemanggil tidak perlu diubah.
+        if (window.TokoNative && window.TokoNative.aktif) {
+            if (typeof salkan === 'function') salkan('Mengambil lokasi GPS...');
+            return window.TokoNative.posisi({ sampel: 4 }).then(function (p) {
+                return { coords: { latitude: p.latitude, longitude: p.longitude, accuracy: p.accuracy } };
+            });
+        }
+
         return new Promise((resolve, reject) => {
             if (!navigator.geolocation) {
                 reject(new Error('Browser ini tidak mendukung pengambilan lokasi.'));

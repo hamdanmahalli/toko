@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    /*
+    | FCM HTTP v1 untuk notifikasi APK. Isi `project_id` dan salah satu dari
+    | `credentials` (path file JSON service account) atau `credentials_base64`.
+    */
+    'fcm' => [
+        'project_id' => env('FCM_PROJECT_ID'),
+        'credentials' => env('FCM_CREDENTIALS', storage_path('app/firebase/service-account.json')),
+        'credentials_base64' => env('FCM_CREDENTIALS_BASE64'),
+    ],
+
 ];

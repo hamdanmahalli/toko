@@ -16,6 +16,7 @@ use App\Http\Controllers\PanduanController;
 use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\ProfilController;
+use App\Http\Controllers\PushController;
 use Illuminate\Support\Facades\Route;
 
 // Halaman sambutan (Get Started). Tamu melihat pengantar masuk/klaim akun;
@@ -73,6 +74,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/profil/password', [ProfilController::class, 'gantiPassword'])->name('profil.password');
     Route::post('/profil/perangkat/{perangkat}/cabut', [ProfilController::class, 'cabutPerangkat'])
         ->name('profil.perangkat-cabut');
+
+    // Token notifikasi FCM dari APK Android (didaftarkan oleh native-bridge.js).
+    Route::post('/perangkat/push', [PushController::class, 'simpan'])->name('push.simpan');
+    Route::delete('/perangkat/push', [PushController::class, 'hapus'])->name('push.hapus');
 
     Route::get('/beranda', [AbsenController::class, 'beranda'])
         ->middleware('permission:dashboard.lihat')

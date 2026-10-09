@@ -4,7 +4,7 @@
     "short_name": "Toko MM",
     "description": "Belanja sambil beramal",
     "lang": "id",
-    "start_url": "/masuk",
+    "start_url": "/",
     "scope": "/",
     "display": "standalone",
     "orientation": "portrait",

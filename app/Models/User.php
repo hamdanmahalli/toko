@@ -47,6 +47,12 @@ class User extends Authenticatable
         return $this->hasMany(UserDevice::class);
     }
 
+    /** Token FCM perangkat Android (APK) milik akun ini. */
+    public function pushTokens(): HasMany
+    {
+        return $this->hasMany(PushToken::class);
+    }
+
     /**
      * Peran yang tidak terikat ke perangkat tertentu: pemilik dan supervisor
      * adalah manusia yang sudah dipercaya, dan `bebas_perangkat` memberi

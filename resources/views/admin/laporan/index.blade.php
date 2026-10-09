@@ -3,12 +3,23 @@
 @section('judul', 'Laporan')
 
 @section('konten')
-    <div class="mb-4">
-        <h1 class="font-display text-xl text-slate-900">Laporan durasi kerja</h1>
-        <p class="text-sm text-slate-500">
-            Dihitung dari absensi yang tercatat, jadi angka bulan lalu tidak ikut berubah
-            saat aturan shift diubah.
-        </p>
+    <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <h1 class="font-display text-xl text-slate-900">Laporan durasi kerja</h1>
+            <p class="text-sm text-slate-500">
+                Dihitung dari absensi yang tercatat, jadi angka bulan lalu tidak ikut berubah
+                saat aturan shift diubah.
+            </p>
+        </div>
+
+        {{-- Hanya tampil di APK: cetak ringkasan ke printer thermal Bluetooth. --}}
+        <button type="button" id="cetak-thermal" hidden
+                class="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm font-medium text-brand-700 transition hover:bg-brand-50">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/>
+            </svg>
+            Cetak struk
+        </button>
     </div>
 
     @if ($errors->any())
@@ -112,3 +123,71 @@
         <div class="mt-3">{{ $baris->links() }}</div>
     @endif
 @endsection
+
+@php
+    $ringkasanCetak = [
+        'Total jam kerja' => \App\Support\Durasi::label($ringkasan['menit']) ?? '0j 0m',
+        'Karyawan hadir' => $ringkasan['karyawan'].' orang',
+        'Total hari kerja' => $ringkasan['hari'].' hari',
+        'Total sesi' => $ringkasan['sesi'].' sesi',
+    ];
+    $rentangCetak = $dari.' s/d '.$sampai;
+@endphp
+
+@push('kaki')
+<script>
+    (function () {
+        const tombol = document.getElementById('cetak-thermal');
+        if (!tombol || !window.TokoNative || !window.TokoNative.aktif) return;
+        tombol.hidden = false;
+
+        const ringkasan = @json($ringkasanCetak);
+        const rentang = @json($rentangCetak);
+
+        tombol.addEventListener('click', function () {
+            const baris = [].slice.call(document.querySelectorAll('table tbody tr')).map(function (tr) {
+                const sel = tr.querySelectorAll('td');
+                const nama = (sel[0] ? sel[0].querySelector('p') : null);
+                return {
+                    nama: nama ? nama.textContent.trim() : (sel[0] ? sel[0].textContent.trim() : ''),
+                    toko: sel[1] ? sel[1].textContent.trim() : '',
+                    total: sel[4] ? sel[4].textContent.trim() : '',
+                };
+            });
+
+            const lines = [];
+            lines.push({ teks: 'ABSENSI TOKO MM', tebal: true, besar: true, tengah: true });
+            lines.push({ teks: 'Laporan durasi kerja', tengah: true });
+            lines.push({ teks: rentang, tengah: true });
+            lines.push({ garis: true, panjang: 32 });
+
+            Object.keys(ringkasan).forEach(function (k) {
+                lines.push(k + ': ' + ringkasan[k]);
+            });
+
+            if (baris.length) {
+                lines.push({ garis: true, panjang: 32 });
+                baris.slice(0, 40).forEach(function (b) {
+                    lines.push({ teks: b.nama, tebal: true });
+                    lines.push('  ' + b.toko + ' - ' + b.total);
+                });
+            }
+
+            lines.push({ garis: true, panjang: 32 });
+            lines.push({ teks: 'Dicetak: ' + new Date().toLocaleString('id-ID'), tengah: true });
+
+            const labelAsli = tombol.innerHTML;
+            tombol.disabled = true;
+            window.TokoNative.cetakPrinter(lines)
+                .then(function () { tombol.textContent = 'Tercetak'; })
+                .catch(function (e) { alert(e && e.message ? e.message : 'Cetak gagal.'); })
+                .finally(function () {
+                    setTimeout(function () {
+                        tombol.innerHTML = labelAsli;
+                        tombol.disabled = false;
+                    }, 1500);
+                });
+        });
+    })();
+</script>
+@endpush

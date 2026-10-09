@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('judul', 'Admin') · Toko MM</title>
+    <meta name="toko-native-auth" content="{{ auth()->check() ? '1' : '0' }}">
+    <script src="{{ asset('native-bridge.js') }}?v={{ filemtime(public_path('native-bridge.js')) }}" defer></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-full bg-brand-50/60 text-slate-800 antialiased">
@@ -78,5 +80,6 @@
             @include('layouts.admin-sidebar')
         </div>
     </div>
+    @stack('kaki')
 </body>
 </html>

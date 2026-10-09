@@ -44,6 +44,15 @@
             </p>
         </div>
 
+        {{-- Hanya tampil di dalam APK; memindai kartu pakai kamera HP. --}}
+        <button type="button" id="scan-kamera" hidden
+                class="flex w-full items-center justify-center gap-2 rounded-xl border border-brand-200 bg-white px-4 py-3 text-sm font-semibold text-brand-700 transition hover:bg-brand-50">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M3 12h18"/>
+            </svg>
+            Scan dengan kamera
+        </button>
+
         <button type="submit"
                 class="w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-700">
             Catat Absensi
@@ -85,6 +94,27 @@
             const input = document.getElementById('token');
             if (input) {
                 input.focus();
+            }
+
+            // Di dalam APK, tampilkan pemindai kamera sebagai alternatif
+            // scanner USB. Hasilnya masuk ke input yang sama lalu dikirim.
+            const tombol = document.getElementById('scan-kamera');
+            if (tombol && window.TokoNative && window.TokoNative.aktif) {
+                tombol.hidden = false;
+                tombol.addEventListener('click', function () {
+                    tombol.disabled = true;
+                    window.TokoNative.scanKartu().then(function (nilai) {
+                        if (nilai) {
+                            const inp = document.getElementById('token');
+                            inp.value = nilai;
+                            inp.form.submit();
+                        }
+                    }).catch(function (e) {
+                        alert(e && e.message ? e.message : 'Pemindaian gagal.');
+                    }).finally(function () {
+                        tombol.disabled = false;
+                    });
+                });
             }
         });
     </script>

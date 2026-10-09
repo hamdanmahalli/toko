@@ -8,6 +8,7 @@ use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\OvertimeRequest;
 use App\Models\Shop;
+use App\Services\FcmService;
 use App\Support\CakupanToko;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -97,7 +98,40 @@ class PengajuanController extends Controller
 
         $kata = $status->isApproved() ? 'disetujui' : 'ditolak';
 
+        $this->beriTahuKaryawan($pengajuan, $jenis, $status, $catatan);
+
         return back()->with('sukses', 'Pengajuan '.$jenis.' '.$pengajuan->employee->nama.' berhasil '.$kata.'.');
+    }
+
+    /**
+     * Kabari karyawan pemilik pengajuan lewat notifikasi APK. Kegagalan kirim
+     * tidak boleh menggagalkan proses persetujuan.
+     *
+     * @param  LeaveRequest|OvertimeRequest  $pengajuan
+     */
+    private function beriTahuKaryawan($pengajuan, string $jenis, RequestStatus $status, ?string $catatan): void
+    {
+        $userId = $pengajuan->employee?->user_id;
+
+        if ($userId === null) {
+            return;
+        }
+
+        $kata = $status->isApproved() ? 'disetujui' : 'ditolak';
+        $pesan = 'Pengajuan '.$jenis.' Anda '.$kata.'.';
+
+        if ($catatan) {
+            $pesan .= ' Catatan: '.$catatan;
+        }
+
+        try {
+            app(FcmService::class)->kirimKeUser($userId, 'Pengajuan '.$kata, $pesan, [
+                'jenis' => 'pengajuan',
+                'url' => route('pengajuan.index'),
+            ]);
+        } catch (\Throwable $e) {
+            // Notifikasi pelengkap; abaikan kegagalan.
+        }
     }
 
     /** @return Builder<LeaveRequest> */

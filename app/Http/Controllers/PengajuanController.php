@@ -7,6 +7,8 @@ use App\Enums\RequestStatus;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\OvertimeRequest;
+use App\Models\User;
+use App\Services\FcmService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -81,6 +83,11 @@ class PengajuanController extends Controller
             'status' => RequestStatus::Pending,
         ]);
 
+        $this->beriTahuAtasan(
+            'Pengajuan '.$data['jenis'].' baru',
+            $employee->nama.' mengajukan '.$data['jenis'].' tanggal '.$mulai->format('d/m/Y').'.',
+        );
+
         return redirect()
             ->route('pengajuan.index')
             ->with('sukses', 'Pengajuan '.$data['jenis'].' terkirim dan menunggu persetujuan atasan.');
@@ -132,6 +139,11 @@ class PengajuanController extends Controller
             'keterangan' => $data['keterangan'] ?? null,
             'status' => RequestStatus::Pending,
         ]);
+
+        $this->beriTahuAtasan(
+            'Pengajuan lembur baru',
+            $employee->nama.' mengajukan lembur '.$durasi.' jam pada '.Carbon::parse($data['tanggal'])->format('d/m/Y').'.',
+        );
 
         return redirect()
             ->route('pengajuan.index')
@@ -197,5 +209,27 @@ class PengajuanController extends Controller
         abort_if($employee === null, 403, 'Akun ini belum tertaut ke data karyawan.');
 
         return $employee;
+    }
+
+    /**
+     * Kabari semua akun yang berhak menyetujui pengajuan lewat notifikasi APK.
+     * Kegagalan pengiriman tidak boleh menggagalkan pengajuan karyawan.
+     */
+    private function beriTahuAtasan(string $judul, string $pesan): void
+    {
+        try {
+            $ids = User::query()->permission('pengajuan.setujui')->pluck('id')->all();
+
+            if ($ids === []) {
+                return;
+            }
+
+            app(FcmService::class)->kirimKeUsers($ids, $judul, $pesan, [
+                'jenis' => 'pengajuan',
+                'url' => route('admin.pengajuan.index'),
+            ]);
+        } catch (\Throwable $e) {
+            // Sengaja diabaikan: notifikasi bersifat pelengkap.
+        }
     }
 }
