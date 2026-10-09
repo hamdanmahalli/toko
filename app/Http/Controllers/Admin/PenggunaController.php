@@ -24,11 +24,14 @@ use Spatie\Permission\Models\Role;
 use Throwable;
 
 /**
- * Manajemen akun login: peran, status aktif, dan penugasan toko.
+ * Manajemen akun login: peran, status aktif, dan penugasan toko. Akun dibuat
+ * sepenuhnya dari halaman ini oleh admin.
  *
- * Tanpa halaman ini, tabel `user_shop` tidak pernah terisi, dan supervisor
- * yang belum ditugaskan tidak punya toko sama sekali. Karena itu halaman ini
- * menampilkan peringatan eksplisit untuk akun tanpa penugasan.
+ * Tabel `user_shop` diatur lewat halaman ini; akun yang tertaut data karyawan
+ * juga otomatis mewarisi toko karyawannya, sehingga supervisor yang belum
+ * ditugaskan tetap perlu diatur manual di sini (kalau tidak, ia melihat nol
+ * toko). Karena itu halaman ini menampilkan peringatan eksplisit untuk akun
+ * tanpa penugasan.
  */
 class PenggunaController extends Controller
 {
@@ -65,10 +68,9 @@ class PenggunaController extends Controller
     }
 
     /**
-     * Buat akun login dari halaman Pengguna, tanpa menunggu karyawan mengklaim
-     * sendiri. Dipakai dua cara: menautkan akun ke data karyawan lewat NIP
-     * (email diambil dari data karyawan), atau membuat akun bebas tanpa data
-     * karyawan (mis. supervisor).
+     * Buat akun login dari halaman Pengguna. Dipakai dua cara: menautkan akun
+     * ke data karyawan lewat NIP (email diambil dari data karyawan), atau
+     * membuat akun bebas tanpa data karyawan (mis. supervisor).
      */
     public function store(Request $request): RedirectResponse
     {
@@ -144,7 +146,7 @@ class PenggunaController extends Controller
                     // Akun tertaut mewarisi toko karyawannya, kecuali peran
                     // global (pemilik) yang memang sudah boleh semua toko.
                     if (! $this->adalahPeranGlobal($data['peran'])) {
-                        $akun->shops()->sync([$karyawan->shop_id]);
+                        $akun->sertakanToko($karyawan->shop_id);
                     }
                 }
 
@@ -178,6 +180,13 @@ class PenggunaController extends Controller
         // Peran global sudah boleh semua toko, jadi daftar toko tidak berarti apa-apa.
         if ($this->adalahPeranGlobal($data['peran'])) {
             $data['toko'] = [];
+        } else {
+            // Toko dari data karyawan tidak boleh hilang hanya karena admin
+            // tidak mencentangnya lagi (checkbox-nya memang dimatikan di form).
+            $data['toko'] = array_values(array_unique(array_merge(
+                $data['toko'] ?? [],
+                array_filter([$pengguna->employee?->shop_id]),
+            )));
         }
 
         DB::transaction(function () use ($pengguna, $data) {

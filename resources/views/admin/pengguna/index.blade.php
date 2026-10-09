@@ -129,6 +129,9 @@
                     // penugasan tidak ditampilkan sebagai sesuatu yang aktif.
                     $sudahGlobal = $u->roles->pluck('name')->intersect($peranGlobal)->isNotEmpty();
                     $idTokoTerpilih = $u->shops->pluck('id')->all();
+                    // Toko dari data karyawan selalu dianggap tercentang dan
+                    // tidak bisa dilepas dari sini (sumbernya data karyawan).
+                    $tokoKaryawanId = $u->employee?->shop_id;
                 @endphp
 
                 <form method="POST" class="card p-4"
@@ -191,6 +194,10 @@
                                     Peran {{ $u->roles->pluck('name')->intersect($peranGlobal)->join(', ') }}
                                     sudah memberi akses ke semua toko, jadi penugasan di bawah diabaikan.
                                 </p>
+                            @elseif ($tokoKaryawanId !== null)
+                                <p class="mt-1 rounded-lg bg-brand-50 px-2 py-1.5 text-[11px] text-brand-700">
+                                    Toko dari data karyawan otomatis tercentang dan tidak bisa dilepas di sini.
+                                </p>
                             @elseif ($tanpaPenugasan($u))
                                 <p class="mt-1 rounded-lg bg-amber-50 px-2 py-1.5 text-[11px] text-amber-700">
                                     Belum ditugaskan ke toko mana pun, jadi akun ini tidak melihat data apa pun.
@@ -199,13 +206,17 @@
 
                             <div class="mt-1 max-h-28 space-y-1 overflow-y-auto rounded-lg border border-slate-200 px-2 py-1.5">
                                 @forelse ($toko as $t)
+                                    @php $dariKaryawan = $t->id === $tokoKaryawanId; @endphp
                                     <label class="flex items-center gap-2 text-sm text-slate-600">
                                         <input type="checkbox" name="toko[]" value="{{ $t->id }}"
-                                               @checked(in_array($t->id, $idTokoTerpilih, true))
-                                               @disabled($sudahGlobal)
+                                               @checked($dariKaryawan || in_array($t->id, $idTokoTerpilih, true))
+                                               @disabled($sudahGlobal || $dariKaryawan)
                                                class="rounded border-slate-200 text-brand-600 focus:ring-brand-500">
                                         {{ $t->nama }}
                                         <span class="text-[11px] text-slate-400">{{ $t->kode }}</span>
+                                        @if ($dariKaryawan)
+                                            <span class="text-[11px] text-brand-600">dari data karyawan</span>
+                                        @endif
                                     </label>
                                 @empty
                                     <p class="text-[11px] text-slate-400">Tidak ada toko yang boleh Anda assign.</p>

@@ -102,6 +102,10 @@ class EmployeeController extends Controller
 
         $karyawan->update($data);
 
+        // Pindah toko: akun yang tertaut tetap mewarisi toko baru tanpa
+        // menghapus penugasan toko lain yang mungkin sudah ada.
+        $karyawan->user?->sertakanToko($karyawan->shop_id);
+
         $this->pasangShift($request, $karyawan);
 
         return redirect()
@@ -220,8 +224,8 @@ class EmployeeController extends Controller
             'nama' => ['required', 'string', 'max:120'],
             'nip' => ['required', 'string', 'max:30', Rule::unique('employees', 'nip')->ignore($karyawan?->id)],
             'telepon' => ['nullable', 'string', 'max:30'],
-            // Email dipakai untuk mengisi otomatis form klaim. Karyawan boleh
-            // memakai email lain saat klaim, jadi di sini tidak mengikat akun.
+            // Email dipakai sebagai alamat login saat admin membuat akun dari
+            // data karyawan ini. Tidak ada keterikatan akun di sini.
             'email' => ['nullable', 'email', 'max:120', Rule::unique('employees', 'email')->ignore($karyawan?->id)],
             'shop_id' => ['required', Rule::exists('shops', 'id')],
             'position_id' => ['nullable', Rule::exists('positions', 'id')],

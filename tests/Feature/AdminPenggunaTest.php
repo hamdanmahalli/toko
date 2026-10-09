@@ -14,10 +14,11 @@ use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 /**
- * Halaman Pengguna adalah satu-satunya tempat tabel `user_shop` terisi.
- * Tanpa itu, supervisor tidak punya toko sama sekali dan tidak bisa memantau
- * apa pun, jadi penugasan di sini adalah bagian dari keamanan, bukan sekadar
- * fitur administer.
+ * Halaman Pengguna adalah tempat utama tabel `user_shop` diatur. Tanpa itu,
+ * supervisor tidak punya toko sama sekali dan tidak bisa memantau apa pun,
+ * jadi penugasan di sini adalah bagian dari keamanan, bukan sekadar fitur
+ * administer. Selain itu, akun yang tertaut data karyawan otomatis diwarisi
+ * toko karyawannya (lihat `User::sertakanToko`).
  */
 class AdminPenggunaTest extends TestCase
 {
@@ -544,5 +545,59 @@ class AdminPenggunaTest extends TestCase
             ->assertSessionHas('galat');
 
         $this->assertDatabaseMissing('users', ['email' => 'nakal@toko.test']);
+    }
+
+    public function test_toko_karyawan_tercentang_di_halaman(): void
+    {
+        $toko = Shop::factory()->create();
+        $akun = User::factory()->create(['name' => 'Budi']);
+        Employee::factory()->create([
+            'shop_id' => $toko->id,
+            'user_id' => $akun->id,
+            'email' => 'budi@toko.test',
+        ]);
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->get('/admin/pengguna')
+            ->assertOk()
+            ->assertSee('dari data karyawan')
+            ->assertDontSee('Belum ditugaskan ke toko mana pun');
+    }
+
+    public function test_simpan_tidak_menghapus_toko_karyawan(): void
+    {
+        $toko = Shop::factory()->create();
+        $akun = User::factory()->create();
+        Employee::factory()->create(['shop_id' => $toko->id, 'user_id' => $akun->id]);
+
+        // Form tidak mengirim `toko` sama sekali karena checkbox karyawan
+        // dimatikan di UI; toko itu tetap harus bertahan.
+        $this->actingAs($this->dengan('pemilik'))
+            ->put("/admin/pengguna/{$akun->id}", [
+                'peran' => ['karyawan'],
+                'aktif' => '1',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('user_shop', [
+            'user_id' => $akun->id,
+            'shop_id' => $toko->id,
+        ]);
+    }
+
+    public function test_command_selaras_toko_mengisi_akun_lama(): void
+    {
+        $toko = Shop::factory()->create();
+        $akun = User::factory()->create();
+        Employee::factory()->create(['shop_id' => $toko->id, 'user_id' => $akun->id]);
+
+        $this->assertDatabaseMissing('user_shop', ['user_id' => $akun->id]);
+
+        $this->artisan('pengguna:selaras-toko')->assertSuccessful();
+
+        $this->assertDatabaseHas('user_shop', [
+            'user_id' => $akun->id,
+            'shop_id' => $toko->id,
+        ]);
     }
 }

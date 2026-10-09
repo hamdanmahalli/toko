@@ -281,4 +281,25 @@ class AdminKaryawanTest extends TestCase
             ->get("/admin/karyawan/{$karyawan->id}/qr")
             ->assertNotFound();
     }
+
+    public function test_pindah_toko_menambahkan_toko_ke_akun_karyawan(): void
+    {
+        $tokoA = Shop::factory()->create();
+        $tokoB = Shop::factory()->create();
+
+        $akun = User::factory()->create();
+        $akun->shops()->attach($tokoA);
+        $karyawan = Employee::factory()->create(['shop_id' => $tokoA->id, 'user_id' => $akun->id]);
+
+        $this->actingAs($this->pemilik())
+            ->put("/admin/karyawan/{$karyawan->id}", $this->dataKaryawan($tokoB, [
+                'nip' => $karyawan->nip,
+                'nama' => $karyawan->nama,
+            ]))
+            ->assertRedirect(route('admin.karyawan.index'));
+
+        // Toko baru ditambahkan tanpa menghapus penugasan toko lama.
+        $this->assertDatabaseHas('user_shop', ['user_id' => $akun->id, 'shop_id' => $tokoA->id]);
+        $this->assertDatabaseHas('user_shop', ['user_id' => $akun->id, 'shop_id' => $tokoB->id]);
+    }
 }

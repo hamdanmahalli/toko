@@ -86,4 +86,18 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Shop::class, 'user_shop');
     }
+
+    /**
+     * Tambahkan satu toko ke daftar "toko yang diawasi" tanpa menghapus
+     * penugasan lain. Dipakai supaya akun yang tertaut data karyawan otomatis
+     * mewarisi toko karyawannya, ikut saat karyawan pindah toko.
+     */
+    public function sertakanToko(?int $shopId): void
+    {
+        if ($shopId === null) {
+            return;
+        }
+
+        $this->shops()->syncWithoutDetaching([$shopId]);
+    }
 }
