@@ -329,4 +329,21 @@
         cetakPrinter: cetak,
         plugin,
     };
+
+    // Daftarkan token FCM otomatis di SETIAP halaman yang memuat jembatan ini
+    // (beranda karyawan maupun dasbor admin), asalkan dibuka di dalam APK dan
+    // pengguna sudah login. Sebelumnya hanya layout.app yang memanggil ini,
+    // sehingga akun pemilik/supervisor (layout admin) tidak pernah terdaftar.
+    if (aktif) {
+        const pasangPush = () => {
+            const meta = document.querySelector('meta[name="toko-native-auth"]');
+            if (!meta || meta.content !== '1') return;
+            daftarPush().catch(() => {});
+        };
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', pasangPush);
+        } else {
+            pasangPush();
+        }
+    }
 })();

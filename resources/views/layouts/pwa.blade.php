@@ -21,11 +21,5 @@ if ('serviceWorker' in navigator) {
      window.TokoNative dengan aktif=false, jadi tidak mengubah perilaku web. --}}
 <meta name="toko-native-auth" content="{{ auth()->check() ? '1' : '0' }}">
 <script src="{{ asset('native-bridge.js') }}?v={{ filemtime(public_path('native-bridge.js')) }}" defer></script>
-<script>
-window.addEventListener('load', function () {
-    if (!window.TokoNative || !window.TokoNative.aktif) return;
-    var meta = document.querySelector('meta[name="toko-native-auth"]');
-    if (!meta || meta.content !== '1') return;
-    window.TokoNative.daftarPush().catch(function () {});
-});
-</script>
+{{-- Pendaftaran token FCM kini otomatis di dalam native-bridge.js, jadi
+     berlaku juga untuk layout admin (dasbor pemilik/supervisor). --}}
