@@ -331,7 +331,7 @@
                         Let&rsquo;s Get You Set Up<br>for Success
                     </h1>
                     <p class="mx-auto mt-3 max-w-xs text-[13px] leading-relaxed text-slate-500">
-                        {{ $namaApp }} adalah toko milik Pondok Pesantren Maqna&rsquo;ul Ulum,
+                        Toko MM adalah toko milik Pondok Pesantren Maqna&rsquo;ul Ulum,
                         yang menyediakan segala jenis sembako dan kebutuhan pokok.
                     </p>
                 </div>
