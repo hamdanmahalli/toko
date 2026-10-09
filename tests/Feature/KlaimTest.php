@@ -86,6 +86,42 @@ class KlaimTest extends TestCase
         });
     }
 
+    public function test_layar_sukses_tampil_setelah_klaim(): void
+    {
+        $this->karyawan();
+
+        $this->post('/klaim', [
+            'nip' => 'K-1001',
+            'email' => 'budi@toko.test',
+            'username' => 'budikasir',
+        ])->assertRedirect(route('masuk'));
+
+        $this->get('/masuk')
+            ->assertOk()
+            ->assertSee('Akun berhasil dibuat')
+            ->assertSee('Ke Login');
+    }
+
+    public function test_kegagalan_kirim_email_membatalkan_pembuatan_akun(): void
+    {
+        $karyawan = $this->karyawan();
+
+        Mail::shouldReceive('to')->andThrow(new \RuntimeException('smtp mati'));
+
+        $this->post('/klaim', [
+            'nip' => 'K-1001',
+            'email' => 'budi@toko.test',
+            'username' => 'budikasir',
+            'device_id' => 'hp-budi',
+        ])->assertRedirect()->assertSessionHas('galat');
+
+        // Akun, perangkat, dan tautan ke karyawan harus ikut dibatalkan supaya
+        // nomor ID bisa dipakai lagi setelah email diperbaiki.
+        $this->assertDatabaseMissing('users', ['username' => 'budikasir']);
+        $this->assertDatabaseMissing('user_devices', ['device_token' => 'hp-budi']);
+        $this->assertNull($karyawan->fresh()->user_id);
+    }
+
     public function test_akun_baru_langsung_bisa_login_dengan_username_dan_password_dari_email(): void
     {
         $this->karyawan();

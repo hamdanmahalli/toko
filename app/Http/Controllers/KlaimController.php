@@ -9,11 +9,13 @@ use App\Support\Username;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Throwable;
 
 /**
  * Klaim akun untuk karyawan: admin cukup membuat data karyawan dengan nomor ID
@@ -87,28 +89,42 @@ class KlaimController extends Controller
 
         $passwordAwal = Str::random(12);
 
-        $akun = User::create([
-            'name' => $karyawan->nama,
-            'email' => $data['email'],
-            'username' => $username,
-            'password' => Hash::make($passwordAwal),
-            'telepon' => $karyawan->telepon,
-            'aktif' => true,
-        ]);
+        try {
+            // Semua tulis-menulis dibungkus satu transaksi. Kalau email gagal
+            // dikirim, akun + perangkat + tautan ke data karyawan dibatalkan,
+            // supaya nomor ID tidak terpakai sia-sia dan karyawan bisa coba lagi.
+            DB::transaction(function () use ($karyawan, $data, $username, $passwordAwal, $request) {
+                $akun = User::create([
+                    'name' => $karyawan->nama,
+                    'email' => $data['email'],
+                    'username' => $username,
+                    'password' => Hash::make($passwordAwal),
+                    'telepon' => $karyawan->telepon,
+                    'aktif' => true,
+                ]);
 
-        $akun->assignRole('karyawan');
-        $karyawan->forceFill(['user_id' => $akun->id])->save();
+                $akun->assignRole('karyawan');
+                $karyawan->forceFill(['user_id' => $akun->id])->save();
 
-        if ($deviceId = $request->string('device_id')->value()) {
-            $akun->devices()->create([
-                'device_token' => mb_substr($deviceId, 0, 64),
-                'label' => mb_substr((string) $request->userAgent(), 0, 120),
-                'status' => 'approved',
-                'last_seen_at' => now(),
-            ]);
+                if ($deviceId = $request->string('device_id')->value()) {
+                    $akun->devices()->create([
+                        'device_token' => mb_substr($deviceId, 0, 64),
+                        'label' => mb_substr((string) $request->userAgent(), 0, 120),
+                        'status' => 'approved',
+                        'last_seen_at' => now(),
+                    ]);
+                }
+
+                Mail::to($akun->email)->send(new KirimAkunBaru($akun, $passwordAwal));
+            });
+        } catch (Throwable $e) {
+            report($e);
+
+            return back()->with(
+                'galat',
+                'Akun gagal dibuat karena email belum bisa dikirim. Hubungi admin, lalu coba lagi.',
+            );
         }
-
-        Mail::to($akun->email)->send(new KirimAkunBaru($akun, $passwordAwal));
 
         return redirect()
             ->route('masuk')

@@ -249,12 +249,12 @@
         }
     </style>
 
-    <!-- Panel: hanya satu yang tampak; perpindahan memakai animasi naik dan
-         tinggi wadah dianimasikan lewat JS agar tidak melompat. -->
+    <!-- Panel: hanya satu yang tampak; tinggi wadah dianimasikan lewat JS
+         supaya kartu tumbuh/memendek mulus dari atas tanpa bergeser posisi. -->
     <style>
         .panel-wadah {
             overflow: hidden;
-            transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .panel {
@@ -290,7 +290,10 @@
 
     <script>
         // Splash selalu tampil tiap muat ulang: pasang kelas sebelum konten dirender.
-        document.documentElement.classList.add('splash-aktif');
+        // Layar sukses setelah pendaftaran tampil langsung tanpa splash.
+        @if ($panel !== 'sukses')
+            document.documentElement.classList.add('splash-aktif');
+        @endif
     </script>
 
     @include('layouts.pwa')
@@ -317,9 +320,10 @@
         </div>
     </div>
 
-    <div class="relative flex min-h-dvh w-full flex-col lg:flex-row lg:items-start lg:justify-end lg:py-10">
-        <!-- Area gambar: penuh sampai tepi. Mobile = login.png, Web = website.jpg -->
-        <div class="relative h-[45vh] w-full shrink-0 overflow-hidden lg:absolute lg:inset-0 lg:h-auto">
+    <div class="relative flex min-h-dvh w-full flex-col lg:flex-row lg:items-end lg:justify-end">
+        <!-- Area gambar: penuh sampai tepi. Mobile = login.png, Web = website.jpg.
+             flex-1 membuat gambar mengisi ruang tersisa, jadi kartu bisa memanjang ke atas. -->
+        <div class="relative -mb-8 w-full flex-1 overflow-hidden lg:absolute lg:inset-0 lg:mb-0 lg:h-auto">
             <img src="{{ asset('img/login.png') }}"
                  alt="Ilustrasi {{ $namaApp }}"
                  class="absolute inset-0 h-full w-full object-cover object-center lg:hidden">
@@ -329,9 +333,31 @@
         </div>
 
         <!-- Area putih berisi panel: menumpuk gambar di mobile, melayang di kanan saat web -->
-        <div id="panel-wadah" class="panel-wadah relative -mt-8 flex w-full flex-col rounded-t-[2rem] bg-white px-6 pb-8 pt-7
-                    lg:my-auto lg:mr-10 lg:w-[440px] lg:shrink-0 lg:rounded-[2rem] lg:px-10 lg:py-10 lg:shadow-2xl">
-            @include('layouts.pesan')
+        <div class="relative flex w-full flex-col rounded-t-[2rem] bg-white px-6 pb-8 pt-7
+                    lg:mb-10 lg:mr-10 lg:w-[440px] lg:shrink-0 lg:rounded-[2rem] lg:px-10 lg:py-10 lg:shadow-2xl">
+            @if ($panel !== 'sukses')
+                @include('layouts.pesan')
+            @endif
+
+            <div id="panel-wadah" class="panel-wadah">
+            {{-- PANEL: SUKSES (setelah pendaftaran) --}}
+            <section id="panel-sukses" class="panel {{ $panel === 'sukses' ? 'aktif' : '' }}">
+                <div class="text-center">
+                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 ring-1 ring-brand-100">
+                        <svg class="h-7 w-7 text-brand-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <h2 class="mt-5 text-[26px] font-extrabold tracking-tight text-slate-800">Akun berhasil dibuat</h2>
+                    <p class="mx-auto mt-3 max-w-xs text-[13px] leading-relaxed text-slate-500">
+                        {{ session('sukses') }}
+                    </p>
+                </div>
+                <button type="button" data-ke="masuk"
+                        class="mt-7 w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.99]">
+                    Ke Login
+                </button>
+            </section>
 
             {{-- PANEL: GET STARTED --}}
             <section id="panel-mulai" class="panel {{ $panel === 'mulai' ? 'aktif' : '' }}">
@@ -459,12 +485,13 @@
                     </button>
                 </form>
             </section>
+            </div>
         </div>
     </div>
 
     <script>
         // Pindah antar panel (Get Started / Login / Sign Up) tanpa muat ulang.
-        // Tinggi wadah dianimasikan agar perpindahan mulus, bukan melompat.
+        // Tinggi wadah dianimasikan supaya kartu tumbuh/memendek mulus dari atas.
         document.addEventListener('click', function (e) {
             var tombol = e.target.closest('[data-ke]');
             if (!tombol) return;
@@ -486,7 +513,7 @@
             clearTimeout(wadah._timer);
             wadah._timer = setTimeout(function () {
                 wadah.style.height = '';
-            }, 380);
+            }, 330);
         });
     </script>
     <script>
