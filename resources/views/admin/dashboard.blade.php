@@ -130,6 +130,15 @@
                             {{ $pendingLembur }}
                         </span>
                     </a>
+                    @can('perangkat.kelola')
+                        <a href="{{ route('admin.pengguna.index') }}"
+                           class="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2.5 text-sm hover:bg-slate-50 focus:border-brand-400">
+                            <span class="text-slate-700">Perangkat menunggu persetujuan</span>
+                            <span class="tabular font-semibold {{ $perangkatMenunggu > 0 ? 'text-amber-600' : 'text-slate-400' }}">
+                                {{ $perangkatMenunggu }}
+                            </span>
+                        </a>
+                    @endcan
                 </div>
             </section>
 

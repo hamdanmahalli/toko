@@ -25,7 +25,7 @@ class AuthController extends Controller
             return redirect()->route('beranda');
         }
 
-        return view('auth.masuk');
+        return view('auth.halaman-awal', ['panel' => 'masuk']);
     }
 
     public function masuk(Request $request): RedirectResponse

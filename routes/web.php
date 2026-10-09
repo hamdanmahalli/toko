@@ -18,7 +18,11 @@ use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\ProfilController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/beranda')->name('awal');
+// Halaman sambutan (Get Started). Tamu melihat pengantar masuk/klaim akun;
+// karyawan yang sudah login langsung diarahkan ke beranda.
+Route::get('/', function () {
+    return auth()->check() ? redirect()->route('beranda') : view('auth.halaman-awal', ['panel' => 'mulai']);
+})->name('awal');
 
 // Panduan dibiarkan terbuka tanpa login supaya orang yang sedang lupa
 // password masih bisa membacanya.

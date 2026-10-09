@@ -137,6 +137,53 @@ class AdminDashboardTest extends TestCase
             ->assertSee(route('admin.pengajuan.index', ['hanya_pending' => 1]));
     }
 
+    public function test_perangkat_menunggu_terhitung(): void
+    {
+        Permission::create(['name' => 'perangkat.kelola', 'guard_name' => 'web']);
+
+        $toko = Shop::factory()->create();
+        $akun = User::factory()->create();
+        Employee::factory()->create(['shop_id' => $toko->id, 'user_id' => $akun->id]);
+
+        $akun->devices()->create(['device_token' => 'hp-baru', 'status' => 'pending']);
+        // Perangkat yang sudah disetujui tidak ikut dihitung.
+        $akun->devices()->create(['device_token' => 'hp-lama', 'status' => 'approved']);
+
+        $this->actingAs($this->pemilik())
+            ->get('/admin')
+            ->assertOk()
+            ->assertViewHas('perangkatMenunggu', 1)
+            ->assertSee('Perangkat menunggu persetujuan')
+            ->assertSee(route('admin.pengguna.index'));
+    }
+
+    public function test_perangkat_menunggu_dibatasi_toko_yang_diawasi(): void
+    {
+        Permission::create(['name' => 'perangkat.kelola', 'guard_name' => 'web']);
+
+        $milik = Shop::factory()->create();
+        $orangLain = Shop::factory()->create();
+
+        $akunMilik = User::factory()->create();
+        Employee::factory()->create(['shop_id' => $milik->id, 'user_id' => $akunMilik->id]);
+        $akunMilik->devices()->create(['device_token' => 'a', 'status' => 'pending']);
+
+        $akunLain = User::factory()->create();
+        Employee::factory()->create(['shop_id' => $orangLain->id, 'user_id' => $akunLain->id]);
+        $akunLain->devices()->create(['device_token' => 'b', 'status' => 'pending']);
+
+        $supervisor = User::factory()->create();
+        $role = Role::firstOrCreate(['name' => 'supervisor', 'guard_name' => 'web']);
+        $role->givePermissionTo(Permission::all());
+        $supervisor->assignRole($role);
+        $supervisor->shops()->attach($milik);
+
+        $this->actingAs($supervisor->fresh())
+            ->get('/admin')
+            ->assertOk()
+            ->assertViewHas('perangkatMenunggu', 1);
+    }
+
     public function test_supervisor_hanya_melihat_tokonya(): void
     {
         $milik = Shop::factory()->create(['nama' => 'Toko Milik']);

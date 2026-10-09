@@ -135,6 +135,9 @@ class PanduanTest extends TestCase
 
     public function test_halaman_masuk_tautkan_ke_panduan(): void
     {
-        $this->get('/masuk')->assertOk()->assertSee('Butuh bantuan? Baca panduan');
+        $this->get('/masuk')
+            ->assertOk()
+            ->assertSee('Baca Panduan')
+            ->assertSee(route('panduan'), false);
     }
 }

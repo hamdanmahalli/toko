@@ -41,10 +41,23 @@ class AuthTest extends TestCase
             ->assertDontSee('Masuk untuk melanjutkan');
     }
 
-    public function test_root_mengalihkan_ke_halaman_masuk(): void
+    public function test_root_menampilkan_halaman_sambutan_untuk_tamu(): void
     {
-        $this->get('/')->assertRedirect('/beranda');
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Let&rsquo;s Get You Set Up<br>for Success', false)
+            ->assertSee('img/login.png', false)
+            ->assertSee(route('masuk'), false)
+            ->assertSee(route('klaim.proses'), false);
+
         $this->get('/beranda')->assertRedirect(route('masuk'));
+    }
+
+    public function test_root_mengalihkan_karyawan_yang_sudah_login_ke_beranda(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get('/')->assertRedirect(route('beranda'));
     }
 
     public function test_bisa_login_dengan_email(): void

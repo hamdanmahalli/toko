@@ -27,7 +27,7 @@ class KlaimController extends Controller
             return redirect()->route('beranda');
         }
 
-        return view('auth.klaim');
+        return view('auth.halaman-awal', ['panel' => 'klaim']);
     }
 
     public function klaim(Request $request): RedirectResponse
