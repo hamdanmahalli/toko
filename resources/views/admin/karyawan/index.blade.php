@@ -30,12 +30,82 @@
         </button>
     </form>
 
-    <div class="card overflow-x-auto">
-        @if ($karyawan->isEmpty())
-            <p class="px-4 py-8 text-center text-sm text-slate-500">
-                Belum ada karyawan yang cocok.
-            </p>
-        @else
+    @if ($karyawan->isEmpty())
+        <p class="card px-4 py-8 text-center text-sm text-slate-500">
+            Belum ada karyawan yang cocok.
+        </p>
+    @else
+        {{-- Kartu pengenal untuk layar kecil --}}
+        <div class="grid gap-3 md:hidden">
+            @foreach ($karyawan as $k)
+                @php $shift = $k->shiftBerlaku()?->template; @endphp
+                <div class="card overflow-hidden">
+                    <div @class([
+                        'border-t-4 p-4',
+                        'border-brand-600' => $k->aktif,
+                        'border-slate-300' => ! $k->aktif,
+                    ])>
+                        <p class="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                            {{ $k->shop->nama }}
+                        </p>
+
+                        <div class="mt-3 flex items-center gap-3">
+                            <span class="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-200">
+                                @if ($k->fotoUrl())
+                                    <img src="{{ $k->fotoUrl() }}" alt="" class="h-full w-full object-cover">
+                                @else
+                                    <span class="flex h-full w-full items-center justify-center text-slate-300">
+                                        <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.5 8a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 20a7 7 0 0 1 14 0"/>
+                                        </svg>
+                                    </span>
+                                @endif
+                            </span>
+
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate font-display text-base text-slate-900">{{ $k->nama }}</p>
+                                <p class="truncate text-xs text-slate-500">{{ $k->position->nama ?? 'Tanpa jabatan' }}</p>
+                                <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                    <span @class([
+                                        'rounded-full px-2 py-0.5 text-[11px] font-medium',
+                                        'bg-brand-50 text-brand-700' => $k->aktif,
+                                        'bg-slate-100 text-slate-500' => ! $k->aktif,
+                                    ])>
+                                        {{ $k->aktif ? 'Aktif' : 'Nonaktif' }}
+                                    </span>
+                                    @php $shift = $k->shiftBerlaku()?->template; @endphp
+                                    @if ($shift)
+                                        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                                            {{ $shift->nama }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 flex items-center justify-between gap-2 border-t border-dashed border-slate-200 pt-2.5 text-[11px] text-slate-400">
+                            <span class="truncate">NIP {{ $k->nip ?? '-' }}{{ $k->telepon ? ' · '.$k->telepon : '' }}</span>
+                            <span class="shrink-0">{{ $k->user ? 'Punya akun' : 'Belum ada akun' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 border-t border-slate-100 p-2.5">
+                        <a href="{{ route('admin.karyawan.qr', $k) }}"
+                           class="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-center text-sm font-medium text-slate-600 hover:bg-slate-50">
+                            Kartu
+                        </a>
+                        <a href="{{ route('admin.karyawan.edit', $k) }}"
+                           class="flex-1 rounded-lg bg-brand-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-brand-700">
+                            Ubah
+                        </a>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        {{-- Tabel untuk layar lebar --}}
+        <div class="card hidden overflow-x-auto md:block">
             <table class="w-full min-w-[46rem] text-left text-sm">
                 <thead class="border-b border-slate-100 bg-slate-50/70 text-[11px] font-medium text-slate-400">
                     <tr>
@@ -98,17 +168,18 @@
                                     <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">Nonaktif</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-right">
-                                <a href="{{ route('admin.karyawan.qr', $k) }}" class="text-sm font-medium text-slate-500 hover:underline">QR</a>
-                                <span class="px-1 text-slate-300">|</span>
-                                <a href="{{ route('admin.karyawan.edit', $k) }}" class="text-sm font-medium text-brand-600 hover:underline">Ubah</a>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center justify-end gap-3">
+                                    <a href="{{ route('admin.karyawan.qr', $k) }}" class="text-xs font-medium text-slate-500 hover:text-slate-700">Kartu</a>
+                                    <a href="{{ route('admin.karyawan.edit', $k) }}" class="text-xs font-medium text-brand-700 hover:text-brand-800">Ubah</a>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
-        @endif
-    </div>
+        </div>
+    @endif
 
     @if ($karyawan->hasPages())
         <div class="mt-3">{{ $karyawan->links() }}</div>

@@ -216,31 +216,6 @@
                     </button>
                 </form>
             </div>
-
-            @if ($karyawan->user)
-                <details class="card p-5">
-                    <summary class="cursor-pointer font-display text-[15px] text-slate-900">Ganti password karyawan</summary>
-                    <form method="POST" action="{{ route('admin.karyawan.reset-password', $karyawan) }}"
-                          class="mt-4 grid gap-4 sm:grid-cols-2">
-                        @csrf
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="pw">Password baru</label>
-                            <input id="pw" name="password" type="password" required autocomplete="new-password"
-                                   class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="pw2">Ulangi password</label>
-                            <input id="pw2" name="password_confirmation" type="password" required autocomplete="new-password"
-                                   class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
-                        </div>
-                        <div class="sm:col-span-2">
-                            <button class="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900">
-                                Simpan password baru
-                            </button>
-                        </div>
-                    </form>
-                </details>
-            @endif
         </div>
     @endif
 
