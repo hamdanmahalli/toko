@@ -16,6 +16,7 @@
     $bolehCatat = auth()->user()->can('absen.catat');
     $bolehRiwayat = Route::has('absen.riwayat') && auth()->user()->can('absen.lihat');
     $bolehPengajuan = Route::has('pengajuan.index') && auth()->user()->can('pengajuan.lihat');
+    $bolehKas = Route::has('kas.index') && auth()->user()->can('kas.lihat');
 
     // Judul kartu status mengikuti keadaan absensi hari ini. Terlambat tetap
     // ditandai lewat lencana, bukan mengganti judulnya.
@@ -40,6 +41,8 @@
             'ikon' => 'M4 6h16M4 12h16M4 18h10'],
         ['route' => 'pengajuan.index', 'label' => 'Pengajuan', 'tampil' => $bolehPengajuan,
             'ikon' => 'M8 3v3m8-3v3M4 9h16M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z'],
+        ['route' => 'kas.index', 'label' => 'Kas', 'tampil' => $bolehKas,
+            'ikon' => 'M3 7h18v10H3V7Zm0 3h18M7 13.5h3'],
         ['route' => 'profil.index', 'label' => 'Profil', 'tampil' => true,
             'ikon' => 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 0c-3.3 0-6 1.8-6 4v1h12v-1c0-2.2-2.7-4-6-4Z'],
     ], fn ($m) => $m['tampil']));

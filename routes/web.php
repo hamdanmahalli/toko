@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ShiftTemplateController;
 use App\Http\Controllers\Admin\ShiftWindowController;
 use App\Http\Controllers\Admin\ShopController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\KasController;
 use App\Http\Controllers\PanduanController;
 use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\PresensiController;
@@ -110,6 +111,28 @@ Route::middleware('auth')->group(function () {
         Route::post('/pengajuan/{jenis}/{id}/batal', [PengajuanController::class, 'batal'])
             ->whereIn('jenis', ['izin', 'lembur'])
             ->name('pengajuan.batal');
+    });
+
+    // Buku kas pribadi karyawan. Rute literal (/kas, /kas/laporan, ...) didaftar
+    // lebih dulu supaya tidak tertangkap pola /kas/{buku}.
+    Route::middleware('permission:kas.lihat')->group(function () {
+        Route::get('/kas', [KasController::class, 'index'])->name('kas.index');
+        Route::get('/kas/laporan', [KasController::class, 'laporan'])->name('kas.laporan');
+        Route::get('/kas/laporan/pdf', [KasController::class, 'laporanPdf'])->name('kas.laporan.pdf');
+        Route::get('/kas/laporan/excel', [KasController::class, 'laporanExcel'])->name('kas.laporan.excel');
+        Route::get('/kas/{buku}', [KasController::class, 'show'])->whereNumber('buku')->name('kas.show');
+    });
+
+    Route::middleware('permission:kas.buat')->group(function () {
+        Route::get('/kas/tambah', [KasController::class, 'create'])->name('kas.create');
+        Route::post('/kas', [KasController::class, 'store'])->name('kas.store');
+        Route::get('/kas/{buku}/ubah', [KasController::class, 'edit'])->whereNumber('buku')->name('kas.edit');
+        Route::put('/kas/{buku}', [KasController::class, 'update'])->whereNumber('buku')->name('kas.update');
+        Route::delete('/kas/{buku}', [KasController::class, 'destroy'])->whereNumber('buku')->name('kas.destroy');
+        Route::post('/kas/{buku}/transaksi', [KasController::class, 'storeTransaksi'])
+            ->whereNumber('buku')->name('kas.transaksi.store');
+        Route::delete('/kas/{buku}/transaksi/{transaksi}', [KasController::class, 'destroyTransaksi'])
+            ->whereNumber('buku')->whereNumber('transaksi')->name('kas.transaksi.destroy');
     });
 
     // ---------------------------------------------------------------- admin
@@ -221,6 +244,13 @@ Route::middleware('auth')->group(function () {
             Route::post('/pengguna/{pengguna}/reset-password', [PenggunaController::class, 'resetPassword'])
                 ->middleware('permission:pengguna.kelola')
                 ->name('pengguna.reset-password');
+
+            // Hapus akun: nonaktifkan, putus sesi, dan lepas tautan data
+            // karyawan supaya bisa dibuatkan akun baru. Bukan hapus permanen —
+            // riwayat absensi dan data karyawan tetap tersimpan.
+            Route::delete('/pengguna/{pengguna}', [PenggunaController::class, 'hapus'])
+                ->middleware('permission:pengguna.kelola')
+                ->name('pengguna.hapus');
         });
 
         // Persetujuan perangkat terpisah dari `pengguna.kelola`: supervisor

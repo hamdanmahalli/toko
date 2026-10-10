@@ -80,6 +80,11 @@ class Employee extends Model
         return $this->hasMany(PayrollDetail::class);
     }
 
+    public function cashBooks(): HasMany
+    {
+        return $this->hasMany(CashBook::class);
+    }
+
     /** Absensi approved lewat pengajuan izin/cuti/dinas pada tanggal tertentu. */
     public function approvedLeaves(): HasMany
     {

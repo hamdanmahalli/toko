@@ -37,6 +37,9 @@ class RolePermissionSeeder extends Seeder
         'pengajuan.buat',
         'pengajuan.setujui',
 
+        'kas.lihat',
+        'kas.buat',
+
         'laporan.lihat',
         'laporan.expor',
 
@@ -79,6 +82,8 @@ class RolePermissionSeeder extends Seeder
         'absen.lihat',
         'pengajuan.buat',
         'pengajuan.lihat',
+        'kas.lihat',
+        'kas.buat',
     ];
 
     public function run(): void
