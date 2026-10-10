@@ -52,10 +52,26 @@
                     @foreach ($karyawan as $k)
                         <tr>
                             <td class="px-4 py-3">
-                                <p class="font-medium text-slate-800">{{ $k->nama }}</p>
-                                <p class="text-xs text-slate-500">
-                                    {{ $k->nip ?? '-' }}{{ $k->telepon ? ' · '.$k->telepon : '' }}
-                                </p>
+                                <div class="flex items-center gap-3">
+                                    <span class="h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-slate-100 ring-1 ring-slate-200">
+                                        @if ($k->fotoUrl())
+                                            <img src="{{ $k->fotoUrl() }}" alt="" class="h-full w-full object-cover">
+                                        @else
+                                            <span class="flex h-full w-full items-center justify-center text-slate-300">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.5 8a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 20a7 7 0 0 1 14 0"/>
+                                                </svg>
+                                            </span>
+                                        @endif
+                                    </span>
+                                    <div class="min-w-0">
+                                        <p class="font-medium text-slate-800">{{ $k->nama }}</p>
+                                        <p class="text-xs text-slate-500">
+                                            {{ $k->nip ?? '-' }}{{ $k->telepon ? ' · '.$k->telepon : '' }}
+                                        </p>
+                                    </div>
+                                </div>
                             </td>
                             <td class="px-4 py-3 text-slate-600">{{ $k->shop->nama }}</td>
                             <td class="px-4 py-3 text-slate-600">{{ $k->position->nama ?? '-' }}</td>

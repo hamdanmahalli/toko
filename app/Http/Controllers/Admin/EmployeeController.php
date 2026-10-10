@@ -15,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Role;
@@ -73,6 +74,8 @@ class EmployeeController extends Controller
     {
         $data = $this->validasi($request);
 
+        $data['foto'] = $this->simpanFoto($request);
+
         $karyawan = Employee::create($data + [
             'qr_version' => 1,
         ]);
@@ -99,6 +102,11 @@ class EmployeeController extends Controller
     public function update(Request $request, Employee $karyawan): RedirectResponse
     {
         $data = $this->validasi($request, $karyawan);
+
+        if ($request->hasFile('foto')) {
+            $this->hapusFoto($karyawan);
+            $data['foto'] = $this->simpanFoto($request);
+        }
 
         $karyawan->update($data);
 
@@ -238,6 +246,9 @@ class EmployeeController extends Controller
             'aktif' => ['nullable', 'boolean'],
             'boleh_presensi' => ['nullable', 'boolean'],
             'catatan' => ['nullable', 'string', 'max:255'],
+            // Foto hanya disimpan lewat `simpanFoto`, bukan sebagai teks di
+            // kolom, jadi nilai mentahnya dibuang dari payload di bawah.
+            'foto' => ['nullable', 'image', 'max:2048'],
         ]);
 
         // Supervisor tidak boleh memindahkan karyawan ke luar tokonya.
@@ -254,8 +265,27 @@ class EmployeeController extends Controller
         unset(
             $validated['shift_template_id'],
             $validated['shift_mulai_berlaku'],
+            $validated['foto'],
         );
 
         return $validated;
+    }
+
+    /** Simpan foto unggahan ke disk publik; null bila tidak ada berkas baru. */
+    private function simpanFoto(Request $request): ?string
+    {
+        if (! $request->hasFile('foto')) {
+            return null;
+        }
+
+        return $request->file('foto')->store('karyawan', 'public');
+    }
+
+    /** Hapus foto lama supaya tidak menumpuk berkas yatim di penyimpanan. */
+    private function hapusFoto(Employee $karyawan): void
+    {
+        if ($karyawan->foto && Storage::disk('public')->exists($karyawan->foto)) {
+            Storage::disk('public')->delete($karyawan->foto);
+        }
     }
 }

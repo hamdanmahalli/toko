@@ -9,6 +9,7 @@
 
     <form method="POST"
           action="{{ $karyawan->exists ? route('admin.karyawan.update', $karyawan) : route('admin.karyawan.store') }}"
+          enctype="multipart/form-data"
           class="space-y-4">
         @csrf
         @if ($karyawan->exists)
@@ -16,6 +17,23 @@
         @endif
 
         <div class="space-y-4 card p-5">
+            <div class="flex items-center gap-4">
+                <div class="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-200">
+                    <img id="pratinjau-foto" alt="" src="{{ $karyawan->fotoUrl() }}"
+                         class="h-full w-full object-cover {{ $karyawan->fotoUrl() ? '' : 'hidden' }}">
+                    <span id="pratinjau-inisial"
+                          class="flex h-full w-full items-center justify-center text-lg font-semibold text-slate-400 {{ $karyawan->fotoUrl() ? 'hidden' : '' }}">
+                        {{ $karyawan->initials() }}
+                    </span>
+                </div>
+                <div class="min-w-0">
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700" for="foto">Foto karyawan</label>
+                    <input id="foto" name="foto" type="file" accept="image/*"
+                           class="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-brand-700 hover:file:bg-brand-100">
+                    <p class="mt-1 text-xs text-slate-500">JPG/PNG, maksimal 2 MB. Dipakai di kartu pengenal.</p>
+                </div>
+            </div>
+
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-slate-700" for="nama">Nama lengkap</label>
@@ -242,6 +260,25 @@
                     catatan.textContent = pakaiTemplate ? wajib : bebas;
                 });
             }
+        })();
+    </script>
+
+    <script>
+        (() => {
+            const input = document.getElementById('foto');
+            const gambar = document.getElementById('pratinjau-foto');
+            const inisial = document.getElementById('pratinjau-inisial');
+
+            if (!input || !gambar) return;
+
+            input.addEventListener('change', () => {
+                const berkas = input.files && input.files[0];
+                if (!berkas) return;
+
+                gambar.src = URL.createObjectURL(berkas);
+                gambar.classList.remove('hidden');
+                if (inisial) inisial.classList.add('hidden');
+            });
         })();
     </script>
 @endsection

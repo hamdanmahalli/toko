@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 #[
     Fillable([
@@ -94,6 +95,12 @@ class Employee extends Model
     public function scopeDiToko(Builder $query, int|Shop $shop): Builder
     {
         return $query->where('shop_id', $shop instanceof Shop ? $shop->id : $shop);
+    }
+
+    /** URL foto karyawan di disk publik; null bila belum ada foto. */
+    public function fotoUrl(): ?string
+    {
+        return $this->foto ? Storage::disk('public')->url($this->foto) : null;
     }
 
     public function initials(): string

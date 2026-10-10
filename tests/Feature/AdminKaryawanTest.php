@@ -8,7 +8,9 @@ use App\Models\Shop;
 use App\Models\User;
 use App\Services\QrService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -104,6 +106,43 @@ class AdminKaryawanTest extends TestCase
 
         $karyawan = Employee::where('nip', 'K-100')->first();
         $this->assertNull($karyawan->user_id);
+    }
+
+    public function test_foto_karyawan_bisa_diunggah(): void
+    {
+        Storage::fake('public');
+        $toko = Shop::factory()->create();
+
+        $this->actingAs($this->pemilik())
+            ->post('/admin/karyawan', $this->dataKaryawan($toko, [
+                'foto' => UploadedFile::fake()->image('budi.jpg', 200, 200),
+            ]))
+            ->assertRedirect();
+
+        $karyawan = Employee::where('nip', 'K-100')->firstOrFail();
+
+        $this->assertNotNull($karyawan->foto);
+        Storage::disk('public')->assertExists($karyawan->foto);
+    }
+
+    public function test_ganti_foto_menghapus_foto_lama(): void
+    {
+        Storage::fake('public');
+        $toko = Shop::factory()->create();
+        $karyawan = Employee::factory()->create(['shop_id' => $toko->id, 'foto' => 'karyawan/lama.jpg']);
+        Storage::disk('public')->put('karyawan/lama.jpg', 'isi-lama');
+
+        $this->actingAs($this->pemilik())
+            ->put("/admin/karyawan/{$karyawan->id}", $this->dataKaryawan($toko, [
+                'nip' => $karyawan->nip,
+                'foto' => UploadedFile::fake()->image('baru.jpg', 200, 200),
+            ]))
+            ->assertRedirect();
+
+        $karyawan->refresh();
+        $this->assertNotSame('karyawan/lama.jpg', $karyawan->foto);
+        Storage::disk('public')->assertMissing('karyawan/lama.jpg');
+        Storage::disk('public')->assertExists($karyawan->foto);
     }
 
     public function test_karyawan_baru_diizinkan_memakai_perangkat_presensi(): void
