@@ -32,14 +32,33 @@
         {{-- Kartu identitas utama. --}}
         <div class="card p-5">
             <div class="flex items-center gap-4">
-                @if ($foto)
-                    <span class="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-slate-100 shadow-md shadow-brand-600/25">
-                        <img src="{{ $foto }}" alt="{{ $employee->nama }}" class="h-full w-full object-cover">
-                    </span>
-                @elseif ($employee)
-                    <span class="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-xl font-bold text-white shadow-md shadow-brand-600/25">
-                        {{ $employee->initials() }}
-                    </span>
+                @if ($employee)
+                    {{-- Foto bisa diganti langsung dari avatar (khusus akun
+                         karyawan). Berkas otomatis terkirim saat dipilih. --}}
+                    <form method="POST" action="{{ route('profil.foto') }}" enctype="multipart/form-data"
+                          class="relative shrink-0">
+                        @csrf
+                        <label for="foto-profil" class="group block cursor-pointer" title="Ganti foto profil">
+                            <span class="block h-16 w-16 overflow-hidden rounded-full bg-slate-100 shadow-md shadow-brand-600/25 ring-2 ring-transparent transition group-hover:ring-brand-300">
+                                @if ($foto)
+                                    <img src="{{ $foto }}" alt="{{ $employee->nama }}" class="h-full w-full object-cover">
+                                @else
+                                    <span class="grid h-full w-full place-items-center bg-gradient-to-br from-brand-500 to-brand-600 text-xl font-bold text-white">
+                                        {{ $employee->initials() }}
+                                    </span>
+                                @endif
+                            </span>
+                            <span class="absolute -bottom-0.5 -right-0.5 grid h-6 w-6 place-items-center rounded-full bg-brand-600 text-white ring-2 ring-white transition group-hover:bg-brand-700">
+                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 8.5A1.5 1.5 0 0 1 5.5 7h1.7l.8-1.3A1.5 1.5 0 0 1 9.3 5h5.4a1.5 1.5 0 0 1 1.3.7l.8 1.3h1.7A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5v-9Z"/>
+                                    <circle cx="12" cy="13" r="3.2"/>
+                                </svg>
+                            </span>
+                        </label>
+
+                        <input id="foto-profil" type="file" name="foto" accept="image/png,image/jpeg,image/webp"
+                               class="sr-only" onchange="this.form.submit()">
+                    </form>
                 @else
                     <span class="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-slate-100 text-xl font-bold text-slate-600">
                         {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($akun->name, 0, 2)) }}
@@ -54,6 +73,17 @@
                     <span class="mt-2 inline-block rounded-full bg-brand-50 px-2.5 py-0.5 text-[11px] font-semibold text-brand-700 ring-1 ring-brand-100">
                         {{ $peran }}
                     </span>
+
+                    @if ($foto)
+                        <form method="POST" action="{{ route('profil.foto-hapus') }}" class="mt-1.5">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                    class="text-[11px] font-medium text-merah-500 transition hover:text-merah-600">
+                                Hapus foto
+                            </button>
+                        </form>
+                    @endif
                 </div>
             </div>
         </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Employee;
 use App\Models\UserDevice;
 use App\Support\Username;
 use Illuminate\Http\JsonResponse;
@@ -9,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
@@ -31,6 +33,49 @@ class ProfilController extends Controller
         return view('profil.keamanan', [
             'akun' => auth()->user(),
         ]);
+    }
+
+    /**
+     * Unggah/ganti foto profil karyawan. Hanya berlaku untuk akun yang tertaut
+     * ke data karyawan; berkas disimpan di disk publik (folder karyawan) supaya
+     * ikut terpakai pada kartu pengenal dan absensi selfie.
+     */
+    public function unggahFoto(Request $request): RedirectResponse
+    {
+        $employee = $request->user()->employee;
+
+        if (! $employee instanceof Employee) {
+            return back()->with('galat', 'Akun ini tidak tertaut data karyawan, jadi belum bisa punya foto.');
+        }
+
+        $request->validate([
+            'foto' => ['required', 'image', 'max:2048'],
+        ]);
+
+        $this->buangFotoLama($employee);
+        $employee->update(['foto' => $request->file('foto')->store('karyawan', 'public')]);
+
+        return back()->with('sukses', 'Foto profil diperbarui.');
+    }
+
+    public function hapusFoto(Request $request): RedirectResponse
+    {
+        $employee = $request->user()->employee;
+
+        if ($employee instanceof Employee) {
+            $this->buangFotoLama($employee);
+            $employee->update(['foto' => null]);
+        }
+
+        return back()->with('sukses', 'Foto profil dihapus.');
+    }
+
+    /** Buang berkas foto lama supaya tidak menumpuk file yatim. */
+    private function buangFotoLama(Employee $employee): void
+    {
+        if ($employee->foto && Storage::disk('public')->exists($employee->foto)) {
+            Storage::disk('public')->delete($employee->foto);
+        }
     }
 
     public function gantiPassword(Request $request): RedirectResponse
