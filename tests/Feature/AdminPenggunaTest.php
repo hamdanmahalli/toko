@@ -370,6 +370,54 @@ class AdminPenggunaTest extends TestCase
         $this->assertDatabaseHas('user_devices', ['id' => $perangkat->id]);
     }
 
+    public function test_admin_menghapus_akun_target(): void
+    {
+        $target = $this->dengan('karyawan');
+        $karyawan = Employee::factory()->create([
+            'user_id' => $target->id,
+            'shop_id' => Shop::factory()->create()->id,
+            'aktif' => true,
+        ]);
+        $target->forceFill(['active_session_id' => 'sesi-lama'])->save();
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->delete("/admin/pengguna/{$target->id}")
+            ->assertRedirect()
+            ->assertSessionHas('sukses');
+
+        // Akun nonaktif + sesi diputus; karyawan dilepas supaya bisa dibuatkan
+        // akun baru, tapi riwayatnya tetap aman (baris users tidak hilang).
+        $this->assertDatabaseHas('users', [
+            'id' => $target->id,
+            'aktif' => false,
+            'active_session_id' => null,
+        ]);
+        $this->assertDatabaseHas('employees', ['id' => $karyawan->id, 'user_id' => null]);
+    }
+
+    public function test_admin_tidak_bisa_menghapus_akun_sendiri(): void
+    {
+        $pemilik = $this->dengan('pemilik');
+
+        $this->actingAs($pemilik)
+            ->delete("/admin/pengguna/{$pemilik->id}")
+            ->assertSessionHas('galat');
+
+        $this->assertDatabaseHas('users', ['id' => $pemilik->id, 'aktif' => true]);
+    }
+
+    public function test_tanpa_pengguna_kelola_tidak_bisa_menghapus_akun(): void
+    {
+        $target = $this->dengan('karyawan');
+        $pengawas = $this->dengan('pengawas', ['dashboard.lihat', 'pengguna.lihat']);
+
+        $this->actingAs($pengawas)
+            ->delete("/admin/pengguna/{$target->id}")
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('users', ['id' => $target->id, 'aktif' => true]);
+    }
+
     private function karyawan(array $atribut = []): Employee
     {
         return Employee::factory()->create($atribut + [

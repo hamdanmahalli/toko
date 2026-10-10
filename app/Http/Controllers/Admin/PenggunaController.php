@@ -235,6 +235,32 @@ class PenggunaController extends Controller
     }
 
     /**
+     * Hapus akun = nonaktifkan, putus semua sesi, dan lepas tautan ke data
+     * karyawan (lihat `admin.pengguna.hapus`). Riwayat absensi dan data
+     * karyawan TIDAK ikut hilang; bila karyawannya masih aktif, ia bisa
+     * dibuatkan akun baru dari halaman ini.
+     */
+    public function hapus(Request $request, User $pengguna): RedirectResponse
+    {
+        if ($pengguna->is($request->user())) {
+            return back()->with('galat', 'Tidak bisa menghapus akun Anda sendiri.');
+        }
+
+        DB::transaction(function () use ($pengguna) {
+            if ($pengguna->employee) {
+                $pengguna->employee->update(['user_id' => null]);
+            }
+
+            $pengguna->forceFill([
+                'aktif' => false,
+                'active_session_id' => null,
+            ])->save();
+        });
+
+        return back()->with('sukses', 'Akun '.$pengguna->name.' dihapus. Data karyawan dan riwayat absensi tetap tersimpan.');
+    }
+
+    /**
      * Hapus perangkat akun — satu-satunya tindakan yang perlu diambil pemilik
      * saat karyawan ganti perangkat. Butuh `perangkat.kelola`, dan target
      * harus benar-benar milik akun yang disebut di URL.

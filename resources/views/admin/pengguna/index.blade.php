@@ -300,22 +300,37 @@
                         </form>
 
                         @can('pengguna.kelola')
-                            <form id="reset-{{ $u->id }}" method="POST"
-                                  action="{{ route('admin.pengguna.reset-password', $u) }}"
-                                  onsubmit="return confirm('Kirim password baru ke {{ $u->email }}? Password lama dan sesi yang sedang aktif akan berhenti berlaku.');">
-                                @csrf
-                            </form>
+<form id="reset-{{ $u->id }}" method="POST"
+                          action="{{ route('admin.pengguna.reset-password', $u) }}"
+                          onsubmit="return confirm('Kirim password baru ke {{ $u->email }}? Password lama dan sesi yang sedang aktif akan berhenti berlaku.');">
+                            @csrf
+                        </form>
 
-                            <div class="flex flex-wrap items-center justify-end gap-2 px-4 pb-4">
-                                <button type="submit" form="reset-{{ $u->id }}"
-                                        class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
-                                    Reset password
+                        @if ($u->id !== auth()->id())
+                            <form id="hapus-{{ $u->id }}" method="POST"
+                                  action="{{ route('admin.pengguna.hapus', $u) }}"
+                                  onsubmit="return confirm('Hapus akun {{ $u->name }}? Akun dinonaktifkan, semua sesi diputus, dan data karyawan dilepas dari akun ini. Riwayat absensi tetap tersimpan.');">
+                                @csrf
+                                @method('DELETE')
+                            </form>
+                        @endif
+
+                        <div class="flex flex-wrap items-center justify-end gap-2 px-4 pb-4">
+                            @if ($u->id !== auth()->id())
+                                <button type="submit" form="hapus-{{ $u->id }}"
+                                        class="rounded-lg border border-merah-200 px-3 py-1.5 text-sm font-medium text-merah-600 hover:bg-merah-50">
+                                    Hapus akun
                                 </button>
-                                <button type="submit" form="update-{{ $u->id }}"
-                                        class="rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700">
-                                    Simpan
-                                </button>
-                            </div>
+                            @endif
+                            <button type="submit" form="reset-{{ $u->id }}"
+                                    class="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                                Reset password
+                            </button>
+                            <button type="submit" form="update-{{ $u->id }}"
+                                    class="rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700">
+                                Simpan
+                            </button>
+                        </div>
                         @endcan
 
                         @if ($u->devices->isNotEmpty())
