@@ -38,6 +38,8 @@ class AuthTest extends TestCase
             ->assertSee('logo-toko-mm.png', false)
             ->assertSee('name="login"', false)
             ->assertSee('name="password"', false)
+            ->assertDontSee('name="ingat"', false)
+            ->assertDontSee('Remember Me')
             ->assertDontSee('Masuk untuk melanjutkan');
     }
 

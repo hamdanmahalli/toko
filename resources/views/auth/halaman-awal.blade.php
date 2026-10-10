@@ -361,13 +361,13 @@
                     <input type="hidden" name="device_id">
 
                     <div>
-                        <label for="login" class="sr-only">Nama atau username</label>
+                        <label for="login" class="sr-only">Email atau username</label>
                         <div class="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 transition focus-within:border-brand-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-brand-100">
                             <svg class="h-[18px] w-[18px] shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.1a7.5 7.5 0 0 1 15 0v.15H4.5V20.1Z"/>
                             </svg>
                             <input id="login" name="login" type="text" required autocomplete="username"
-                                   value="{{ old('login') }}" placeholder="nama/username"
+                                   value="{{ old('login') }}" placeholder="email/username"
                                    class="w-full bg-transparent py-2.5 text-sm outline-none placeholder:text-slate-400">
                         </div>
                     </div>
@@ -384,12 +384,7 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between gap-3">
-                        <label class="flex items-center gap-2 text-[13px] text-slate-500">
-                            <input type="checkbox" name="ingat" value="1"
-                                   class="rounded border-slate-200 text-brand-600 focus:ring-brand-500">
-                            Remember Me
-                        </label>
+                    <div class="flex items-center justify-end gap-3">
                         <a href="{{ route('panduan') }}"
                            class="text-[13px] font-medium text-brand-700 transition hover:text-brand-800">
                             Baca Panduan

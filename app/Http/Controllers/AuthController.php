@@ -33,7 +33,6 @@ class AuthController extends Controller
         $kredensial = $request->validate([
             'login' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string'],
-            'ingat' => ['nullable', 'boolean'],
             'device_id' => ['nullable', 'string', 'max:64'],
         ]);
 
@@ -52,11 +51,8 @@ class AuthController extends Controller
         $kolom = str_contains($login, '@') ? 'email' : 'username';
         $akun = User::where($kolom, $login)->first();
 
-        $ingat = (bool) ($kredensial['ingat'] ?? false);
-
         if (! $akun || ! Auth::attempt(
             [$kolom => $login, 'password' => $kredensial['password'], 'aktif' => true],
-            $ingat,
         )) {
             RateLimiter::hit($kunci, self::KUNCI_SELAMA_DETIK);
 
