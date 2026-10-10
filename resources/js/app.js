@@ -98,3 +98,39 @@
         if (kolom && !kolom.value) kolom.value = id;
     });
 })();
+
+//
+// Umpan balik tombol proses: begitu form dikirim, tombol yang memicunya
+// berubah menjadi spinner + label "Proses" agar tidak terklik dua kali dan
+// pengguna tahu ada yang sedang berjalan. Pengiriman GET (mis. filter)
+// dibiarkan apa adanya, dan form yang sudah dibatalkan (konfirmasi /
+// preventDefault) tidak ikut berubah.
+(function () {
+    'use strict';
+
+    function tombolProses(tombol) {
+        tombol.disabled = true;
+        tombol.classList.add('opacity-80', 'cursor-wait');
+        tombol.innerHTML =
+            '<span class="inline-flex items-center gap-2">' +
+            '<svg class="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+            '<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity="0.25" stroke-width="3"/>' +
+            '<path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>' +
+            '</svg><span>Proses</span></span>';
+    }
+
+    document.addEventListener('submit', function (kejadian) {
+        if (kejadian.defaultPrevented) return;
+
+        var form = kejadian.target;
+        if (!form || form.nodeName !== 'FORM') return;
+        if ((form.getAttribute('method') || 'get').toLowerCase() === 'get') return;
+
+        var tombol = kejadian.submitter ||
+            form.querySelector('button[type="submit"], button:not([type])');
+
+        if (tombol && !tombol.disabled) {
+            tombolProses(tombol);
+        }
+    });
+})();
