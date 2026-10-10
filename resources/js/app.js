@@ -152,7 +152,7 @@ document.addEventListener('click', function (event) {
     tombol.disabled = true;
     tombol.innerHTML = 'Menyiapkan...';
 
-    import('html2canvas')
+    import('html2canvas-pro')
         .then(function (modul) {
             var html2canvas = modul.default || modul;
 

@@ -61,12 +61,12 @@
     /* Frame putih pada latar: kiri 31.5%, atas 20.8%, 37% x 22.6%. */
     .kartu-foto {
         position: absolute;
-        left: 31.5%;
-        top: 20.8%;
-        width: 37%;
-        height: 22.6%;
+        left: 33.7%;
+        top: 21.9%;
+        width: 33%;
+        height: 20.9%;
         overflow: hidden;
-        border-radius: 2.6cqw;
+        border-radius: 3.6cqw;
         background: #fff;
     }
 
@@ -96,7 +96,7 @@
         left: 8%;
         right: 8%;
         top: 45.5%;
-        bottom: 5.5%;
+        bottom: 8%;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -129,7 +129,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 3cqw;
+        gap: 8cqw;
         width: 100%;
     }
 
