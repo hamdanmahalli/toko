@@ -40,6 +40,10 @@ class AuthTest extends TestCase
             ->assertSee('name="password"', false)
             ->assertDontSee('name="ingat"', false)
             ->assertDontSee('Remember Me')
+            // Halaman login tidak memutar splash: setelah gagal login pengguna
+            // tetap di form login, bukan kembali ke animasi sambutan.
+            ->assertDontSee('id="splash-screen"', false)
+            ->assertDontSee("classList.add('splash-aktif')", false)
             ->assertDontSee('Masuk untuk melanjutkan');
     }
 
@@ -49,6 +53,8 @@ class AuthTest extends TestCase
             ->assertOk()
             ->assertSee('Let&rsquo;s Get You Set Up<br>for Success', false)
             ->assertSee('img/login.png', false)
+            ->assertSee('id="splash-screen"', false)
+            ->assertSee("classList.add('splash-aktif')", false)
             ->assertSee(route('masuk'), false);
 
         $this->get('/beranda')->assertRedirect(route('masuk'));

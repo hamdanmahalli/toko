@@ -1,6 +1,9 @@
 @php
     $namaApp = \App\Models\Setting::ambil('umum.nama_app', 'Toko MM');
     $panel = $panel ?? 'mulai';
+    // Splash hanya di halaman sambutan. Di halaman login (termasuk saat kembali
+    // karena gagal login) splash tidak diputar ulang supaya tetap di form login.
+    $tampilkanSplash = $panel === 'mulai';
     $judulPanel = match ($panel) {
         'masuk' => 'Masuk',
         default => 'Selamat Datang',
@@ -287,34 +290,39 @@
         }
     </style>
 
-    <script>
-        // Splash selalu tampil tiap muat ulang: pasang kelas sebelum konten dirender.
-        document.documentElement.classList.add('splash-aktif');
-    </script>
+    @if ($tampilkanSplash)
+        <script>
+            // Splash tampil saat halaman sambutan dimuat: pasang kelas sebelum
+            // konten dirender supaya overlay tampil tanpa kedipan.
+            document.documentElement.classList.add('splash-aktif');
+        </script>
+    @endif
 
     @include('layouts.pwa')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-dvh bg-white antialiased">
-    <!-- SPLASH SCREEN OVERLAY -->
-    <div id="splash-screen">
-        <img class="splash-bg-logo" src="{{ asset('logo-toko-mm.png') }}" alt="" aria-hidden="true">
-        <div class="splash-blob splash-blob-1"></div>
-        <div class="splash-blob splash-blob-2"></div>
+    <!-- SPLASH SCREEN OVERLAY (hanya halaman sambutan) -->
+    @if ($tampilkanSplash)
+        <div id="splash-screen">
+            <img class="splash-bg-logo" src="{{ asset('logo-toko-mm.png') }}" alt="" aria-hidden="true">
+            <div class="splash-blob splash-blob-1"></div>
+            <div class="splash-blob splash-blob-2"></div>
 
-        <div class="splash-logo-wrap">
-            <div class="splash-ring splash-ring-1"></div>
-            <div class="splash-ring splash-ring-2"></div>
-            <div class="splash-logo">
-                <img src="{{ asset('logo-toko-mm.png') }}" alt="{{ $namaApp }}">
+            <div class="splash-logo-wrap">
+                <div class="splash-ring splash-ring-1"></div>
+                <div class="splash-ring splash-ring-2"></div>
+                <div class="splash-logo">
+                    <img src="{{ asset('logo-toko-mm.png') }}" alt="{{ $namaApp }}">
+                </div>
+            </div>
+            <div class="splash-dots">
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
         </div>
-        <div class="splash-dots">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-    </div>
+    @endif
 
     <div class="relative flex min-h-dvh w-full flex-col lg:flex-row lg:items-end lg:justify-end">
         <!-- Area gambar: penuh sampai tepi. Mobile = login.png, Web = website.jpg.
@@ -439,28 +447,30 @@
             });
         });
     </script>
-    <script>
-        // Splash logo: tampil segera (kelas splash-aktif dari <head>), lalu fade-out
-        // setelah 2,5 detik.
-        function tutupSplash() {
-            var splash = document.getElementById('splash-screen');
-            if (!splash) return;
-            if (!document.documentElement.classList.contains('splash-aktif')) return;
+    @if ($tampilkanSplash)
+        <script>
+            // Splash logo: tampil segera (kelas splash-aktif dari <head>), lalu fade-out
+            // setelah 2,5 detik.
+            function tutupSplash() {
+                var splash = document.getElementById('splash-screen');
+                if (!splash) return;
+                if (!document.documentElement.classList.contains('splash-aktif')) return;
 
-            setTimeout(function () {
-                splash.classList.add('fade-out');
-                document.documentElement.classList.remove('splash-aktif');
-                document.body.style.overflow = '';
-                setTimeout(function () { splash.remove(); }, 600);
-            }, 2500);
-        }
+                setTimeout(function () {
+                    splash.classList.add('fade-out');
+                    document.documentElement.classList.remove('splash-aktif');
+                    document.body.style.overflow = '';
+                    setTimeout(function () { splash.remove(); }, 600);
+                }, 2500);
+            }
 
-        // `load` untuk kunjungan normal, `pageshow` untuk kembali dari cache
-        // (bfcache) yang tidak memicu `load` lagi.
-        window.addEventListener('load', tutupSplash);
-        window.addEventListener('pageshow', function (event) {
-            if (event.persisted) tutupSplash();
-        });
-    </script>
+            // `load` untuk kunjungan normal, `pageshow` untuk kembali dari cache
+            // (bfcache) yang tidak memicu `load` lagi.
+            window.addEventListener('load', tutupSplash);
+            window.addEventListener('pageshow', function (event) {
+                if (event.persisted) tutupSplash();
+            });
+        </script>
+    @endif
 </body>
 </html>
