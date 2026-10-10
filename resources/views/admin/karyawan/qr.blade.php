@@ -3,16 +3,23 @@
 @section('judul', 'Kartu Absensi')
 
 @section('konten')
-    <h1 class="mb-4 font-display text-xl text-slate-900">Kartu {{ $karyawan->nama }}</h1>
+    <h1 class="mb-4 font-display text-xl text-slate-900 print:hidden">Kartu {{ $karyawan->nama }}</h1>
 
     <div class="grid gap-4 lg:grid-cols-2">
         <div>
             @include('absen.partials.kartu', ['pengguna' => $karyawan])
 
-            <button type="button" onclick="window.print()"
-                    class="mt-3 w-full rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 print:hidden">
-                Cetak kartu
-            </button>
+            <div class="mt-3 flex gap-2 print:hidden">
+                <button type="button" onclick="window.print()"
+                        class="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+                    Cetak kartu
+                </button>
+                <button type="button" data-unduh-kartu="#kartu-pegawai"
+                        data-label="{{ \Illuminate\Support\Str::slug($karyawan->nama) ?: 'karyawan' }}"
+                        class="flex-1 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700">
+                    Unduh PNG
+                </button>
+            </div>
         </div>
 
         <div class="space-y-4 print:hidden">

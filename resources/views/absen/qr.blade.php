@@ -7,10 +7,17 @@
         <div class="flex items-center justify-between gap-3 print:hidden">
             <h1 class="font-display text-xl text-slate-900">Kartu saya</h1>
 
-            <button type="button" onclick="window.print()"
-                    class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
-                Cetak kartu
-            </button>
+            <div class="flex gap-2">
+                <button type="button" onclick="window.print()"
+                        class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
+                    Cetak kartu
+                </button>
+                <button type="button" data-unduh-kartu="#kartu-pegawai"
+                        data-label="{{ \Illuminate\Support\Str::slug($employee->nama) ?: 'karyawan' }}"
+                        class="rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-700">
+                    Unduh PNG
+                </button>
+            </div>
         </div>
 
         <p class="text-[13px] leading-relaxed text-slate-500 print:hidden">

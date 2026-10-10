@@ -1,13 +1,22 @@
 {
+  "node_modules/html2canvas/dist/html2canvas.esm.js": {
+    "file": "assets/html2canvas.esm-QH1iLAAe.js",
+    "name": "html2canvas.esm",
+    "src": "node_modules/html2canvas/dist/html2canvas.esm.js",
+    "isDynamicEntry": true
+  },
   "resources/css/app.css": {
     "file": "assets/app-DBUZ51eW.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-BG7Mo3cY.js",
+    "file": "assets/app-CCZRvO7Y.js",
     "name": "app",
     "src": "resources/js/app.js",
-    "isEntry": true
+    "isEntry": true,
+    "dynamicImports": [
+      "node_modules/html2canvas/dist/html2canvas.esm.js"
+    ]
   }
 }

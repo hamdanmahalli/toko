@@ -134,3 +134,49 @@
         }
     });
 })();
+
+//
+// Unduh kartu pegawai sebagai PNG. html2canvas dimuat saat dibutuhkan saja
+// (dynamic import) supaya tidak memberatkan halaman lain.
+document.addEventListener('click', function (event) {
+    var tombol = event.target.closest('[data-unduh-kartu]');
+    if (!tombol) return;
+
+    var kartu = document.querySelector(tombol.getAttribute('data-unduh-kartu'));
+    if (!kartu) return;
+
+    event.preventDefault();
+
+    var namaFile = tombol.getAttribute('data-label') || 'kartu';
+    var teksAsli = tombol.innerHTML;
+    tombol.disabled = true;
+    tombol.innerHTML = 'Menyiapkan...';
+
+    import('html2canvas')
+        .then(function (modul) {
+            var html2canvas = modul.default || modul;
+
+            return html2canvas(kartu, {
+                backgroundColor: null,
+                scale: 3,
+                useCORS: true,
+                logging: false,
+            });
+        })
+        .then(function (canvas) {
+            var tautan = document.createElement('a');
+            tautan.download = 'kartu-' + namaFile + '.png';
+            tautan.href = canvas.toDataURL('image/png');
+            document.body.appendChild(tautan);
+            tautan.click();
+            tautan.remove();
+        })
+        .catch(function (galat) {
+            console.error(galat);
+            window.alert('Gagal mengunduh kartu. Coba lagi ya.');
+        })
+        .finally(function () {
+            tombol.disabled = false;
+            tombol.innerHTML = teksAsli;
+        });
+});

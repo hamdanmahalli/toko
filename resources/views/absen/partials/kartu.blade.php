@@ -1,46 +1,165 @@
 {{--
-    Kartu absensi cetak. Dipakai oleh halaman karyawan (/saya-qr) dan admin
-    (/admin/karyawan/{id}/qr) supaya keduanya mencetak kartu yang sama persis.
+    Kartu absensi karyawan.
 
-    Dua kode, satu isi: barcode Code128 untuk scanner USB perangkat presensi, QR sebagai
-    kode pendamping untuk reader kamera atau pemindaian manual. Keduanya berisi token yang
-    sama, jadi rotasi kartu membatalkan keduanya sekaligus.
+    Latar kartu (header hijau, gelombang, dan frame foto) sudah disediakan
+    sebagai gambar di public/img/kartu-karyawan.png. View ini hanya menempelkan
+    foto karyawan ke dalam frame putih dan menuliskan data (nama, NIP, jabatan,
+    QR + barcode) di area putih bawah.
+
+    Dipakai oleh halaman admin (/admin/karyawan/{id}/qr) dan halaman karyawan
+    (/saya-qr) supaya keduanya menampilkan kartu yang sama persis.
 --}}
-<div class="kartu-qr card border-t-4 border-merah-500 p-6 text-center print:p-0 print:shadow-none">
-    <p class="text-[11px] font-medium uppercase tracking-wider text-slate-400">
-        {{ $pengguna->shop->nama }}
-    </p>
-    <p class="mt-1 font-display text-xl text-slate-900">{{ $pengguna->nama }}</p>
-    <p class="text-xs text-slate-500">{{ $pengguna->nip ?? 'Tanpa NIP' }}</p>
-
-    <div class="mx-auto mt-4 w-fit rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-        {!! $qrSvg !!}
+<div class="kartu-pegawai" id="kartu-pegawai">
+    {{-- Foto karyawan, mengisi frame putih pada latar. --}}
+    <div class="kartu-foto">
+        @if ($pengguna->fotoUrl())
+            <img src="{{ $pengguna->fotoUrl() }}" alt="Foto {{ $pengguna->nama }}">
+        @else
+            <span class="kartu-foto-kosong">
+                <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.5 8a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 20a7 7 0 0 1 14 0"/>
+                </svg>
+            </span>
+        @endif
     </div>
 
-    {{-- Barcode ini yang dibaca scanner perangkat presensi. Lebarnya dibuat pendek
-     supaya muat di kartu dompet, tapi tetap cukup tinggi untuk discan. --}}
-    <div class="mt-5">
-        <p class="mb-1 text-[11px] font-medium uppercase tracking-wider text-slate-400">
-            Kode untuk perangkat presensi
-        </p>
-        <div class="mx-auto w-full max-w-[300px] bg-white">
-            {!! $barcodeSvg !!}
+    {{-- Data karyawan di area putih bawah. --}}
+    <div class="kartu-info">
+        <p class="kartu-nama">{{ $pengguna->nama }}</p>
+        <p class="kartu-nip">{{ $pengguna->nip ?? 'Tanpa NIP' }}</p>
+        <p class="kartu-jabatan">{{ $pengguna->position->nama ?? 'Karyawan' }}</p>
+
+        {{-- Dua kode, satu isi: QR untuk kamera, barcode untuk scanner USB
+             perangkat presensi. Keduanya berisi token yang sama. --}}
+        <div class="kartu-kode">
+            <p class="sr-only">Kode untuk perangkat presensi</p>
+            <div class="kartu-qr">{!! $qrSvg !!}</div>
+            <div class="kartu-barcode">{!! $barcodeSvg !!}</div>
         </div>
-        <p class="mt-1.5 text-[11px] leading-relaxed text-slate-400">
-            Tahan kartu di scanner perangkat presensi, atau ketik kode di bawah secara manual.
-        </p>
     </div>
-
-    <code class="mt-3 block select-all break-all rounded-lg bg-slate-50 px-3 py-2 text-center text-[11px] text-slate-500">
-        {{ $token }}
-    </code>
-
-    <p class="mt-3 text-[11px] text-slate-400">Versi {{ $pengguna->qr_version }}</p>
 </div>
 
 <style>
-    /* Hanya berlaku di halaman yang merender kartu. Fungsinya supaya tombol
-       "Cetak" menghasilkan kartu saja, bukan seluruh halaman dengan menu. */
+    /* Semua ukuran memakai satuan container (cqw) supaya kartu bisa mengecil
+       di layar HP tanpa kehilangan proporsi. Ukuran asli latar 638x1012. */
+    .kartu-pegawai {
+        position: relative;
+        width: 100%;
+        max-width: 360px;
+        aspect-ratio: 638 / 1012;
+        container-type: inline-size;
+        border-radius: 14px;
+        overflow: hidden;
+        background-color: #2d5a43;
+        background-image: url('{{ asset('img/kartu-karyawan.png') }}');
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        box-shadow: 0 18px 40px -20px rgba(45, 90, 67, .55);
+    }
+
+    /* Frame putih pada latar: kiri 31.5%, atas 20.8%, 37% x 22.6%. */
+    .kartu-foto {
+        position: absolute;
+        left: 31.5%;
+        top: 20.8%;
+        width: 37%;
+        height: 22.6%;
+        overflow: hidden;
+        border-radius: 2.6cqw;
+        background: #fff;
+    }
+
+    .kartu-foto img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 28%;
+    }
+
+    .kartu-foto-kosong {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        color: #cbd5e1;
+    }
+
+    .kartu-foto-kosong svg {
+        width: 46%;
+        height: 46%;
+    }
+
+    .kartu-info {
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        top: 45.5%;
+        bottom: 5.5%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .kartu-nama {
+        font-size: 6.4cqw;
+        font-weight: 700;
+        line-height: 1.08;
+        color: #2d5a43;
+    }
+
+    .kartu-nip {
+        margin-top: 1.8cqw;
+        font-size: 3.6cqw;
+        font-weight: 500;
+        letter-spacing: .06em;
+        color: #64748b;
+    }
+
+    .kartu-jabatan {
+        margin-top: 1.2cqw;
+        font-size: 3.8cqw;
+        color: #475569;
+    }
+
+    .kartu-kode {
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3cqw;
+        width: 100%;
+    }
+
+    .kartu-qr {
+        width: 33cqw;
+        height: 33cqw;
+        padding: 2.4cqw;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 3cqw;
+    }
+
+    .kartu-qr svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    .kartu-barcode {
+        width: 80%;
+    }
+
+    .kartu-barcode svg {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    /* Hanya berlaku di halaman yang merender kartu: supaya "Cetak" menghasilkan
+       kartu saja, bukan seluruh halaman dengan menu. */
     @media print {
         header, nav, aside, #menu-admin {
             display: none !important;
@@ -48,6 +167,12 @@
 
         body {
             background: #fff;
+        }
+
+        .kartu-pegawai {
+            width: 90mm;
+            max-width: none;
+            box-shadow: none;
         }
     }
 </style>
