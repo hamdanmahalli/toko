@@ -42,7 +42,7 @@
                 </p>
                 <form method="POST" action="{{ route('admin.karyawan.rotasi-qr', $karyawan) }}" class="mt-3">
                     @csrf
-                    <button class="rounded-lg border border-amber-300 px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-50">
+                    <button class="rounded-lg border border-merah-300 px-3 py-2 text-sm font-medium text-merah-700 hover:bg-merah-50">
                         Ganti kartu
                     </button>
                 </form>

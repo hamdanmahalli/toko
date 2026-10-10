@@ -11,7 +11,7 @@ enum StatusPerangkat: string
     public function label(): string
     {
         return match ($this) {
-            self::Pending => 'Menunggu persetujuan',
+            self::Pending => 'Baru belum dikenal',
             self::Disetujui => 'Diizinkan',
             self::Ditolak => 'Ditolak',
         };

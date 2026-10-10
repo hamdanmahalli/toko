@@ -22,7 +22,7 @@
             </div>
             <div class="card p-4">
                 <p class="text-[11px] font-medium text-slate-400">Terlambat</p>
-                <p class="tabular mt-1 text-2xl font-semibold text-amber-600">{{ $terlambat }}</p>
+                <p class="tabular mt-1 text-2xl font-semibold text-merah-600">{{ $terlambat }}</p>
             </div>
             <div class="card p-4">
                 <p class="text-[11px] font-medium text-slate-400">Belum pulang</p>
@@ -62,14 +62,14 @@
                                     @if ($t['geofence'])
                                         <span class="text-brand-600">Aktif</span>
                                     @else
-                                        <span class="text-amber-600">Belum ada koordinat</span>
+                                        <span class="text-merah-600">Belum ada koordinat</span>
                                     @endif
                                 </td>
                                 <td class="tabular px-4 py-3 text-slate-600">{{ $t['karyawan'] }}</td>
                                 <td class="tabular px-4 py-3 text-slate-600">{{ $t['hadir'] }}</td>
                                 <td class="tabular px-4 py-3">
                                     @if ($t['terlambat'] > 0)
-                                        <span class="font-medium text-amber-600">{{ $t['terlambat'] }}</span>
+                                        <span class="font-medium text-merah-600">{{ $t['terlambat'] }}</span>
                                     @else
                                         <span class="text-slate-400">0</span>
                                     @endif
@@ -111,7 +111,7 @@
                 <h2 class="font-display text-[15px] text-slate-900">Perlu persetujuan</h2>
                 @if ($pendingIzin + $pendingLembur > 0)
                     <p class="text-xs text-slate-500">
-                        <span class="tabular font-medium text-amber-600">{{ $pendingIzin + $pendingLembur }}</span>
+                        <span class="tabular font-medium text-merah-600">{{ $pendingIzin + $pendingLembur }}</span>
                         pengajuan menunggu keputusan.
                     </p>
                 @endif
@@ -133,8 +133,8 @@
                     @can('perangkat.kelola')
                         <a href="{{ route('admin.pengguna.index') }}"
                            class="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2.5 text-sm hover:bg-slate-50 focus:border-brand-400">
-                            <span class="text-slate-700">Perangkat menunggu persetujuan</span>
-                            <span class="tabular font-semibold {{ $perangkatMenunggu > 0 ? 'text-amber-600' : 'text-slate-400' }}">
+                            <span class="text-slate-700">Perangkat baru belum dikenal</span>
+                            <span class="tabular font-semibold {{ $perangkatMenunggu > 0 ? 'text-merah-600' : 'text-slate-400' }}">
                                 {{ $perangkatMenunggu }}
                             </span>
                         </a>

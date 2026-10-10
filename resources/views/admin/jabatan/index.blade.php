@@ -68,7 +68,7 @@
                                           onsubmit="return confirm('Hapus jabatan {{ $j->nama }}?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="text-sm font-medium text-rose-600 hover:underline">Hapus</button>
+                                        <button class="text-sm font-medium text-merah-600 hover:underline">Hapus</button>
                                     </form>
                                 @endif
                             </td>

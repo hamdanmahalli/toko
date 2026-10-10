@@ -5,16 +5,16 @@
     </p>
 
 @php($barisKolomKaryawan = [
-    ['Nama lengkap', 'Nama yang tampil di daftar, laporan, dan pengajuan. <span class="text-amber-700">Wajib.</span>'],
+    ['Nama lengkap', 'Nama yang tampil di daftar, laporan, dan pengajuan. <span class="text-merah-700">Wajib.</span>'],
     ['NIP', 'Nomor induk karyawan. Boleh dikosongkan, tapi harus unik bila diisi.'],
     ['Telepon', 'Nomor kontak. Boleh dikosongkan.'],
-    ['Email', 'Dipakai sebagai alamat login kalau akun dibuat. Harus unik. <span class="text-amber-700">Wajib</span> bila membuat akun.'],
-    ['Toko', 'Toko tempat karyawan bekerja. Supervisor hanya bisa memilih toko yang diawasi. <span class="text-amber-700">Wajib.</span>'],
+    ['Email', 'Dipakai sebagai alamat login kalau akun dibuat. Harus unik. <span class="text-merah-700">Wajib</span> bila membuat akun.'],
+    ['Toko', 'Toko tempat karyawan bekerja. Supervisor hanya bisa memilih toko yang diawasi. <span class="text-merah-700">Wajib.</span>'],
     ['Jabatan', 'Menentukan apakah karyawan wajib mengikuti template shift atau cukup ikut window.'],
     ['Template shift', 'Penugasan template khusus untuk satu karyawan. Mengosongkannya berarti kembali mengikuti aturan jabatan dan toko.'],
     ['Shift berlaku mulai', 'Tanggal mulai penugasan template. Kosongkan untuk memakai tanggal masuk karyawan.'],
     ['Tanggal masuk', 'Tanggal karyawan mulai bekerja.'],
-    ['Tipe gaji', '<span class="font-medium text-slate-800">Gaji Harian</span> atau <span class="font-medium text-slate-800">Gaji Per Jam</span>. <span class="text-amber-700">Wajib.</span>'],
+    ['Tipe gaji', '<span class="font-medium text-slate-800">Gaji Harian</span> atau <span class="font-medium text-slate-800">Gaji Per Jam</span>. <span class="text-merah-700">Wajib.</span>'],
     ['Gaji harian (Rp)', 'Nominal gaji per hari untuk tipe gaji harian.'],
     ['Tarif per jam (Rp)', 'Nominal per jam untuk tipe gaji per jam.'],
     ['Catatan', 'Catatan bebas, maksimal 255 karakter.'],

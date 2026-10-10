@@ -11,8 +11,6 @@
 </head>
 <body class="h-full bg-brand-50/60 text-slate-800 antialiased">
     <div class="mx-auto flex min-h-full max-w-5xl flex-col">
-        @include('layouts.kepala')
-
         <main class="flex-1 px-4 pb-28 pt-4 sm:pb-8">
             @include('layouts.pesan')
             @yield('konten')

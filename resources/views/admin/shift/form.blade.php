@@ -24,7 +24,7 @@
 
         {{-- error validasi slot per hari --}}
         @error('slot')
-            <p class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ $message }}</p>
+            <p class="rounded-lg bg-merah-50 px-3 py-2 text-sm text-merah-700">{{ $message }}</p>
         @enderror
 
         <div class="space-y-4 card p-5">
@@ -35,7 +35,7 @@
                            placeholder="Shift Pagi"
                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                     @error('nama')
-                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
@@ -49,7 +49,7 @@
                         @endforeach
                     </select>
                     @error('scope')
-                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
@@ -62,7 +62,7 @@
                            class="tabular w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                     <p class="mt-1 text-xs text-slate-500">Kode pendek untuk laporan, otomatis jadi huruf besar.</p>
                     @error('kode')
-                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
@@ -75,7 +75,7 @@
                         Berlaku untuk semua hari. Bisa ditimpa per hari di tabel bawah. Kosongkan bila tidak ada batas.
                     </p>
                     @error('durasi_maks_menit')
-                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
@@ -93,7 +93,7 @@
                         @endforeach
                     </select>
                     @error('tipe')
-                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                     @enderror
                 </div>
                 <div id="baris-fleksibel" class="hidden">
@@ -108,7 +108,7 @@
                         @endforeach
                     </select>
                     @error('fleksibel_tipe')
-                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
@@ -121,7 +121,7 @@
                            class="tabular w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                     <p class="mt-1 text-xs text-slate-500">Jam pulang dihitung dari jam datang ditambah durasi ini.</p>
                     @error('durasi_kerja_menit')
-                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
@@ -132,7 +132,7 @@
                         Setelah jam ini scan masuk ditolak. Kosongkan bila tidak ada batas jam scan.
                     </p>
                     @error('jam_cut_off')
-                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                        <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
@@ -165,19 +165,19 @@
 
         {{-- Error validasi sesi interval --}}
         @error('interval')
-            <p class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ $message }}</p>
+            <p class="rounded-lg bg-merah-50 px-3 py-2 text-sm text-merah-700">{{ $message }}</p>
         @enderror
         @error('interval.*.nama')
-            <p class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ $message }}</p>
+            <p class="rounded-lg bg-merah-50 px-3 py-2 text-sm text-merah-700">{{ $message }}</p>
         @enderror
         @error('interval.*.mulai')
-            <p class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ $message }}</p>
+            <p class="rounded-lg bg-merah-50 px-3 py-2 text-sm text-merah-700">{{ $message }}</p>
         @enderror
         @error('interval.*.selesai')
-            <p class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ $message }}</p>
+            <p class="rounded-lg bg-merah-50 px-3 py-2 text-sm text-merah-700">{{ $message }}</p>
         @enderror
         @error('interval.*.durasi_min_menit')
-            <p class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ $message }}</p>
+            <p class="rounded-lg bg-merah-50 px-3 py-2 text-sm text-merah-700">{{ $message }}</p>
         @enderror
 
         <div id="panel-slot" class="overflow-x-auto card p-5">
@@ -253,7 +253,7 @@
                 </button>
                 <span>Istirahat boleh dikosongkan bila tidak ada jam istirahat.</span>
                 <span>Durasi maks kosong berarti ikut nilai template di atas.</span>
-                <span id="petunjuk-lintas-malam" class="hidden font-medium text-amber-700">
+                <span id="petunjuk-lintas-malam" class="hidden font-medium text-merah-700">
                     Tipe ini boleh melewati tengah malam: jam pulang boleh lebih awal dari jam masuk.
                 </span>
             </div>
@@ -317,7 +317,7 @@
                                        class="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm outline-none focus:border-brand-500">
                             </td>
                             <td class="px-2 py-1.5 text-center">
-                                <button type="button" class="hapus-sesi text-xs font-medium text-rose-600 hover:text-rose-700">
+                                <button type="button" class="hapus-sesi text-xs font-medium text-merah-600 hover:text-merah-700">
                                     Hapus
                                 </button>
                             </td>
@@ -408,7 +408,7 @@
                            class="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm outline-none focus:border-brand-500">
                 </td>
                 <td class="px-2 py-1.5 text-center">
-                    <button type="button" class="hapus-sesi text-xs font-medium text-rose-600 hover:text-rose-700">Hapus</button>
+                    <button type="button" class="hapus-sesi text-xs font-medium text-merah-600 hover:text-merah-700">Hapus</button>
                 </td>`;
 
             document.getElementById('tambah-sesi').addEventListener('click', () => {

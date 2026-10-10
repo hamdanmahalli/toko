@@ -48,7 +48,7 @@
                                         {{ number_format($t->longitude, 5, ',', '.') }}
                                     </span>
                                 @else
-                                    <span class="text-amber-600">Belum ada koordinat</span>
+                                    <span class="text-merah-600">Belum ada koordinat</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3">

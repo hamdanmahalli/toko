@@ -124,7 +124,7 @@
             </div>
 
             @unless ($toko->presensiSiap())
-                <p class="rounded-lg bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800">
+                <p class="rounded-lg bg-merah-50 px-3 py-2 text-xs leading-relaxed text-merah-800">
                     Perangkat presensi <span class="font-medium">{{ $toko->exists ? 'toko ini masih' : 'belum' }} belum punya
                     user dan password, jadi siapa pun yang membuka tautannya akan melihat halaman
                     "belum siap" dan tidak bisa memindai kartu.
@@ -147,7 +147,7 @@
                 </div>
 
                 @unless ($toko->hasGeofence())
-                    <p class="rounded-lg bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800">
+                    <p class="rounded-lg bg-merah-50 px-3 py-2 text-xs leading-relaxed text-merah-800">
                         Perangkat presensi belum bisa dipakai karena koordinat toko masih kosong. Isi latitude dan longitude dulu.
                     </p>
                 @endunless

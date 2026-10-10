@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\StatusPerangkat;
 use App\Http\Controllers\Controller;
 use App\Mail\KirimAkunBaru;
 use App\Mail\KirimPasswordBaru;
@@ -236,25 +235,10 @@ class PenggunaController extends Controller
     }
 
     /**
-     * Setujui/tolak/hapus perangkat akun. Semuanya butuh `perangkat.kelola`,
-     * dan target harus benar-benar milik akun yang disebut di URL.
+     * Hapus perangkat akun — satu-satunya tindakan yang perlu diambil pemilik
+     * saat karyawan ganti perangkat. Butuh `perangkat.kelola`, dan target
+     * harus benar-benar milik akun yang disebut di URL.
      */
-    public function perangkatSetujui(User $pengguna, UserDevice $perangkat): RedirectResponse
-    {
-        abort_unless($perangkat->user_id === $pengguna->id, 404);
-        $perangkat->update(['status' => StatusPerangkat::Disetujui, 'last_seen_at' => now()]);
-
-        return back()->with('sukses', 'Perangkat '.$pengguna->name.' diizinkan untuk login.');
-    }
-
-    public function perangkatTolak(User $pengguna, UserDevice $perangkat): RedirectResponse
-    {
-        abort_unless($perangkat->user_id === $pengguna->id, 404);
-        $perangkat->update(['status' => StatusPerangkat::Ditolak]);
-
-        return back()->with('sukses', 'Perangkat '.$pengguna->name.' ditolak untuk login.');
-    }
-
     public function perangkatHapus(User $pengguna, UserDevice $perangkat): RedirectResponse
     {
         abort_unless($perangkat->user_id === $pengguna->id, 404);

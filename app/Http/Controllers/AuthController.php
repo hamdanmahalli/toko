@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -82,6 +83,57 @@ class AuthController extends Controller
             ->with('sukses', 'Selamat datang, '.$akun->name.'.');
     }
 
+    /**
+     * Login "passkey sederhana": membuka kunci token yang disegel server
+     * (lihat ProfilController::biometrik) setelah biometrik perangkat lolos.
+     * Token hanya berlaku bila device_id-nya sama dengan saat diterbitkan.
+     */
+    public function masukBiometrik(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'token' => ['required', 'string'],
+            'device_id' => ['nullable', 'string', 'max:64'],
+        ]);
+
+        $deviceId = (string) ($data['device_id'] ?? '');
+
+        try {
+            $isi = json_decode(Crypt::decryptString($data['token']), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\Throwable) {
+            throw ValidationException::withMessages([
+                'login' => 'Login biometrik tidak valid. Silakan masuk dengan password.',
+            ]);
+        }
+
+        $akun = User::find($isi['uid'] ?? null);
+
+        if (! $akun instanceof User || ! $akun->aktif || (int) ($isi['exp'] ?? 0) < now()->getTimestamp()) {
+            throw ValidationException::withMessages([
+                'login' => 'Login biometrik sudah kedaluwarsa. Silakan masuk dengan password.',
+            ]);
+        }
+
+        if ((string) ($isi['dev'] ?? '') !== $deviceId) {
+            throw ValidationException::withMessages([
+                'login' => 'Login biometrik hanya berlaku di perangkat aslinya.',
+            ]);
+        }
+
+        $blokir = $this->perangkatDiizinkan($akun, $deviceId);
+
+        if ($blokir !== null) {
+            throw ValidationException::withMessages(['login' => $blokir]);
+        }
+
+        Auth::login($akun, true);
+        $request->session()->regenerate();
+        $request->session()->put('sesi_aktif_menunggu', $akun->getKey());
+
+        return redirect()
+            ->intended(route('beranda'))
+            ->with('sukses', 'Selamat datang, '.$akun->name.'.');
+    }
+
     public function keluar(Request $request): RedirectResponse
     {
         Auth::logout();
@@ -98,8 +150,11 @@ class AuthController extends Controller
      * Cek penjagaan perangkat untuk akun karyawan.
      *
      * Mengembalikan null ketika diizinkan, atau pesan penolakan ketika tidak.
-     * Perangkat pertama yang belum dikenal otomatis dicatat sebagai "menunggu
-     * persetujuan" supaya pemilik/kepala toko tinggal menyetujui di Pengguna.
+     * Selama akun masih punya perangkat aktif, perangkat lain yang belum
+     * dikenal dicatat "menunggu" dan loginnya diblokir; penyelesaiannya adalah
+     * pemilik HAPUS perangkat lama di menu Pengguna. Begitu tidak ada perangkat
+     * aktif tersisa, perangkat berikutnya dianggap perangkat pertama dan
+     * langsung diizinkan.
      */
     private function perangkatDiizinkan(User $akun, string $deviceId): ?string
     {
@@ -112,6 +167,7 @@ class AuthController extends Controller
         }
 
         $perangkat = $akun->devices()->where('device_token', $deviceId)->first();
+        $adaPerangkatAktif = $akun->devices()->where('status', StatusPerangkat::Disetujui)->exists();
 
         if ($perangkat) {
             if ($perangkat->status === StatusPerangkat::Disetujui) {
@@ -120,14 +176,35 @@ class AuthController extends Controller
                 return null;
             }
 
-            return $perangkat->status === StatusPerangkat::Ditolak
-                ? 'Perangkat ini sudah ditolak. Minta pemilik menentukan ulang di menu Pengguna.'
-                : 'Perangkat ini belum disetujui. Minta pemilik atau kepala toko mengizinkannya di menu Pengguna.';
+            if ($perangkat->status === StatusPerangkat::Ditolak) {
+                return 'Perangkat ini sudah ditolak. Minta pemilik menghapusnya di menu Pengguna untuk bisa dipakai lagi.';
+            }
+
+            // Menunggu: selama perangkat lama masih aktif, tetap diblokir.
+            if ($adaPerangkatAktif) {
+                return 'Perangkat ini belum dikenal. Minta pemilik atau kepala toko menghapus perangkat lama di menu Pengguna, lalu coba login lagi.';
+            }
+
+            // Perangkat lama sudah dihapus → perangkat ini jadi yang pertama.
+            $perangkat->update(['status' => StatusPerangkat::Disetujui, 'last_seen_at' => now()]);
+
+            return null;
         }
 
-        $this->catatPerangkatBaru($akun, $deviceId);
+        if ($adaPerangkatAktif) {
+            $this->catatPerangkatBaru($akun, $deviceId);
 
-        return 'Perangkat ini belum didaftarkan dan sekarang menunggu persetujuan pemilik atau kepala toko di menu Pengguna.';
+            return 'Perangkat ini belum dikenal. Minta pemilik atau kepala toko menghapus perangkat lama di menu Pengguna, lalu coba login lagi.';
+        }
+
+        // Tidak ada perangkat aktif = perangkat pertama, langsung diizinkan.
+        $akun->devices()->create([
+            'device_token' => mb_substr($deviceId, 0, 64),
+            'label' => mb_substr((string) request()->userAgent(), 0, 120),
+            'status' => StatusPerangkat::Disetujui,
+        ]);
+
+        return null;
     }
 
     private function catatPerangkatBaru(User $akun, string $deviceId): void

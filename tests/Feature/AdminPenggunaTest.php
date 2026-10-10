@@ -313,20 +313,7 @@ class AdminPenggunaTest extends TestCase
         $this->assertFalse($target->fresh()->bebas_perangkat);
     }
 
-    public function test_admin_menyetujui_perangkat_pending(): void
-    {
-        $target = $this->dengan('karyawan');
-        $perangkat = $target->devices()->create(['device_token' => 'hp-1', 'status' => 'pending']);
-
-        $this->actingAs($this->dengan('pemilik'))
-            ->post("/admin/pengguna/{$target->id}/perangkat/{$perangkat->id}/setujui")
-            ->assertRedirect()
-            ->assertSessionHas('sukses');
-
-        $this->assertSame('approved', $perangkat->fresh()->status->value);
-    }
-
-    public function test_halaman_pengguna_menampilkan_tombol_setujui_perangkat(): void
+    public function test_halaman_pengguna_menampilkan_perangkat_dan_tombol_hapus_saja(): void
     {
         $target = $this->dengan('karyawan');
         $perangkat = $target->devices()->create(['device_token' => 'hp-1', 'status' => 'pending']);
@@ -335,48 +322,52 @@ class AdminPenggunaTest extends TestCase
             ->get('/admin/pengguna')
             ->assertOk()
             ->assertSee('Perangkat yang tercatat')
-            ->assertSee('Setujui')
-            ->assertSee(route('admin.pengguna.perangkat-setujui', [$target, $perangkat]), false);
+            // "Setujui"/"Tolak" dihapus: penyelesaian ganti perangkat adalah
+            // Hapus perangkat lama, perangkat baru otomatis jadi yang pertama.
+            ->assertDontSee('Setujui')
+            ->assertDontSee('Tolak')
+            ->assertSee(route('admin.pengguna.perangkat-hapus', [$target, $perangkat]), false);
     }
 
-    public function test_admin_menolak_perangkat(): void
+    public function test_bisa_hapus_perangkat_akun_target(): void
     {
         $target = $this->dengan('karyawan');
         $perangkat = $target->devices()->create(['device_token' => 'hp-1', 'status' => 'pending']);
 
         $this->actingAs($this->dengan('pemilik'))
-            ->post("/admin/pengguna/{$target->id}/perangkat/{$perangkat->id}/tolak")
-            ->assertRedirect();
+            ->delete("/admin/pengguna/{$target->id}/perangkat/{$perangkat->id}")
+            ->assertRedirect()
+            ->assertSessionHas('sukses');
 
-        $this->assertSame('rejected', $perangkat->fresh()->status->value);
+        $this->assertDatabaseMissing('user_devices', ['id' => $perangkat->id]);
     }
 
-    public function test_akun_tanpa_perangkat_kelola_tidak_bisa_menyetujui(): void
+    public function test_tanpa_perangkat_kelola_tidak_bisa_hapus_perangkat(): void
     {
         $target = $this->dengan('karyawan');
         $perangkat = $target->devices()->create(['device_token' => 'hp-1', 'status' => 'pending']);
 
-        // Boleh melihat pengguna, tapi bukan memberi izin perangkat.
+        // Boleh melihat pengguna, tapi bukan mengurus perangkat.
         $pengawas = $this->dengan('pengawas', ['dashboard.lihat', 'pengguna.lihat']);
 
         $this->actingAs($pengawas)
-            ->post("/admin/pengguna/{$target->id}/perangkat/{$perangkat->id}/setujui")
+            ->delete("/admin/pengguna/{$target->id}/perangkat/{$perangkat->id}")
             ->assertForbidden();
 
-        $this->assertSame('pending', $perangkat->fresh()->status->value);
+        $this->assertDatabaseHas('user_devices', ['id' => $perangkat->id]);
     }
 
-    public function test_perangkat_di_luar_akun_target_ditolak(): void
+    public function test_tidak_bisa_hapus_perangkat_akun_lain(): void
     {
         $target = $this->dengan('karyawan');
         $lain = $this->dengan('karyawan');
         $perangkat = $lain->devices()->create(['device_token' => 'hp-lain', 'status' => 'pending']);
 
         $this->actingAs($this->dengan('pemilik'))
-            ->post("/admin/pengguna/{$target->id}/perangkat/{$perangkat->id}/setujui")
+            ->delete("/admin/pengguna/{$target->id}/perangkat/{$perangkat->id}")
             ->assertNotFound();
 
-        $this->assertSame('pending', $perangkat->fresh()->status->value);
+        $this->assertDatabaseHas('user_devices', ['id' => $perangkat->id]);
     }
 
     private function karyawan(array $atribut = []): Employee

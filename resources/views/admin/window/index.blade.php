@@ -12,7 +12,7 @@
         </p>
     </div>
 
-    <div class="mb-4 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-xs leading-relaxed text-sky-900">
+    <div class="mb-4 rounded-2xl border border-brand-200 bg-brand-50 p-4 text-xs leading-relaxed text-brand-900">
         <p class="font-semibold">Berlaku untuk kasir dan pramuniaga.</p>
         <p class="mt-1">
             Jabatan yang tidak wajib memakai template shift ikut aturan jam di halaman ini: status telat
@@ -23,14 +23,14 @@
     </div>
 
     @if ($bentrok !== [])
-        <div class="mb-4 rounded-2xl border border-amber-300 bg-amber-50 p-4">
-            <p class="text-sm font-medium text-amber-900">Ada window yang saling tumpang tindih</p>
-            <ul class="mt-1.5 space-y-0.5 text-xs text-amber-800">
+        <div class="mb-4 rounded-2xl border border-merah-300 bg-merah-50 p-4">
+            <p class="text-sm font-medium text-merah-900">Ada window yang saling tumpang tindih</p>
+            <ul class="mt-1.5 space-y-0.5 text-xs text-merah-800">
                 @foreach ($bentrok as $pasangan)
                     <li>• {{ $pasangan }}</li>
                 @endforeach
             </ul>
-            <p class="mt-2 text-xs text-amber-800">
+            <p class="mt-2 text-xs text-merah-800">
                 Yang dipakai adalah window yang jam mulainya paling akhir.
             </p>
         </div>
@@ -50,14 +50,14 @@
                                 @if ($w->kode)
                                     <span class="rounded bg-slate-900 px-1.5 py-0.5 text-[11px] font-medium text-white">{{ $w->kode }}</span>
                                 @endif
-                                <span class="rounded-full px-2 py-0.5 text-[11px] font-medium {{ $w->aturan() === AturanAbsensi::Ketat ? 'bg-rose-100 text-rose-700' : 'bg-brand-100 text-brand-800' }}">
+                                <span class="rounded-full px-2 py-0.5 text-[11px] font-medium {{ $w->aturan() === AturanAbsensi::Ketat ? 'bg-merah-100 text-merah-700' : 'bg-brand-100 text-brand-800' }}">
                                     {{ $w->aturan()->label() }}
                                 </span>
                                 <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
                                     {{ $w->shop ? $w->shop->nama : 'Semua toko' }}
                                 </span>
                                 @if (! $w->aktif)
-                                    <span class="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-medium text-rose-700">Nonaktif</span>
+                                    <span class="rounded-full bg-merah-100 px-2 py-0.5 text-[11px] font-medium text-merah-700">Nonaktif</span>
                                 @endif
                             </div>
                             <p class="mt-1 text-xs text-slate-500">
@@ -86,7 +86,7 @@
                                           action="{{ route('admin.window.destroy', $w) }}"
                                           onsubmit="return confirm('Nonaktifkan window ini? Kasir dan pramuniaga yang jam datangnya jatuh di sini akan tercatat tanpa penilaian sampai window diaktifkan lagi.')">
                                         @csrf @method('DELETE')
-                                        <button class="rounded-lg border border-rose-300 px-2.5 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50">
+                                        <button class="rounded-lg border border-merah-300 px-2.5 py-1 text-xs font-medium text-merah-600 hover:bg-merah-50">
                                             Nonaktifkan
                                         </button>
                                     </form>
@@ -112,7 +112,7 @@
                                 <input id="ubah-nama-{{ $w->id }}" name="nama" value="{{ $w->nama }}" required maxlength="60"
                                        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                                 @error('nama')
-                                    <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                    <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                                 @enderror
                             </div>
 
@@ -123,7 +123,7 @@
                                            placeholder="PAGI"
                                            class="tabular w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                                     @error('kode')
-                                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                        <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                                     @enderror
                                 </div>
                                 <div>
@@ -135,7 +135,7 @@
                                         @endforeach
                                     </select>
                                     @error('aturan_absensi')
-                                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                        <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                                     @enderror
                                 </div>
                             </div>
@@ -150,7 +150,7 @@
                                     Kosongkan bila tidak ada batas. Ini catatan saja, durasi kerja tetap dihitung penuh.
                                 </p>
                                 @error('durasi_maks_menit')
-                                    <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                    <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                                 @enderror
                             </div>
 
@@ -160,7 +160,7 @@
                                     <input id="ubah-mulai-{{ $w->id }}" name="mulai" type="time" required value="{{ $w->mulai->format('H:i') }}"
                                            class="tabular w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                                     @error('mulai')
-                                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                        <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                                     @enderror
                                 </div>
                                 <div>
@@ -168,7 +168,7 @@
                                     <input id="ubah-selesai-{{ $w->id }}" name="selesai" type="time" required value="{{ $w->selesai->format('H:i') }}"
                                            class="tabular w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                                     @error('selesai')
-                                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                        <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                                     @enderror
                                 </div>
                             </div>
@@ -180,7 +180,7 @@
                                        class="tabular w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                                 <p class="mt-1 text-xs text-slate-500">Kosongkan berarti harus datang tepat di jam mulai.</p>
                                 @error('batas_telat')
-                                    <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                    <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                                 @enderror
                             </div>
 
@@ -239,7 +239,7 @@
                                placeholder="Pagi"
                                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                         @error('nama')
-                            <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -250,7 +250,7 @@
                                    class="tabular w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                             <p class="mt-1 text-xs text-slate-500">Kode pendek untuk laporan, misal PAGI.</p>
                             @error('kode')
-                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>
@@ -263,7 +263,7 @@
                                 @endforeach
                             </select>
                             @error('aturan_absensi')
-                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
@@ -274,7 +274,7 @@
                             <input id="mulai" name="mulai" type="time" required value="{{ old('mulai', '06:00') }}"
                                    class="tabular w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                             @error('mulai')
-                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>
@@ -282,7 +282,7 @@
                             <input id="selesai" name="selesai" type="time" required value="{{ old('selesai', '14:00') }}"
                                    class="tabular w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                             @error('selesai')
-                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
@@ -295,7 +295,7 @@
                             Lewat dari jam ini berarti terlambat. Kosongkan bila harus datang tepat di jam mulai.
                         </p>
                         @error('batas_telat')
-                            <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -308,7 +308,7 @@
                             Kosongkan bila tidak ada batas. Ini catatan saja, durasi kerja tetap dihitung penuh.
                         </p>
                         @error('durasi_maks_menit')
-                            <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -327,7 +327,7 @@
                             {{ $bolehSemuaToko ? 'Pilih toko bila window ini hanya berlaku di sana.' : 'Window ini hanya berlaku untuk toko yang Anda awasi.' }}
                         </p>
                         @error('shop_id')
-                            <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -336,7 +336,7 @@
                         <input id="urutan" name="urutan" type="number" min="0" max="999" value="{{ old('urutan', 0) }}"
                                class="tabular w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
                         @error('urutan')
-                            <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-merah-600">{{ $message }}</p>
                         @enderror
                     </div>
 

@@ -29,6 +29,8 @@ class PengajuanController extends Controller
 
         return view('pengajuan.index', [
             'employee' => $employee,
+            'jenis' => LeaveType::options(),
+            'tarifDefault' => $employee->tarif_jam,
             'izin' => LeaveRequest::query()
                 ->where('employee_id', $employee->id)
                 ->orderByDesc('tanggal_mulai')

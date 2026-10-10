@@ -13,7 +13,7 @@
 
         @include('layouts.pesan')
 
-        <div class="rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-[13px] leading-relaxed text-amber-800">
+        <div class="rounded-xl border border-merah-200 bg-merah-50 px-3.5 py-3 text-[13px] leading-relaxed text-merah-800">
             Hubungi pemilik toko atau admin untuk mengisi user dan password presensi di menu
             <span class="font-medium">Toko</span>. Perangkat baru bisa dipakai setelah itu diisi.
         </div>

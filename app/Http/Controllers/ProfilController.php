@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\UserDevice;
 use App\Support\Username;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
@@ -19,7 +21,15 @@ class ProfilController extends Controller
     public function index(): View
     {
         return view('profil.index', [
-            'akun' => auth()->user()->load(['devices']),
+            'akun' => auth()->user(),
+            'employee' => auth()->user()->employee,
+        ]);
+    }
+
+    public function keamanan(): View
+    {
+        return view('profil.keamanan', [
+            'akun' => auth()->user(),
         ]);
     }
 
@@ -60,12 +70,30 @@ class ProfilController extends Controller
         return back()->with('sukses', 'Username berhasil diganti.');
     }
 
+    /**
+     * Terbitkan token "passkey sederhana" untuk login biometrik di perangkat
+     * ini. Token disegel dengan APP_KEY dan hanya berguna bersama device_id
+     * yang sama, jadi tidak bisa dipakai bila disalin ke perangkat lain.
+     */
+    public function biometrik(Request $request): JsonResponse
+    {
+        $deviceId = mb_substr((string) $request->string('device_id'), 0, 64);
+
+        $token = Crypt::encryptString(json_encode([
+            'uid' => $request->user()->getKey(),
+            'dev' => $deviceId,
+            'exp' => now()->addDays(30)->getTimestamp(),
+        ]));
+
+        return response()->json(['token' => $token]);
+    }
+
     public function cabutPerangkat(Request $request, UserDevice $perangkat): RedirectResponse
     {
         abort_unless($perangkat->user_id === $request->user()->getKey(), 404);
 
         $perangkat->update(['status' => 'rejected']);
 
-        return back()->with('sukses', 'Izin perangkat itu dicabut. Tidak bisa dipakai untuk login lagi sampai disetujui ulang.');
+        return back()->with('sukses', 'Izin perangkat itu dicabut. Perangkat tidak bisa dipakai login sampai pemilik menghapusnya di menu Pengguna.');
     }
 }

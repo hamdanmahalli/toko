@@ -40,9 +40,10 @@ class DashboardController extends Controller
             ->whereHas('employee', fn (Builder $q) => $this->cakupan->batasi($q, $user))
             ->where('status', RequestStatus::Pending->value);
 
-        // Perangkat karyawan yang menunggu persetujuan. Karyawan hanya punya
-        // satu data karyawan yang menautkannya ke toko, jadi cakupan toko
-        // disaring lewat relasi itu; peran global melihat semuanya.
+        // Perangkat karyawan yang belum dikenal (menunggu perangkat lamanya
+        // dihapus). Karyawan hanya punya satu data karyawan yang menautkannya
+        // ke toko, jadi cakupan toko disaring lewat relasi itu; peran global
+        // melihat semuanya.
         $perangkatMenunggu = UserDevice::query()
             ->where('status', StatusPerangkat::Pending->value)
             ->when(

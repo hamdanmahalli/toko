@@ -18,7 +18,7 @@ enum AbsenMasukStatus: string
     public function badgeClass(): string
     {
         return match ($this) {
-            self::TepatWaktu => 'bg-emerald-100 text-emerald-700',
+            self::TepatWaktu => 'bg-brand-100 text-brand-700',
             self::Terlambat => 'bg-merah-100 text-merah-700',
         };
     }

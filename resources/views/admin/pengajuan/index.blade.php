@@ -7,7 +7,7 @@
         <h1 class="font-display text-xl text-slate-900">Pengajuan</h1>
         <p class="text-xs text-slate-500">
             @if ($jumlahPending > 0)
-                <span class="tabular font-medium text-amber-600">{{ $jumlahPending }}</span> pengajuan menunggu keputusan.
+                <span class="tabular font-medium text-merah-600">{{ $jumlahPending }}</span> pengajuan menunggu keputusan.
             @else
                 Tidak ada pengajuan yang menunggu keputusan.
             @endif
@@ -101,7 +101,7 @@
                                                   action="{{ route('admin.pengajuan.tolak', ['izin', $p->id]) }}">
                                                 @csrf
                                                 <input type="hidden" name="catatan" value="">
-                                                <button class="rounded-lg border border-rose-300 px-2.5 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50">
+                                                <button class="rounded-lg border border-merah-300 px-2.5 py-1 text-xs font-medium text-merah-600 hover:bg-merah-50">
                                                     Tolak
                                                 </button>
                                             </form>
@@ -192,7 +192,7 @@
                                                   action="{{ route('admin.pengajuan.tolak', ['lembur', $p->id]) }}">
                                                 @csrf
                                                 <input type="hidden" name="catatan" value="">
-                                                <button class="rounded-lg border border-rose-300 px-2.5 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50">
+                                                <button class="rounded-lg border border-merah-300 px-2.5 py-1 text-xs font-medium text-merah-600 hover:bg-merah-50">
                                                     Tolak
                                                 </button>
                                             </form>

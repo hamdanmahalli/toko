@@ -6,9 +6,9 @@
     </p>
 
     @php($barisKolomWindow = [
-    ['Nama', 'Nama window, misalnya <span class="italic">Pagi</span>. <span class="text-amber-700">Wajib.</span>'],
+    ['Nama', 'Nama window, misalnya <span class="italic">Pagi</span>. <span class="text-merah-700">Wajib.</span>'],
     ['Kode', 'Kode pendek untuk laporan, misalnya <span class="italic">PAGI</span>.'],
-    ['Mulai / Selesai', 'Rentang jam window. Jam selesai harus setelah jam mulai. <span class="text-amber-700">Wajib.</span>'],
+    ['Mulai / Selesai', 'Rentang jam window. Jam selesai harus setelah jam mulai. <span class="text-merah-700">Wajib.</span>'],
     ['Batas telat', 'Lewat dari jam ini berarti terlambat. Harus di antara jam mulai dan selesai. Kosongkan berarti harus datang tepat di jam mulai.'],
     ['Aturan absensi', '<span class="font-medium text-slate-800">Ketat</span> berarti absen di luar rentang shift langsung dihitung terlambat. <span class="font-medium text-slate-800">Toleran</span> berarti tetap dicatat, tapi tidak dihitung terlambat.'],
     ['Durasi maksimum (menit)', 'Catatan batas durasi kerja. Ini catatan saja, durasi tetap dihitung penuh.'],

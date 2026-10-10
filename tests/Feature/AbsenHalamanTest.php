@@ -357,7 +357,6 @@ class AbsenHalamanTest extends TestCase
         $this->actingAs($karyawan->user)
             ->get('/beranda')
             ->assertOk()
-            ->assertSee('Selamat')
             ->assertSee('Lutfi');
     }
 

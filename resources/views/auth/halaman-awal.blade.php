@@ -399,13 +399,31 @@
                         </a>
                     </div>
 
-                    <button class="w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.99]">
-                        Login
-                    </button>
+                    <div class="flex items-center gap-3">
+                        <button class="flex h-12 flex-1 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700 active:scale-[0.99]">
+                            Login
+                        </button>
+
+                        {{-- Tombol biometrik: ikon di kanan tombol login, muncul
+                             hanya kalau perangkat ini menyimpan kredensial
+                             (ditampilkan oleh app.js). --}}
+                        <button type="button" id="bio-masuk" hidden
+                                title="Masuk dengan biometrik" aria-label="Masuk dengan biometrik"
+                                class="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-brand-600 text-white shadow-md shadow-brand-600/25 transition hover:bg-brand-700 active:scale-[0.98]">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25a4.5 4.5 0 1 1 9 0M5.25 8.25a6.75 6.75 0 1 1 13.5 0M12 12v3.75m-3.75 3.75c1.5-1.5 2.25-3 2.25-5.25m7.5 0c0 2.25-.75 3.75-2.25 5.25"/>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+
+                <form id="bio-masuk-form" method="POST" action="{{ route('masuk.biometrik') }}">
+                    @csrf
+                    <input type="hidden" name="token">
+                    <input type="hidden" name="device_id">
                 </form>
             </section>
 
-            </div>
         </div>
     </div>
 

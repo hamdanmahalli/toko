@@ -17,14 +17,12 @@
     <div @class([
         'masuk mb-4 flex items-start gap-3 rounded-2xl border bg-white p-3.5 shadow-sm',
         'border-brand-100' => $pesan[0] === 'sukses',
-        'border-rose-100' => $pesan[0] === 'galat',
-        'border-amber-100' => $pesan[0] === 'pesan',
+        'border-merah-100' => in_array($pesan[0], ['galat', 'pesan'], true),
     ]) role="status">
         <span @class([
             'flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
             'bg-brand-50 text-brand-700' => $pesan[0] === 'sukses',
-            'bg-rose-50 text-rose-600' => $pesan[0] === 'galat',
-            'bg-amber-50 text-amber-600' => $pesan[0] === 'pesan',
+            'bg-merah-50 text-merah-600' => in_array($pesan[0], ['galat', 'pesan'], true),
         ])>
             <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 @if ($pesan[0] === 'sukses')
@@ -42,8 +40,7 @@
             <p @class([
                 'text-[13px] font-semibold',
                 'text-brand-900' => $pesan[0] === 'sukses',
-                'text-rose-900' => $pesan[0] === 'galat',
-                'text-amber-900' => $pesan[0] === 'pesan',
+                'text-merah-900' => in_array($pesan[0], ['galat', 'pesan'], true),
             ])>{{ $judul[$pesan[0]] }}</p>
             <p class="mt-0.5 text-[13px] leading-relaxed text-slate-600">{{ $pesan[1] }}</p>
         </div>
@@ -58,8 +55,8 @@
 @endif
 
 @if ($errors->any())
-    <div class="masuk mb-4 flex items-start gap-3 rounded-2xl border border-rose-100 bg-white p-3.5 shadow-sm" role="alert">
-        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600">
+    <div class="masuk mb-4 flex items-start gap-3 rounded-2xl border border-merah-100 bg-white p-3.5 shadow-sm" role="alert">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-merah-50 text-merah-600">
             <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="9"/>
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v5m0 3.5h.01"/>
@@ -67,7 +64,7 @@
         </span>
 
         <div class="min-w-0 flex-1">
-            <p class="text-[13px] font-semibold text-rose-900">Periksa kembali</p>
+            <p class="text-[13px] font-semibold text-merah-900">Periksa kembali</p>
             <ul class="mt-0.5 space-y-0.5 text-[13px] leading-relaxed text-slate-600">
                 @foreach ($errors->all() as $isi)
                     <li>{{ $isi }}</li>

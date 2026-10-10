@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -139,6 +140,73 @@ class AuthTest extends TestCase
             'Email/username atau password salah.',
             $respons->getSession()->get('errors')->first('login'),
         );
+        $this->assertGuest();
+    }
+
+    public function test_halaman_masuk_menyediakan_tombol_biometrik_tersembunyi(): void
+    {
+        // Tombolnya ada di markup tapi `hidden`; app.js yang menampilkannya
+        // kalau perangkat ini memang punya kredensial tersimpan.
+        $this->get('/masuk')
+            ->assertOk()
+            ->assertSee('id="bio-masuk"', false)
+            ->assertSee('Masuk dengan biometrik')
+            ->assertSee(route('masuk.biometrik'), false);
+    }
+
+    public function test_bisa_login_biometrik_dengan_token_dan_perangkat_yang_sama(): void
+    {
+        $user = User::factory()->create();
+
+        $token = Crypt::encryptString(json_encode([
+            'uid' => $user->getKey(),
+            'dev' => 'hp-uji',
+            'exp' => now()->addDay()->getTimestamp(),
+        ]));
+
+        $this->post('/masuk/biometrik', ['token' => $token, 'device_id' => 'hp-uji'])
+            ->assertRedirect(route('beranda'));
+
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_login_biometrik_ditolak_di_perangkat_lain(): void
+    {
+        $user = User::factory()->create();
+
+        $token = Crypt::encryptString(json_encode([
+            'uid' => $user->getKey(),
+            'dev' => 'hp-asli',
+            'exp' => now()->addDay()->getTimestamp(),
+        ]));
+
+        $this->post('/masuk/biometrik', ['token' => $token, 'device_id' => 'hp-lain'])
+            ->assertSessionHasErrors('login');
+
+        $this->assertGuest();
+    }
+
+    public function test_login_biometrik_kedaluwarsa_ditolak(): void
+    {
+        $user = User::factory()->create();
+
+        $token = Crypt::encryptString(json_encode([
+            'uid' => $user->getKey(),
+            'dev' => 'hp-uji',
+            'exp' => now()->subMinute()->getTimestamp(),
+        ]));
+
+        $this->post('/masuk/biometrik', ['token' => $token, 'device_id' => 'hp-uji'])
+            ->assertSessionHasErrors('login');
+
+        $this->assertGuest();
+    }
+
+    public function test_token_biometrik_palsu_ditolak(): void
+    {
+        $this->post('/masuk/biometrik', ['token' => 'token-ngasal', 'device_id' => 'hp-uji'])
+            ->assertSessionHasErrors('login');
+
         $this->assertGuest();
     }
 

@@ -6,7 +6,7 @@
     </p>
 
     @php($barisKolomJabatan = [
-    ['Nama jabatan', 'Nama jabatan, harus unik. <span class="text-amber-700">Wajib.</span>'],
+    ['Nama jabatan', 'Nama jabatan, harus unik. <span class="text-merah-700">Wajib.</span>'],
     ['Kode', 'Kode pendek untuk laporan. Boleh dikosongkan; kalau begitu dibuat otomatis dari nama jabatan.'],
     ['Deskripsi', 'Penjelasan bebas, maksimal 500 karakter.'],
     ['Wajib memakai template shift', 'Centang untuk manajer atau kepala toko. Bila tidak dicentang, jam datang karyawan sendiri yang menentukan dia masuk shift mana.'],

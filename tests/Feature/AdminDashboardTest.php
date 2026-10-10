@@ -153,7 +153,7 @@ class AdminDashboardTest extends TestCase
             ->get('/admin')
             ->assertOk()
             ->assertViewHas('perangkatMenunggu', 1)
-            ->assertSee('Perangkat menunggu persetujuan')
+            ->assertSee('Perangkat baru belum dikenal')
             ->assertSee(route('admin.pengguna.index'));
     }
 

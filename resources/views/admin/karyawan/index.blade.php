@@ -158,7 +158,7 @@
                                 @if ($k->user)
                                     <span class="text-slate-600">{{ $k->user->email }}</span>
                                 @else
-                                    <span class="text-amber-600">Belum ada akun</span>
+                                    <span class="text-merah-600">Belum ada akun</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3">

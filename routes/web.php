@@ -56,6 +56,12 @@ Route::post('/presensi/{kode}', [PresensiController::class, 'proses'])
 Route::middleware('guest')->group(function () {
     Route::get('/masuk', [AuthController::class, 'formMasuk'])->name('masuk');
     Route::post('/masuk', [AuthController::class, 'masuk'])->middleware('throttle:10,1');
+
+    // "Passkey sederhana": login cepat lewat biometrik perangkat memakai
+    // token yang disegel server dan terikat pada satu device_id.
+    Route::post('/masuk/biometrik', [AuthController::class, 'masukBiometrik'])
+        ->middleware('throttle:10,1')
+        ->name('masuk.biometrik');
 });
 
 Route::middleware('auth')->group(function () {
@@ -63,8 +69,10 @@ Route::middleware('auth')->group(function () {
 
     // Kelola akun sendiri: username, password, dan izin perangkat milik sendiri.
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
+    Route::get('/profil/keamanan', [ProfilController::class, 'keamanan'])->name('profil.keamanan');
     Route::post('/profil/username', [ProfilController::class, 'gantiUsername'])->name('profil.username');
     Route::post('/profil/password', [ProfilController::class, 'gantiPassword'])->name('profil.password');
+    Route::post('/profil/biometrik', [ProfilController::class, 'biometrik'])->name('profil.biometrik');
     Route::post('/profil/perangkat/{perangkat}/cabut', [ProfilController::class, 'cabutPerangkat'])
         ->name('profil.perangkat-cabut');
 
@@ -217,11 +225,9 @@ Route::middleware('auth')->group(function () {
 
         // Persetujuan perangkat terpisah dari `pengguna.kelola`: supervisor
         // kepala toko boleh memberi izin login perangkat karyawannya sendiri.
+        // Perangkat baru tidak lagi butuh "Setujui": yang dihapus adalah
+        // perangkat lama, lalu perangkat baru otomatis jadi perangkat pertama.
         Route::middleware('permission:perangkat.kelola')->group(function () {
-            Route::post('/pengguna/{pengguna}/perangkat/{perangkat}/setujui', [PenggunaController::class, 'perangkatSetujui'])
-                ->name('pengguna.perangkat-setujui');
-            Route::post('/pengguna/{pengguna}/perangkat/{perangkat}/tolak', [PenggunaController::class, 'perangkatTolak'])
-                ->name('pengguna.perangkat-tolak');
             Route::delete('/pengguna/{pengguna}/perangkat/{perangkat}', [PenggunaController::class, 'perangkatHapus'])
                 ->name('pengguna.perangkat-hapus');
         });

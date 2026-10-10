@@ -107,26 +107,26 @@ class IzinAbsenTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_beranda_tidak_menampilkan_tombol_absen_bagi_akun_baca(): void
+    public function test_beranda_tidak_menampilkan_aksi_absen_bagi_akun_baca(): void
     {
         $user = $this->akun(['dashboard.lihat', 'absen.lihat']);
 
         $this->actingAs($user)
             ->get('/beranda')
             ->assertOk()
-            ->assertDontSee('absen-tombol', false)
-            ->assertDontSee('Datang');
+            ->assertDontSee('data-absen-arah="', false)
+            ->assertDontSee('Absen masuk');
     }
 
-    public function test_beranda_menampilkan_tombol_absen_bagi_akun_mencatat(): void
+    public function test_beranda_menampilkan_aksi_absen_bagi_akun_mencatat(): void
     {
         $user = $this->akun(['dashboard.lihat', 'absen.catat']);
 
         $this->actingAs($user)
             ->get('/beranda')
             ->assertOk()
-            ->assertSee('absen-tombol', false)
-            ->assertSee('Datang');
+            ->assertSee('data-absen-arah="', false)
+            ->assertSee('Absen masuk');
     }
 
     public function test_menu_bawah_menyembunyikan_qr_dan_riwayat_bagi_akun_baca(): void
@@ -158,6 +158,6 @@ class IzinAbsenTest extends TestCase
 
         $this->actingAs($user)->get('/riwayat')->assertOk();
         $this->lanjut('/saya-qr')->assertOk();
-        $this->lanjut('/beranda')->assertSee('Datang');
+        $this->lanjut('/beranda')->assertSee('Absen masuk');
     }
 }

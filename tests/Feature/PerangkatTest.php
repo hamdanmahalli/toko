@@ -52,27 +52,50 @@ class PerangkatTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_percobaan_dari_perangkat_baru_dicatat_sebagai_pending(): void
+    public function test_perangkat_pertama_langsung_disetujui(): void
     {
+        // Pengajuan hanya untuk ganti perangkat. Perangkat pertama seorang
+        // karyawan baru langsung disetujui agar tidak ada antre.
         $user = $this->karyawan(['email' => 'siti@toko.test']);
 
         $this->post('/masuk', [
             'login' => 'siti@toko.test',
             'password' => 'password',
             'device_id' => 'hp-baru-123',
-        ])->assertSessionHasErrors('login');
+        ])->assertRedirect(route('beranda'));
 
-        $this->assertGuest();
+        $this->assertAuthenticatedAs($user);
         $this->assertDatabaseHas('user_devices', [
             'user_id' => $user->id,
             'device_token' => 'hp-baru-123',
+            'status' => 'approved',
+        ]);
+    }
+
+    public function test_ganti_perangkat_diblokir_sampai_perangkat_lama_dihapus(): void
+    {
+        $user = $this->karyawan(['email' => 'siti@toko.test']);
+        $user->devices()->create(['device_token' => 'hp-lama', 'status' => 'approved']);
+
+        $respons = $this->post('/masuk', [
+            'login' => 'siti@toko.test',
+            'password' => 'password',
+            'device_id' => 'hp-baru',
+        ]);
+
+        $respons->assertSessionHasErrors('login');
+        $this->assertGuest();
+        $this->assertDatabaseHas('user_devices', [
+            'user_id' => $user->id,
+            'device_token' => 'hp-baru',
             'status' => 'pending',
         ]);
     }
 
-    public function test_perangkat_pending_ditolak(): void
+    public function test_perangkat_belum_dikenal_tetap_diblokir_saat_ada_perangkat_aktif(): void
     {
         $user = $this->karyawan(['email' => 'siti@toko.test']);
+        $user->devices()->create(['device_token' => 'hp-lama', 'status' => 'approved']);
         $user->devices()->create(['device_token' => 'hp-1', 'status' => 'pending']);
 
         $this->post('/masuk', [
@@ -82,6 +105,51 @@ class PerangkatTest extends TestCase
         ])->assertSessionHasErrors('login');
 
         $this->assertGuest();
+    }
+
+    public function test_perangkat_belum_dikenal_langsung_diizinkan_saat_tidak_ada_perangkat_aktif(): void
+    {
+        // Perangkat tercatat "menunggu" tapi perangkat lama sudah dihapus
+        // pemilik, jadi perangkat ini berperan sebagai perangkat pertama.
+        $user = $this->karyawan(['email' => 'siti@toko.test']);
+        $user->devices()->create(['device_token' => 'hp-1', 'status' => 'pending']);
+
+        $this->post('/masuk', [
+            'login' => 'siti@toko.test',
+            'password' => 'password',
+            'device_id' => 'hp-1',
+        ])->assertRedirect(route('beranda'));
+
+        $this->assertAuthenticatedAs($user);
+        $this->assertDatabaseHas('user_devices', [
+            'user_id' => $user->id,
+            'device_token' => 'hp-1',
+            'status' => 'approved',
+        ]);
+    }
+
+    public function test_perangkat_baru_diizinkan_setelah_perangkat_lama_dihapus(): void
+    {
+        // Alur ganti perangkat: perangkat baru dicatat "menunggu" dan diblokir,
+        // lalu pemilik HAPUS perangkat lama. Login berikutnya langsung masuk.
+        $user = $this->karyawan(['email' => 'siti@toko.test']);
+        $user->devices()->create(['device_token' => 'hp-lama', 'status' => 'approved']);
+        $user->devices()->create(['device_token' => 'hp-baru', 'status' => 'pending']);
+
+        $user->devices()->where('device_token', 'hp-lama')->delete();
+
+        $this->post('/masuk', [
+            'login' => 'siti@toko.test',
+            'password' => 'password',
+            'device_id' => 'hp-baru',
+        ])->assertRedirect(route('beranda'));
+
+        $this->assertAuthenticatedAs($user);
+        $this->assertDatabaseHas('user_devices', [
+            'user_id' => $user->id,
+            'device_token' => 'hp-baru',
+            'status' => 'approved',
+        ]);
     }
 
     public function test_perangkat_disetujui_dibolehkan(): void
@@ -200,12 +268,13 @@ class PerangkatTest extends TestCase
             'login' => 'siti@toko.test',
             'password' => 'password',
             'device_id' => $terlalu,
-        ])->assertSessionHasErrors('login');
+        ])->assertRedirect(route('beranda'));
 
+        $this->assertAuthenticatedAs($user);
         $this->assertDatabaseHas('user_devices', [
             'user_id' => $user->id,
             'device_token' => $terlalu,
-            'status' => 'pending',
+            'status' => 'approved',
         ]);
         $this->assertSame(1, $user->devices()->count());
     }

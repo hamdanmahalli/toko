@@ -136,6 +136,217 @@
 })();
 
 //
+// Keamanan akun: "simpan nama user" dan "login dengan biometrik". Keduanya
+// preferensi perangkat, jadi disimpan di localStorage, bukan di server.
+// Biometrik di sini adalah passkey sederhana: kredensial perangkat hanya
+// membuka kunci token yang disegel server dan terikat pada device_id ini.
+(function () {
+    'use strict';
+
+    var KUNCI_BIO = 'tokom_bio';
+    var KUNCI_INGAT = 'tokom_ingat';
+    var KUNCI_LOGIN = 'tokom_login';
+
+    function baca(kunci) {
+        try { return window.localStorage.getItem(kunci); } catch (e) { return null; }
+    }
+
+    function tulis(kunci, nilai) {
+        try {
+            if (nilai === null) {
+                window.localStorage.removeItem(kunci);
+            } else {
+                window.localStorage.setItem(kunci, nilai);
+            }
+        } catch (e) { /* penyimpanan terkunci */ }
+    }
+
+    function bacaJson(kunci) {
+        try { return JSON.parse(baca(kunci)); } catch (e) { return null; }
+    }
+
+    function deviceId() {
+        return baca('tokom_dev') || '';
+    }
+
+    function tokenCsrf() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.content : '';
+    }
+
+    function keB64url(buf) {
+        var bytes = new Uint8Array(buf);
+        var str = '';
+        for (var i = 0; i < bytes.length; i++) str += String.fromCharCode(bytes[i]);
+        return window.btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    function dariB64url(s) {
+        s = s.replace(/-/g, '+').replace(/_/g, '/');
+        while (s.length % 4) s += '=';
+        var str = window.atob(s);
+        var bytes = new Uint8Array(str.length);
+        for (var i = 0; i < str.length; i++) bytes[i] = str.charCodeAt(i);
+        return bytes;
+    }
+
+    function tantanganAcak() {
+        var t = new Uint8Array(32);
+        window.crypto.getRandomValues(t);
+        return t;
+    }
+
+    // --- Halaman login: isi otomatis username + tombol biometrik ---
+    var formLogin = document.querySelector('form[action$="/masuk"]');
+    if (formLogin) {
+        var inputLogin = formLogin.querySelector('input[name="login"]');
+
+        if (inputLogin && !inputLogin.value && baca(KUNCI_INGAT) === '1') {
+            var tersimpan = baca(KUNCI_LOGIN) || '';
+            if (tersimpan) inputLogin.value = tersimpan;
+        }
+
+        formLogin.addEventListener('submit', function () {
+            if (baca(KUNCI_INGAT) === '1' && inputLogin && inputLogin.value) {
+                tulis(KUNCI_LOGIN, inputLogin.value);
+            }
+        });
+
+        var bioLogin = bacaJson(KUNCI_BIO);
+        var tombolBio = document.getElementById('bio-masuk');
+        if (bioLogin && bioLogin.credentialId && bioLogin.token && tombolBio) {
+            tombolBio.hidden = false;
+            tombolBio.addEventListener('click', function () {
+                masukBiometrik(bioLogin, tombolBio);
+            });
+        }
+    }
+
+    function masukBiometrik(bio, tombol) {
+        var form = document.getElementById('bio-masuk-form');
+        if (!form || form.dataset.sibuk) return;
+        if (!navigator.credentials || !window.PublicKeyCredential) return;
+
+        form.dataset.sibuk = '1';
+        tombol.disabled = true;
+
+        navigator.credentials.get({
+            publicKey: {
+                challenge: tantanganAcak(),
+                allowCredentials: [{ id: dariB64url(bio.credentialId), type: 'public-key' }],
+                userVerification: 'required',
+                timeout: 60000,
+            },
+        }).then(function () {
+            form.querySelector('input[name="token"]').value = bio.token;
+            form.querySelector('input[name="device_id"]').value = deviceId();
+            form.submit();
+        }).catch(function () {
+            tombol.disabled = false;
+            delete form.dataset.sibuk;
+        });
+    }
+
+    // --- Halaman profil: dua toggle keamanan akun ---
+    var toggleIngat = document.getElementById('ingat-toggle');
+    if (toggleIngat) {
+        toggleIngat.checked = baca(KUNCI_INGAT) === '1';
+        toggleIngat.addEventListener('change', function () {
+            if (toggleIngat.checked) {
+                tulis(KUNCI_INGAT, '1');
+            } else {
+                tulis(KUNCI_INGAT, null);
+                tulis(KUNCI_LOGIN, null);
+            }
+        });
+    }
+
+    var toggleBio = document.getElementById('bio-toggle');
+    if (toggleBio) {
+        var bioTersimpan = bacaJson(KUNCI_BIO);
+        toggleBio.checked = !!(bioTersimpan && bioTersimpan.credentialId);
+
+        var dukungan = window.PublicKeyCredential &&
+            window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable;
+
+        if (dukungan) {
+            window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+                .then(function (ada) {
+                    if (ada) return;
+                    toggleBio.disabled = true;
+                    var ket = document.getElementById('bio-ket');
+                    if (ket) ket.textContent = 'Perangkat ini tidak menyediakan sidik jari atau wajah.';
+                })
+                .catch(function () { /* biarkan aktif */ });
+        } else {
+            toggleBio.disabled = true;
+            var ketUnsupported = document.getElementById('bio-ket');
+            if (ketUnsupported) ketUnsupported.textContent = 'Perangkat ini tidak mendukung login biometrik.';
+        }
+
+        toggleBio.addEventListener('change', function () {
+            if (toggleBio.checked) {
+                daftarBiometrik(toggleBio);
+            } else {
+                tulis(KUNCI_BIO, null);
+            }
+        });
+    }
+
+    function daftarBiometrik(toggle) {
+        if (!navigator.credentials || !window.PublicKeyCredential) {
+            toggle.checked = false;
+            return;
+        }
+
+        var userId = new Uint8Array(16);
+        window.crypto.getRandomValues(userId);
+
+        navigator.credentials.create({
+            publicKey: {
+                challenge: tantanganAcak(),
+                rp: { name: document.title || 'Toko MM' },
+                user: {
+                    id: userId,
+                    name: toggle.dataset.user || 'karyawan',
+                    displayName: 'Karyawan',
+                },
+                pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+                authenticatorSelection: {
+                    authenticatorAttachment: 'platform',
+                    userVerification: 'required',
+                },
+                attestation: 'none',
+                timeout: 60000,
+            },
+        }).then(function (kredensial) {
+            return window.fetch(toggle.dataset.tokenUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': tokenCsrf(),
+                    'Accept': 'application/json',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ device_id: deviceId() }),
+            }).then(function (respons) {
+                if (!respons.ok) throw new Error('gagal');
+                return respons.json();
+            }).then(function (hasil) {
+                tulis(KUNCI_BIO, JSON.stringify({
+                    credentialId: keB64url(kredensial.rawId),
+                    token: hasil.token,
+                    username: toggle.dataset.user || '',
+                }));
+            });
+        }).catch(function () {
+            toggle.checked = false;
+            tulis(KUNCI_BIO, null);
+        });
+    }
+})();
+
+//
 // Unduh kartu pegawai sebagai PNG. html2canvas dimuat saat dibutuhkan saja
 // (dynamic import) supaya tidak memberatkan halaman lain.
 document.addEventListener('click', function (event) {

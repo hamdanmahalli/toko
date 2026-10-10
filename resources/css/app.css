@@ -7,33 +7,34 @@
     --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
         'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
 
-    /* Hijau emerald pekat. 600 dan 700 adalah warna yang diminta langsung
-       (#0F5342 / #135846); sisanya diturunkan dari rona yang sama. */
-    --color-brand-50: #f2f7f5;
-    --color-brand-100: #e3efea;
-    --color-brand-200: #c8dfd7;
-    --color-brand-300: #a3c8ba;
-    --color-brand-400: #74a897;
-    --color-brand-500: #3f7a6b;
-    --color-brand-600: #0F5342;
-    --color-brand-700: #135846;
-    --color-brand-800: #0e4237;
-    --color-brand-900: #0b342b;
-    --color-brand-950: #072119;
+    /* Hijau mint/sage sebagai warna sekunder aplikasi. 500 adalah warna yang
+       diminta langsung (rgb(82, 183, 136) / #52B788); sisanya diturunkan dari
+       rona yang sama untuk teks dan hover yang tetap terbaca di atas putih. */
+    --color-brand-50: #eefaf4;
+    --color-brand-100: #d5f2e3;
+    --color-brand-200: #ace5c8;
+    --color-brand-300: #7dd2a8;
+    --color-brand-400: #66c59a;
+    --color-brand-500: #52b788;
+    --color-brand-600: #379d6b;
+    --color-brand-700: #2b7a53;
+    --color-brand-800: #256044;
+    --color-brand-900: #1f4e39;
+    --color-brand-950: #0f2c20;
 
-    /* Merah aksen toko (identitas merah-hijau-putih). Dipakai sedikit saja:
-       terlambat, batas atas kartu hero, tombol pulang, status pengajuan.
-       Ditonem agar sejalan dengan hijau brand yang pekat. */
-    --color-merah-50: #fdf3f2;
-    --color-merah-100: #fbe4e1;
-    --color-merah-200: #f6c6c1;
-    --color-merah-300: #ee9d94;
-    --color-merah-400: #e2655b;
-    --color-merah-500: #c93a30;
-    --color-merah-600: #b3261e;
-    --color-merah-700: #962017;
-    --color-merah-800: #791913;
-    --color-merah-900: #5d110d;
+    /* Merah bata menuju marun sebagai aksen; dipakai sedikit saja (sekitar
+       10%): terlambat, tombol pulang, status pengajuan. */
+    --color-merah-50: #fdf2f0;
+    --color-merah-100: #fbe1dc;
+    --color-merah-200: #f6c3bb;
+    --color-merah-300: #ee9d90;
+    --color-merah-400: #e2705f;
+    --color-merah-500: #cf4a3a;
+    --color-merah-600: #b23a2e;
+    --color-merah-700: #98302a;
+    --color-merah-800: #7d2b26;
+    --color-merah-900: #672723;
+    --color-merah-950: #3a1210;
 }
 
 /* Angka waktu selalu rata lebar supaya tidak "bergeser" tiap detik. */
@@ -52,13 +53,15 @@
     letter-spacing: -0.02em;
 }
 
-/* Kartu: tanpa border tebal, cukup permukaan yang sedikit terangkat. */
+/* Kartu: permukaan putih membulat dengan ring tipis, gaya yang sama dipakai
+   di seluruh halaman agar konsisten dengan beranda karyawan. */
 @utility card {
-    border-radius: 1rem;
+    border-radius: 1.5rem;
     background-color: #fff;
     box-shadow:
-        0 1px 2px rgb(7 33 25 / 0.04),
-        0 1px 3px rgb(7 33 25 / 0.06);
+        0 0 0 1px rgb(0 0 0 / 0.05),
+        0 1px 2px rgb(15 44 32 / 0.04),
+        0 1px 3px rgb(15 44 32 / 0.06);
 }
 
 /* Kartu absen: kode QR dan barcode-nya punya ukuran piksel tetap dari

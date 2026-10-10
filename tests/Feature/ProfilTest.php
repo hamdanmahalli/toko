@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\UserDevice;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -30,7 +31,7 @@ class ProfilTest extends TestCase
         $this->get('/profil')->assertRedirect(route('masuk'));
     }
 
-    public function test_halaman_menampilkan_info_akun_dan_perangkat(): void
+    public function test_halaman_menampilkan_info_akun(): void
     {
         $user = $this->akun(['username' => 'siti.kasir']);
         $user->devices()->create([
@@ -39,12 +40,68 @@ class ProfilTest extends TestCase
             'status' => 'approved',
         ]);
 
+        // Perangkat sengaja tidak ditampilkan ke karyawan. Username tidak lagi
+        // tampil di sini karena mengelola kredensial pindah ke halaman keamanan.
         $this->actingAs($user)
             ->get('/profil')
             ->assertOk()
-            ->assertSee('siti.kasir')
-            ->assertSee('Samsung A54')
-            ->assertSee('Diizinkan');
+            ->assertSee('Profil Saya')
+            ->assertDontSee('siti.kasir')
+            ->assertDontSee('Samsung A54')
+            ->assertDontSee('Perangkat yang diizinkan');
+    }
+
+    public function test_halaman_menyediakan_tautan_ke_halaman_keamanan(): void
+    {
+        $user = $this->akun();
+
+        $this->actingAs($user)
+            ->get('/profil')
+            ->assertOk()
+            ->assertSee('Keamanan akun')
+            ->assertSee(route('profil.keamanan'), false)
+            // Form perubahan kredensial pindah ke halamannya sendiri.
+            ->assertDontSee('name="password_lama"', false)
+            ->assertDontSee('id="bio-toggle"', false);
+    }
+
+    public function test_halaman_keamanan_menampilkan_semua_bagian(): void
+    {
+        $user = $this->akun();
+
+        $this->actingAs($user)
+            ->get('/profil/keamanan')
+            ->assertOk()
+            ->assertSee('Keamanan akun')
+            ->assertSee('Kredensial login')
+            ->assertSee('Ganti username')
+            ->assertSee('Ganti password')
+            ->assertSee('Masuk cepat')
+            ->assertSee('Simpan nama user')
+            ->assertSee('Login dengan biometrik')
+            ->assertSee('id="bio-toggle"', false)
+            ->assertSee('id="ingat-toggle"', false)
+            ->assertSee(route('profil.index'), false);
+    }
+
+    public function test_tamu_dialihkan_dari_halaman_keamanan(): void
+    {
+        $this->get('/profil/keamanan')->assertRedirect(route('masuk'));
+    }
+
+    public function test_terbitkan_token_biometrik(): void
+    {
+        $user = $this->akun();
+
+        $respons = $this->actingAs($user)
+            ->postJson('/profil/biometrik', ['device_id' => 'hp-1']);
+
+        $respons->assertOk()->assertJsonStructure(['token']);
+
+        $isi = json_decode(Crypt::decryptString($respons->json('token')), true);
+
+        $this->assertSame($user->getKey(), $isi['uid']);
+        $this->assertSame('hp-1', $isi['dev']);
     }
 
     public function test_ganti_password_berhasil(): void

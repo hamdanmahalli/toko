@@ -193,14 +193,14 @@
                             @endforeach
 
                             @if ($u->bebas_perangkat)
-                                <span class="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                                <span class="rounded-full bg-merah-50 px-2 py-0.5 text-[11px] font-medium text-merah-700">
                                     Bebas perangkat
                                 </span>
                             @endif
                         </div>
 
                         @if ($u->active_session_id)
-                            <p class="mt-2 text-[11px] text-amber-600">Sedang dipakai di perangkat lain.</p>
+                            <p class="mt-2 text-[11px] text-merah-600">Sedang dipakai di perangkat lain.</p>
                         @endif
 
                         <div class="mt-3 flex items-center justify-between gap-2 border-t border-dashed border-slate-200 pt-2.5 text-[11px] text-slate-400">
@@ -218,7 +218,7 @@
                             </span>
                             <span class="flex items-center gap-2">
                                 @if ($perangkatMenunggu > 0)
-                                    <span class="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                                    <span class="rounded-full bg-merah-50 px-2 py-0.5 text-[11px] font-medium text-merah-700">
                                         {{ $perangkatMenunggu }} perangkat menunggu
                                     </span>
                                 @endif
@@ -337,36 +337,16 @@
                                         <span @class([
                                             'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium',
                                             'bg-brand-50 text-brand-700' => $perangkat->status->value === 'approved',
-                                            'bg-amber-50 text-amber-700' => $perangkat->status->value === 'pending',
-                                            'bg-rose-50 text-rose-700' => $perangkat->status->value === 'rejected',
+                                            'bg-merah-50 text-merah-700' => in_array($perangkat->status->value, ['pending', 'rejected'], true),
                                         ])>
                                             {{ $perangkat->status->label() }}
                                         </span>
 
                                         @can('perangkat.kelola')
                                             <span class="flex shrink-0 items-center gap-1.5">
-                                                @if ($perangkat->status->value !== 'approved')
-                                                    <form method="POST"
-                                                          action="{{ route('admin.pengguna.perangkat-setujui', [$u, $perangkat]) }}">
-                                                        @csrf
-                                                        <button class="text-[11px] font-medium text-brand-700 hover:text-brand-800">
-                                                            Setujui
-                                                        </button>
-                                                    </form>
-                                                @endif
-
-                                                @if ($perangkat->status->value !== 'rejected')
-                                                    <form method="POST"
-                                                          action="{{ route('admin.pengguna.perangkat-tolak', [$u, $perangkat]) }}">
-                                                        @csrf
-                                                        <button class="text-[11px] font-medium text-rose-600 hover:text-rose-700">
-                                                            Tolak
-                                                        </button>
-                                                    </form>
-                                                @endif
-
                                                 <form method="POST"
-                                                      action="{{ route('admin.pengguna.perangkat-hapus', [$u, $perangkat]) }}">
+                                                      action="{{ route('admin.pengguna.perangkat-hapus', [$u, $perangkat]) }}"
+                                                      onsubmit="return confirm('Hapus perangkat ini? Perangkat baru nanti akan dianggap perangkat pertama.');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="text-[11px] font-medium text-slate-400 hover:text-slate-600">

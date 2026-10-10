@@ -6,14 +6,14 @@
     </p>
 
 @php($barisKolomToko = [
-    ['Nama toko', 'Nama yang tampil di daftar dan laporan. Maksimal 120 karakter. <span class="text-amber-700">Wajib.</span>'],
-    ['Kode', 'Kode pendek dan unik. Dipakai untuk pencarian cepat dan untuk alamat perangkat presensi. <span class="text-amber-700">Wajib.</span>'],
+    ['Nama toko', 'Nama yang tampil di daftar dan laporan. Maksimal 120 karakter. <span class="text-merah-700">Wajib.</span>'],
+    ['Kode', 'Kode pendek dan unik. Dipakai untuk pencarian cepat dan untuk alamat perangkat presensi. <span class="text-merah-700">Wajib.</span>'],
     ['Alamat', 'Alamat lengkap cabang.'],
     ['Latitude / Longitude', 'Titik tengah area geofence. Ambil dari Google Maps: klik lokasi toko lalu salin angka setelah tanda <span class="italic">@</span>. Contoh <span class="italic">-6.1753924, 106.8271528</span>.'],
     ['Radius (meter)', 'Jarak yang masih dianggap berada di dalam toko. Minimal 20, maksimal 5000 meter.'],
     ['Buka / Tutup', 'Jam buka dan tutup toko. Jam tutup harus setelah jam buka.'],
     ['Zona waktu', 'Zona waktu toko. Default <span class="italic">Asia/Jakarta</span>.'],
-    ['User presensi', 'User untuk masuk ke halaman perangkat presensi. Unik antar toko. <span class="text-amber-700">Wajib</span> supaya perangkat presensi bisa dipakai.'],
+    ['User presensi', 'User untuk masuk ke halaman perangkat presensi. Unik antar toko. <span class="text-merah-700">Wajib</span> supaya perangkat presensi bisa dipakai.'],
     ['Password presensi', 'Password untuk halaman perangkat presensi, minimal 8 karakter. Kosongkan berarti password lama tidak diubah.'],
     ['Toko aktif', 'Bila dimatikan, toko berhenti dipakai untuk absensi. Riwayat yang sudah tercatat tetap utuh.'],
 ])

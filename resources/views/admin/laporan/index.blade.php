@@ -23,7 +23,7 @@
     </div>
 
     @if ($errors->any())
-        <div class="mb-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700 ring-1 ring-rose-200">
+        <div class="mb-3 rounded-lg bg-merah-50 px-3 py-2 text-sm text-merah-700 ring-1 ring-merah-200">
             {{ $errors->first() }}
         </div>
     @endif
@@ -100,14 +100,14 @@
                             </td>
                             <td class="tabular px-4 py-3 text-right">
                                 @if ($b['terlambat'] > 0)
-                                    <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-700">{{ $b['terlambat'] }}x</span>
+                                    <span class="rounded-full bg-merah-100 px-2 py-0.5 text-[11px] font-medium text-merah-700">{{ $b['terlambat'] }}x</span>
                                 @else
                                     <span class="text-slate-400">-</span>
                                 @endif
                             </td>
                             <td class="tabular px-4 py-3 text-right">
                                 @if ($b['belum_pulang'] > 0)
-                                    <span class="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-medium text-rose-700">{{ $b['belum_pulang'] }}x</span>
+                                    <span class="rounded-full bg-merah-100 px-2 py-0.5 text-[11px] font-medium text-merah-700">{{ $b['belum_pulang'] }}x</span>
                                 @else
                                     <span class="text-slate-400">-</span>
                                 @endif

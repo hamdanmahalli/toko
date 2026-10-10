@@ -14,7 +14,7 @@
         </a>
     </div>
 
-    <div class="mb-4 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-xs leading-relaxed text-sky-900">
+    <div class="mb-4 rounded-2xl border border-brand-200 bg-brand-50 p-4 text-xs leading-relaxed text-brand-900">
         <p class="font-semibold">Hanya untuk jabatan yang wajib memakai template.</p>
         <p class="mt-1">
             Manajer dan kepala toko memakai template ini. Kasir dan pramuniaga tidak perlu template sama sekali,
@@ -47,14 +47,14 @@
                             @if ($t->kode)
                                 <span class="rounded bg-slate-900 px-1.5 py-0.5 text-[11px] font-medium text-white">{{ $t->kode }}</span>
                             @endif
-                            <span class="rounded-full px-2 py-0.5 text-[11px] font-medium {{ $t->tipe() === \App\Enums\ShiftTipe::Tetap ? 'bg-slate-100 text-slate-600' : 'bg-sky-100 text-sky-700' }}">
+                            <span class="rounded-full px-2 py-0.5 text-[11px] font-medium {{ $t->tipe() === \App\Enums\ShiftTipe::Tetap ? 'bg-slate-100 text-slate-600' : 'bg-brand-100 text-brand-700' }}">
                                 {{ $t->tipe()->label() }}
                             </span>
                             <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
                                 {{ $t->scope->label() }}{{ $t->shop ? ' · '.$t->shop->nama : '' }}
                             </span>
                             @if (! $t->aktif)
-                                <span class="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-medium text-rose-700">Nonaktif</span>
+                                <span class="rounded-full bg-merah-100 px-2 py-0.5 text-[11px] font-medium text-merah-700">Nonaktif</span>
                             @endif
                         </div>
                         @if ($t->keterangan)
@@ -89,7 +89,7 @@
                                   action="{{ route('admin.shift.destroy', $t) }}"
                                   onsubmit="return confirm('Hapus template &quot;{{ $t->nama }}&quot; beserta slot dan penugasannya? Riwayat absensi lama tidak berubah, tetapi karyawan yang memakai template ini akan kehilangan jam kerjanya.')">
                                 @csrf @method('DELETE')
-                                <button class="rounded-lg border border-rose-300 px-3 py-1.5 text-sm font-medium text-rose-600 hover:bg-rose-50">
+                                <button class="rounded-lg border border-merah-300 px-3 py-1.5 text-sm font-medium text-merah-600 hover:bg-merah-50">
                                     Hapus
                                 </button>
                             </form>
@@ -100,7 +100,7 @@
                 @php $aktif = $t->slots->where('aktif', true)->sortBy('hari'); @endphp
 
                 @if ($aktif->isEmpty())
-                    <p class="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                    <p class="mt-3 rounded-lg bg-merah-50 px-3 py-2 text-xs text-merah-700">
                         Belum ada hari kerja aktif, jadi template ini tidak bisa dipakai untuk absensi.
                     </p>
                 @else
