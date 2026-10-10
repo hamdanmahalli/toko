@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Mail\KirimAkunBaru;
+use App\Mail\KirimPasswordBaru;
 use App\Models\Employee;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -324,6 +326,19 @@ class AdminPenggunaTest extends TestCase
         $this->assertSame('approved', $perangkat->fresh()->status->value);
     }
 
+    public function test_halaman_pengguna_menampilkan_tombol_setujui_perangkat(): void
+    {
+        $target = $this->dengan('karyawan');
+        $perangkat = $target->devices()->create(['device_token' => 'hp-1', 'status' => 'pending']);
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->get('/admin/pengguna')
+            ->assertOk()
+            ->assertSee('Perangkat yang tercatat')
+            ->assertSee('Setujui')
+            ->assertSee(route('admin.pengguna.perangkat-setujui', [$target, $perangkat]), false);
+    }
+
     public function test_admin_menolak_perangkat(): void
     {
         $target = $this->dengan('karyawan');
@@ -599,5 +614,67 @@ class AdminPenggunaTest extends TestCase
             'user_id' => $akun->id,
             'shop_id' => $toko->id,
         ]);
+    }
+
+    public function test_admin_mengatur_ulang_password_dan_mengirim_email(): void
+    {
+        Mail::fake();
+
+        $target = User::factory()->create(['email' => 'budi@toko.test']);
+        $target->assignRole('karyawan');
+        $hashLama = $target->password;
+
+        // Sesi lama harus ikut diputus supaya pemegang password lama tidak
+        // tetap masuk setelah password diatur ulang.
+        $target->forceFill(['active_session_id' => 'sesi-lama'])->save();
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->post("/admin/pengguna/{$target->id}/reset-password")
+            ->assertRedirect()
+            ->assertSessionHas('sukses');
+
+        $terkirim = null;
+        Mail::assertSent(KirimPasswordBaru::class, function (KirimPasswordBaru $mail) use ($target, &$terkirim) {
+            $terkirim = $mail;
+
+            return $mail->hasTo($target->email) && $mail->akun->is($target);
+        });
+
+        $target->refresh();
+        $this->assertNotSame($hashLama, $target->password);
+        $this->assertTrue(Hash::check($terkirim->passwordBaru, $target->password));
+        $this->assertNull($target->active_session_id);
+    }
+
+    public function test_aturs_ulang_password_dibatalkan_bila_email_gagal(): void
+    {
+        Mail::shouldReceive('to->send')->andThrow(new \RuntimeException('smtp mati'));
+
+        $target = User::factory()->create();
+        $target->assignRole('karyawan');
+        $hashLama = $target->password;
+
+        $this->actingAs($this->dengan('pemilik'))
+            ->post("/admin/pengguna/{$target->id}/reset-password")
+            ->assertRedirect()
+            ->assertSessionHas('galat');
+
+        // Transaksi di-rollback: password lama tetap berlaku supaya akun
+        // tidak terkunci tanpa password yang diketahui siapa pun.
+        $this->assertSame($hashLama, $target->fresh()->password);
+    }
+
+    public function test_supervisor_tidak_bisa_aturs_ulang_password(): void
+    {
+        Mail::fake();
+
+        $target = User::factory()->create();
+        $target->assignRole('karyawan');
+
+        $this->actingAs($this->dengan('supervisor', ['dashboard.lihat', 'pengguna.lihat']))
+            ->post("/admin/pengguna/{$target->id}/reset-password")
+            ->assertForbidden();
+
+        Mail::assertNothingSent();
     }
 }

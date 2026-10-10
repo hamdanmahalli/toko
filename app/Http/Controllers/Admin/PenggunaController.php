@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\StatusPerangkat;
 use App\Http\Controllers\Controller;
 use App\Mail\KirimAkunBaru;
+use App\Mail\KirimPasswordBaru;
 use App\Models\Employee;
 use App\Models\Shop;
 use App\Models\User;
@@ -203,6 +204,35 @@ class PenggunaController extends Controller
         });
 
         return back()->with('sukses', 'Akun '.$pengguna->name.' berhasil diperbarui.');
+    }
+
+    /**
+     * Atur ulang password akun: buat password acak baru, kirim ke email akun,
+     * dan putuskan sesi lama supaya pemilik password lama tidak tetap masuk.
+     *
+     * Satu transaksi: kalau email gagal terkirim, password lama tetap berlaku
+     * supaya akun tidak terkunci tanpa password yang diketahui.
+     */
+    public function resetPassword(User $pengguna): RedirectResponse
+    {
+        $passwordBaru = Str::random(12);
+
+        try {
+            DB::transaction(function () use ($pengguna, $passwordBaru) {
+                $pengguna->forceFill([
+                    'password' => Hash::make($passwordBaru),
+                    'active_session_id' => null,
+                ])->save();
+
+                Mail::to($pengguna->email)->send(new KirimPasswordBaru($pengguna, $passwordBaru));
+            });
+        } catch (Throwable $e) {
+            report($e);
+
+            return back()->with('galat', 'Password gagal diatur ulang karena email belum bisa dikirim. Coba lagi.');
+        }
+
+        return back()->with('sukses', 'Password baru '.$pengguna->name.' sudah dikirim ke '.$pengguna->email.'.');
     }
 
     /**

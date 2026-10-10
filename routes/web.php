@@ -208,6 +208,11 @@ Route::middleware('auth')->group(function () {
             Route::put('/pengguna/{pengguna}', [PenggunaController::class, 'update'])
                 ->middleware('permission:pengguna.kelola')
                 ->name('pengguna.update');
+
+            // Atur ulang password akun: password acak baru dikirim ke emailnya.
+            Route::post('/pengguna/{pengguna}/reset-password', [PenggunaController::class, 'resetPassword'])
+                ->middleware('permission:pengguna.kelola')
+                ->name('pengguna.reset-password');
         });
 
         // Persetujuan perangkat terpisah dari `pengguna.kelola`: supervisor
