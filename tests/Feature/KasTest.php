@@ -10,6 +10,8 @@ use App\Models\Employee;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -377,6 +379,47 @@ class KasTest extends TestCase
             'jumlah' => 12000,
             'keterangan' => 'Belanja bahan',
         ]);
+    }
+
+    public function test_transaksi_bisa_disimpan_dengan_gambar(): void
+    {
+        Storage::fake('public');
+
+        $karyawan = $this->karyawan();
+        $buku = CashBook::factory()->untuk($karyawan)->create(['saldo_awal' => 0]);
+
+        $this->actingAs($karyawan->user)
+            ->post("/kas/{$buku->id}/transaksi", [
+                'jenis' => 'masuk',
+                'kategori' => KategoriKas::Penjualan->value,
+                'tanggal' => '2026-03-01',
+                'jumlah' => '50.000',
+                'gambar' => UploadedFile::fake()->image('bukti.jpg', 400, 300),
+            ])
+            ->assertRedirect(route('kas.show', $buku));
+
+        $trx = CashBookTransaction::latest('id')->firstOrFail();
+
+        $this->assertNotNull($trx->gambar);
+        Storage::disk('public')->assertExists($trx->gambar);
+    }
+
+    public function test_gambar_transaksi_harus_berupa_gambar(): void
+    {
+        Storage::fake('public');
+
+        $karyawan = $this->karyawan();
+        $buku = CashBook::factory()->untuk($karyawan)->create();
+
+        $this->actingAs($karyawan->user)
+            ->post("/kas/{$buku->id}/transaksi", [
+                'jenis' => 'masuk',
+                'kategori' => KategoriKas::Penjualan->value,
+                'tanggal' => '2026-03-01',
+                'jumlah' => '1000',
+                'gambar' => UploadedFile::fake()->create('dokumen.pdf', 10),
+            ])
+            ->assertSessionHasErrors('gambar');
     }
 
     public function test_buku_karyawan_lain_tidak_ditemukan(): void

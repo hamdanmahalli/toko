@@ -16,6 +16,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
@@ -127,7 +128,10 @@ class KasController extends Controller
     public function destroy(Request $request, int $buku): RedirectResponse
     {
         $employee = $this->employee($request);
-        $this->milik($employee, $buku)->delete();
+        $buku = $this->milik($employee, $buku);
+
+        $buku->transactions()->pluck('gambar')->each(fn ($gambar) => $this->hapusGambar($gambar));
+        $buku->delete();
 
         return redirect()
             ->route('kas.index')
@@ -172,6 +176,7 @@ class KasController extends Controller
             'tanggal' => $data['tanggal'],
             'jumlah' => $data['jumlah'],
             'keterangan' => $data['keterangan'] ?? null,
+            'gambar' => $this->simpanGambar($request),
         ]);
 
         return redirect()
@@ -233,6 +238,7 @@ class KasController extends Controller
             'tanggal' => $data['tanggal'],
             'jumlah' => $data['jumlah'],
             'keterangan' => $data['keterangan'] ?? null,
+            'gambar' => $this->simpanGambar($request, $trx),
         ]);
 
         return redirect()
@@ -245,7 +251,9 @@ class KasController extends Controller
         $employee = $this->employee($request);
         $buku = $this->milik($employee, $buku);
 
-        $buku->transactions()->whereKey($transaksi)->delete();
+        $trx = $buku->transactions()->whereKey($transaksi)->firstOrFail();
+        $this->hapusGambar($trx->gambar);
+        $trx->delete();
 
         return redirect()
             ->route('kas.show', $buku)
@@ -435,7 +443,31 @@ class KasController extends Controller
             'tanggal' => ['required', 'date'],
             'jumlah' => ['required', 'numeric', 'min:1'],
             'keterangan' => ['nullable', 'string', 'max:500'],
-        ], [], ['jumlah' => 'nominal']);
+            'gambar' => ['nullable', 'image', 'max:5120'],
+        ], [], ['jumlah' => 'nominal', 'gambar' => 'gambar']);
+    }
+
+    /**
+     * Simpan gambar bukti transaksi ke disk publik. Bila tidak ada unggahan
+     * baru, pertahankan gambar lama (dipakai saat mengubah transaksi).
+     */
+    private function simpanGambar(Request $request, ?CashBookTransaction $lama = null): ?string
+    {
+        if (! $request->hasFile('gambar')) {
+            return $lama?->gambar;
+        }
+
+        $this->hapusGambar($lama?->gambar);
+
+        return $request->file('gambar')->store('transaksi', 'public');
+    }
+
+    /** Buang berkas gambar lama supaya tidak menumpuk file yatim. */
+    private function hapusGambar(?string $gambar): void
+    {
+        if ($gambar && Storage::disk('public')->exists($gambar)) {
+            Storage::disk('public')->delete($gambar);
+        }
     }
 
     /** Kategori aktif milik karyawan dengan jenis yang cocok, atau null. */

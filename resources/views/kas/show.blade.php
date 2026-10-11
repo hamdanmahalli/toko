@@ -70,13 +70,19 @@
                             @else
                                 <div class="card flex items-center justify-between gap-3 p-3.5">
                             @endcan
-                                    <div class="min-w-0">
-                                        @if ($t->keterangan)
-                                            <p class="truncate text-sm font-medium text-slate-800">{{ $t->keterangan }}</p>
-                                            <p class="mt-0.5 truncate text-xs text-slate-500">{{ $label }}</p>
-                                        @else
-                                            <p class="truncate text-sm font-medium text-slate-800">{{ $label }}</p>
+                                    <div class="flex min-w-0 items-center gap-3">
+                                        @if ($t->gambar)
+                                            <img src="{{ $t->gambarUrl() }}" alt="Bukti transaksi"
+                                                 class="h-11 w-11 shrink-0 rounded-lg object-cover ring-1 ring-slate-100">
                                         @endif
+                                        <div class="min-w-0">
+                                            @if ($t->keterangan)
+                                                <p class="truncate text-sm font-medium text-slate-800">{{ $t->keterangan }}</p>
+                                                <p class="mt-0.5 truncate text-xs text-slate-500">{{ $label }}</p>
+                                            @else
+                                                <p class="truncate text-sm font-medium text-slate-800">{{ $label }}</p>
+                                            @endif
+                                        </div>
                                     </div>
                                     <p class="tabular shrink-0 text-sm font-semibold {{ $masuk ? 'text-brand-700' : 'text-merah-600' }}">
                                         {{ $masuk ? '+' : '−' }} {{ \App\Support\Rupiah::format($t->jumlah) }}

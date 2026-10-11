@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 #[
-    Fillable(['cash_book_id', 'jenis', 'kategori', 'tanggal', 'jumlah', 'keterangan']),
+    Fillable(['cash_book_id', 'jenis', 'kategori', 'tanggal', 'jumlah', 'keterangan', 'gambar']),
 ]
 class CashBookTransaction extends Model
 {
@@ -48,5 +49,11 @@ class CashBookTransaction extends Model
     public function nilaiBertanda(): float
     {
         return $this->jenis === JenisKas::Masuk ? (float) $this->jumlah : -(float) $this->jumlah;
+    }
+
+    /** URL gambar bukti transaksi, atau null bila tidak ada. */
+    public function gambarUrl(): ?string
+    {
+        return $this->gambar ? Storage::disk('public')->url($this->gambar) : null;
     }
 }
