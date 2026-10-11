@@ -6,8 +6,8 @@
     - Panel menutupi bottom nav (z-40 di atas nav z-20) dan bisa ditutup lewat
       tombol silang, klik latar, tombol Escape, atau tombol "Simpan" keypad.
     - Setiap ketukan langsung memperbarui kolom #jumlah.
-    - Tombol "Simpan" pada keypad = konfirmasi (merapikan rumus jadi satu
-      angka). Submit form tetap lewat tombol "Simpan" halaman.
+    - Tombol Enter pada keypad = konfirmasi (merapikan rumus jadi satu angka).
+      Submit form tetap lewat tombol "Simpan" halaman.
     Nominal selalu bilangan bulat rupiah, jadi tombol koma tidak aktif.
 --}}
 @props([
@@ -68,7 +68,13 @@
             <button type="button" data-pad="num" data-nilai="7" class="rounded-xl bg-slate-50 text-lg font-semibold text-slate-700 transition hover:bg-slate-100 active:scale-95">7</button>
             <button type="button" data-pad="num" data-nilai="8" class="rounded-xl bg-slate-50 text-lg font-semibold text-slate-700 transition hover:bg-slate-100 active:scale-95">8</button>
             <button type="button" data-pad="num" data-nilai="9" class="rounded-xl bg-slate-50 text-lg font-semibold text-slate-700 transition hover:bg-slate-100 active:scale-95">9</button>
-            <button type="button" data-pad="konfirmasi" class="row-span-2 rounded-xl bg-yellow-400 text-sm font-bold uppercase tracking-wide text-black transition hover:bg-yellow-300 active:scale-95">Simpan</button>
+            <button type="button" data-pad="konfirmasi" aria-label="Enter"
+                    class="row-span-2 flex items-center justify-center rounded-xl bg-yellow-400 text-black transition hover:bg-yellow-300 active:scale-95">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m9 10-5 5 5 5"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 15h12a4 4 0 0 0 4-4V7"/>
+                </svg>
+            </button>
 
             <button type="button" data-pad="num" data-nilai="0" class="rounded-xl bg-slate-50 text-lg font-semibold text-slate-700 transition hover:bg-slate-100 active:scale-95">0</button>
             <button type="button" data-pad="num" data-nilai="000" class="rounded-xl bg-slate-50 text-lg font-semibold text-slate-700 transition hover:bg-slate-100 active:scale-95">000</button>

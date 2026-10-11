@@ -47,9 +47,10 @@
         <div class="space-y-4">
             <div class="grid grid-cols-[84px_1fr] items-center gap-3">
                 <label class="text-sm font-medium text-slate-700" for="kategori">Kategori</label>
-                <div>
+                <div class="relative">
                     <select id="kategori" name="kategori" required
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
+                            data-atur="{{ route('kas.kategori.index') }}"
+                            class="w-full appearance-none rounded-xl border border-slate-200 py-2.5 pl-3 pr-9 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
                         <optgroup label="Pemasukan">
                             @foreach ($masuk as $k)
                                 <option value="{{ $k->kode }}" data-jenis="masuk" @selected($kategoriAwal === $k->kode)>{{ $k->nama }}</option>
@@ -60,10 +61,13 @@
                                 <option value="{{ $k->kode }}" data-jenis="keluar" @selected($kategoriAwal === $k->kode)>{{ $k->nama }}</option>
                             @endforeach
                         </optgroup>
+                        <option value="__atur__">Atur kategori</option>
                     </select>
-                    <a href="{{ route('kas.kategori.index') }}" class="mt-1 block text-right text-xs font-medium text-brand-600 hover:underline">
-                        Atur kategori
-                    </a>
+                    <span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </span>
                 </div>
             </div>
 
@@ -164,10 +168,21 @@
                     if (k.kode === pilih) opsi.selected = true;
                     select.appendChild(opsi);
                 });
+
+                const atur = document.createElement('option');
+                atur.value = '__atur__';
+                atur.textContent = 'Atur kategori';
+                select.appendChild(atur);
             };
 
             bangun(terpilih(), select.value);
             radio.forEach((r) => r.addEventListener('change', () => bangun(terpilih(), null)));
+
+            select.addEventListener('change', () => {
+                if (select.value === '__atur__' && select.dataset.atur) {
+                    window.location.href = select.dataset.atur;
+                }
+            });
         }
 
         const berkas = document.getElementById('gambar');
