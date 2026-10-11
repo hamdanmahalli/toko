@@ -200,6 +200,33 @@ class KasTest extends TestCase
             ->assertSee('Simpan');
     }
 
+    public function test_form_transaksi_mendukung_pratinjau_gambar(): void
+    {
+        $karyawan = $this->karyawan();
+        $buku = CashBook::factory()->untuk($karyawan)->create();
+
+        $this->actingAs($karyawan->user)
+            ->get("/kas/{$buku->id}/transaksi/tambah")
+            ->assertOk()
+            ->assertSee('js-preview', false)
+            ->assertSee('modal-gambar', false);
+    }
+
+    public function test_form_ubah_transaksi_menampilkan_pratinjau_bukti(): void
+    {
+        Storage::fake('public');
+
+        $karyawan = $this->karyawan();
+        $buku = CashBook::factory()->untuk($karyawan)->create();
+        $trx = CashBookTransaction::factory()->untuk($buku)->create(['gambar' => 'kas/bukti.jpg']);
+
+        $this->actingAs($karyawan->user)
+            ->get("/kas/{$buku->id}/transaksi/{$trx->id}/ubah")
+            ->assertOk()
+            ->assertSee('js-preview', false)
+            ->assertSee($trx->gambarUrl(), false);
+    }
+
     public function test_kategori_bawaan_disemai_untuk_karyawan(): void
     {
         $karyawan = $this->karyawan();

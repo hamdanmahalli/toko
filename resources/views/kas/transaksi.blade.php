@@ -118,11 +118,15 @@
             </label>
             <input id="gambar" name="gambar" type="file" accept="image/*" class="sr-only">
 
-            <div id="pratinjau-gambar" class="{{ $gambarAwal ? '' : 'hidden' }} mt-3">
+            <div id="pratinjau-gambar" role="button" tabindex="0" aria-label="Perbesar pratinjau"
+                 data-ket="Pratinjau bukti transaksi"
+                 class="js-preview {{ $gambarAwal ? '' : 'hidden' }} mt-3 cursor-zoom-in">
                 <img id="pratinjau-gambar-img" src="{{ $gambarAwal ?? '' }}" alt="Pratinjau gambar"
                      class="h-40 w-full rounded-2xl object-cover ring-1 ring-slate-100">
             </div>
         </div>
+
+        <x-modal-gambar />
 
         <div class="flex gap-2 pt-1">
             <a href="{{ route('kas.show', $buku) }}"
