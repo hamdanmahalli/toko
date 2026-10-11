@@ -29,17 +29,23 @@ class KasLaporanService
      */
     public function rekap(Employee $employee, ?int $bukuId, Carbon $dari, Carbon $sampai): array
     {
-        $buku = CashBook::query()
+        // Seluruh buku tetap dikirim sebagai pilihan filter; yang dihitung
+        // hanya buku terpilih agar daftar "Buku" di halaman laporan tetap bisa
+        // diganti walau sedang menyaring satu buku.
+        $semuaBuku = CashBook::query()
             ->where('employee_id', $employee->id)
-            ->when($bukuId !== null, fn ($q) => $q->where('id', $bukuId))
             ->orderBy('nama')
             ->get();
+
+        $buku = $bukuId !== null
+            ? $semuaBuku->where('id', $bukuId)->values()
+            : $semuaBuku;
 
         if ($buku->isEmpty()) {
             return [
                 'baris' => [],
                 'ringkasan' => $this->ringkasanKosong(),
-                'buku' => $buku,
+                'buku' => $semuaBuku,
             ];
         }
 
@@ -94,7 +100,7 @@ class KasLaporanService
                 'saldo_akhir' => $saldoAwal + $totalMasuk - $totalKeluar,
                 'jumlah_buku' => $buku->count(),
             ],
-            'buku' => $buku,
+            'buku' => $semuaBuku,
         ];
     }
 

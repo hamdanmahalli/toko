@@ -496,6 +496,24 @@ class KasTest extends TestCase
             ->assertSee('Rp 18.000');
     }
 
+    public function test_laporan_filter_buku_tetap_menampilkan_semua_pilihan_buku(): void
+    {
+        $karyawan = $this->karyawan();
+        $bukuA = CashBook::factory()->untuk($karyawan)->create(['nama' => 'Kas Utama', 'saldo_awal' => 0]);
+        $bukuB = CashBook::factory()->untuk($karyawan)->create(['nama' => 'Kas Cabang', 'saldo_awal' => 0]);
+
+        CashBookTransaction::factory()->untuk($bukuA)->masuk()->create(['tanggal' => '2026-02-05', 'jumlah' => 15000]);
+        CashBookTransaction::factory()->untuk($bukuB)->masuk()->create(['tanggal' => '2026-02-06', 'jumlah' => 9000]);
+
+        $this->actingAs($karyawan->user)
+            ->get('/kas/laporan?buku='.$bukuA->id.'&dari=2026-02-01&sampai=2026-02-28')
+            ->assertOk()
+            ->assertSee('Kas Utama')
+            ->assertSee('Kas Cabang')
+            ->assertSee('Rp 15.000')
+            ->assertDontSee('Rp 9.000');
+    }
+
     public function test_laporan_pdf_dan_excel_bisa_diunduh(): void
     {
         $karyawan = $this->karyawan();

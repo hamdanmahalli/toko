@@ -33,7 +33,7 @@
     <p class="sub">
         {{ $employee->nama }} &middot;
         Periode {{ $dari->format('d/m/Y') }} &ndash; {{ $sampai->format('d/m/Y') }}
-        @if ($bukuId) &middot; {{ optional($buku->first())->nama }} @endif
+        @if ($bukuId) &middot; {{ optional($buku->firstWhere('id', $bukuId))->nama }} @endif
     </p>
 
     <table class="ringkas">
