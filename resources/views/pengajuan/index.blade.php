@@ -79,7 +79,11 @@
                                 </span>
                                 @if ($p->status->isPending())
                                     <form method="POST" action="{{ route('pengajuan.batal', ['izin', $p->id]) }}"
-                                          class="mt-2" onsubmit="return confirm('Batalkan pengajuan ini?')">
+                                          class="mt-2"
+                                          data-konfirmasi="Pengajuan izin ini akan dibatalkan dan tidak bisa dikembalikan."
+                                          data-konfirmasi-judul="Batalkan pengajuan?"
+                                          data-konfirmasi-tombol="Batalkan"
+                                          data-konfirmasi-bahaya>
                                         @csrf
                                         <button class="text-xs font-medium text-merah-600 hover:underline">Batalkan</button>
                                     </form>
@@ -141,7 +145,11 @@
                                 </span>
                                 @if ($p->status->isPending())
                                     <form method="POST" action="{{ route('pengajuan.batal', ['lembur', $p->id]) }}"
-                                          class="mt-2" onsubmit="return confirm('Batalkan pengajuan ini?')">
+                                          class="mt-2"
+                                          data-konfirmasi="Pengajuan lembur ini akan dibatalkan dan tidak bisa dikembalikan."
+                                          data-konfirmasi-judul="Batalkan pengajuan?"
+                                          data-konfirmasi-tombol="Batalkan"
+                                          data-konfirmasi-bahaya>
                                         @csrf
                                         <button class="text-xs font-medium text-merah-600 hover:underline">Batalkan</button>
                                     </form>

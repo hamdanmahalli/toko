@@ -240,24 +240,25 @@
 
                 event.preventDefault();
 
-                const jawaban = window.prompt('Alasan penolakan (wajib diisi, dibaca karyawan):');
+                window.TokoDialog.tanyaTeks({
+                    judul: 'Tolak pengajuan',
+                    pesan: 'Tuliskan alasan penolakan. Alasannya dibaca karyawan yang mengajukan.',
+                    placeholder: 'Contoh: bukti lembur belum lengkap',
+                    labelOk: 'Tolak',
+                    bahaya: true,
+                    wajib: true,
+                    pesanWajib: 'Alasan penolakan wajib diisi.',
+                }).then((alasan) => {
+                    if (alasan === null) return;
 
-                if (jawaban === null) return;
-
-                const alasan = jawaban.trim();
-
-                if (! alasan) {
-                    window.alert('Alasan penolakan wajib diisi.');
-                    return;
-                }
-
-                form.querySelector('[name="catatan"]').value = alasan;
-                form.dataset.sudahDicek = '1';
-                form.querySelectorAll('button').forEach((tombol) => {
-                    tombol.disabled = true;
-                    tombol.classList.add('pointer-events-none', 'opacity-60');
+                    form.querySelector('[name="catatan"]').value = alasan;
+                    form.dataset.sudahDicek = '1';
+                    form.querySelectorAll('button').forEach((tombol) => {
+                        tombol.disabled = true;
+                        tombol.classList.add('pointer-events-none', 'opacity-60');
+                    });
+                    form.submit();
                 });
-                form.submit();
             });
         });
     </script>

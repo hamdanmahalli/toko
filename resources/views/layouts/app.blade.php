@@ -20,6 +20,7 @@
             @include('layouts.nav')
         @endauth
     </div>
+    @include('layouts.dialog')
     @stack('kaki')
 </body>
 </html>

@@ -181,7 +181,12 @@
             tombol.disabled = true;
             window.TokoNative.cetakPrinter(lines)
                 .then(function () { tombol.textContent = 'Tercetak'; })
-                .catch(function (e) { alert(e && e.message ? e.message : 'Cetak gagal.'); })
+                .catch(function (e) {
+                    window.TokoDialog.pesan({
+                        judul: 'Cetak gagal',
+                        pesan: e && e.message ? e.message : 'Cetak gagal.',
+                    });
+                })
                 .finally(function () {
                     setTimeout(function () {
                         tombol.innerHTML = labelAsli;

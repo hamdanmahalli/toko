@@ -74,7 +74,10 @@
 
     @if ($ubah)
         <form method="POST" action="{{ route('kas.destroy', $buku) }}" class="mt-4"
-              onsubmit="return confirm('Hapus buku ini beserta seluruh transaksinya?')">
+              data-konfirmasi="Hapus buku ini beserta seluruh transaksinya?"
+              data-konfirmasi-judul="Hapus buku?"
+              data-konfirmasi-tombol="Hapus buku"
+              data-konfirmasi-bahaya>
             @csrf
             @method('DELETE')
             <button class="w-full rounded-xl border border-merah-100 bg-merah-50 px-4 py-2.5 text-sm font-medium text-merah-700 transition hover:bg-merah-100">

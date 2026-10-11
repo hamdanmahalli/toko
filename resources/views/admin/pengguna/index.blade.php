@@ -306,14 +306,19 @@
                         @can('pengguna.kelola')
 <form id="reset-{{ $u->id }}" method="POST"
                           action="{{ route('admin.pengguna.reset-password', $u) }}"
-                          onsubmit="return confirm('Kirim password baru ke {{ $u->email }}? Password lama dan sesi yang sedang aktif akan berhenti berlaku.');">
+                          data-konfirmasi="Password baru akan dikirim ke {{ $u->email }}. Password lama dan sesi yang sedang aktif akan berhenti berlaku."
+                          data-konfirmasi-judul="Kirim password baru?"
+                          data-konfirmasi-tombol="Kirim">
                             @csrf
                         </form>
 
                         @if ($u->id !== auth()->id())
                             <form id="hapus-{{ $u->id }}" method="POST"
                                   action="{{ route('admin.pengguna.hapus', $u) }}"
-                                  onsubmit="return confirm('Hapus akun {{ $u->name }}? Akun dinonaktifkan, semua sesi diputus, dan data karyawan dilepas dari akun ini. Riwayat absensi tetap tersimpan.');">
+                                  data-konfirmasi="Akun {{ $u->name }} akan dinonaktifkan, semua sesi diputus, dan data karyawan dilepas dari akun ini. Riwayat absensi tetap tersimpan."
+                                  data-konfirmasi-judul="Hapus akun?"
+                                  data-konfirmasi-tombol="Hapus akun"
+                                  data-konfirmasi-bahaya>
                                 @csrf
                                 @method('DELETE')
                             </form>
@@ -365,7 +370,10 @@
                                             <span class="flex shrink-0 items-center gap-1.5">
                                                 <form method="POST"
                                                       action="{{ route('admin.pengguna.perangkat-hapus', [$u, $perangkat]) }}"
-                                                      onsubmit="return confirm('Hapus perangkat ini? Perangkat baru nanti akan dianggap perangkat pertama.');">
+                                                      data-konfirmasi="Perangkat baru nanti akan dianggap perangkat pertama."
+                                                      data-konfirmasi-judul="Hapus perangkat?"
+                                                      data-konfirmasi-tombol="Hapus"
+                                                      data-konfirmasi-bahaya>
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="text-[11px] font-medium text-slate-400 hover:text-slate-600">

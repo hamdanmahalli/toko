@@ -87,7 +87,10 @@
                                 @if ($w->aktif)
                                     <form method="POST"
                                           action="{{ route('admin.window.destroy', $w) }}"
-                                          onsubmit="return confirm('Nonaktifkan window ini? Kasir dan pramuniaga yang jam datangnya jatuh di sini akan tercatat tanpa penilaian sampai window diaktifkan lagi.')">
+                                          data-konfirmasi="Kasir dan pramuniaga yang jam datangnya jatuh di sini akan tercatat tanpa penilaian sampai window diaktifkan lagi."
+                                          data-konfirmasi-judul="Nonaktifkan window?"
+                                          data-konfirmasi-tombol="Nonaktifkan"
+                                          data-konfirmasi-bahaya>
                                         @csrf @method('DELETE')
                                         <button class="rounded-lg border border-merah-300 px-2.5 py-1 text-xs font-medium text-merah-600 hover:bg-merah-50">
                                             Nonaktifkan

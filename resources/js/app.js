@@ -100,6 +100,214 @@
 })();
 
 //
+// Dialog kustom: pengganti confirm/alert/prompt bawaan browser supaya
+// tampilannya seragam dengan aplikasi. Markup-nya ada di
+// layouts/dialog.blade.php, di sini hanya logika buka/tutupnya.
+//   TokoDialog.konfirmasi({...}) -> Promise<boolean>
+//   TokoDialog.pesan({...})      -> Promise<void>
+//   TokoDialog.tanyaTeks({...})  -> Promise<string|null>
+(function () {
+    'use strict';
+
+    var kotak = document.getElementById('dialog');
+    if (!kotak) return;
+
+    var ikonEl = kotak.querySelector('[data-dialog-ikon]');
+    var judulEl = kotak.querySelector('[data-dialog-judul]');
+    var pesanEl = kotak.querySelector('[data-dialog-pesan]');
+    var inputEl = kotak.querySelector('[data-dialog-input]');
+    var galatEl = kotak.querySelector('[data-dialog-galat]');
+    var batalEl = kotak.querySelector('[data-dialog-batal]');
+    var okEl = kotak.querySelector('[data-dialog-ok]');
+    var tutupEl = kotak.querySelector('[data-dialog-tutup]');
+
+    var IKON = {
+        netral: {
+            kelas: 'bg-brand-50 text-brand-700',
+            svg: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M12 3l9 16H3z"/>',
+        },
+        peringatan: {
+            kelas: 'bg-merah-50 text-merah-600',
+            svg: '<path stroke-linecap="round" d="M12 8v5m0 3.5v.01M10.3 3.9 2.5 17.5A2 2 0 0 0 4.2 20.5h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>',
+        },
+    };
+
+    var GAYA_OK =
+        'flex-1 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-105 active:scale-[.99]';
+    var GAYA_OK_BAHAYA =
+        'flex-1 rounded-xl bg-merah-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-merah-700 active:scale-[.99]';
+
+    var selesai = null;
+    var fokusSebelum = null;
+    var modeInput = false;
+    var bolehBatal = true;
+
+    function pasangIkon(jenis) {
+        if (!jenis) {
+            ikonEl.className = 'hidden h-9 w-9 shrink-0';
+            ikonEl.innerHTML = '';
+            return;
+        }
+
+        var pilihan = IKON[jenis] || IKON.netral;
+        ikonEl.className = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-full ' + pilihan.kelas;
+        ikonEl.innerHTML = '<svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' + pilihan.svg + '</svg>';
+    }
+
+    function buka(opsi) {
+        modeInput = opsi.mode === 'input';
+        bolehBatal = !opsi.tanpaBatal;
+
+        judulEl.textContent = opsi.judul || '';
+        pesanEl.textContent = opsi.pesan || '';
+        pesanEl.hidden = !opsi.pesan;
+        pasangIkon(opsi.ikon || 'netral');
+
+        if (modeInput) {
+            inputEl.classList.remove('hidden');
+            inputEl.value = opsi.nilai || '';
+            inputEl.placeholder = opsi.placeholder || '';
+        } else {
+            inputEl.classList.add('hidden');
+        }
+
+        galatEl.classList.add('hidden');
+        galatEl.textContent = '';
+
+        batalEl.hidden = !bolehBatal;
+        okEl.textContent = opsi.labelOk || (bolehBatal ? 'Lanjut' : 'Mengerti');
+        okEl.className = opsi.bahaya ? GAYA_OK_BAHAYA : GAYA_OK;
+
+        fokusSebelum = document.activeElement;
+        kotak.classList.remove('hidden');
+
+        if (modeInput) {
+            inputEl.focus();
+            inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
+        } else {
+            okEl.focus();
+        }
+    }
+
+    function tutup(hasil) {
+        kotak.classList.add('hidden');
+        modeInput = false;
+
+        if (fokusSebelum && fokusSebelum.focus) {
+            try { fokusSebelum.focus(); } catch (e) { /* tak masalah */ }
+        }
+        fokusSebelum = null;
+
+        var lanjut = selesai;
+        selesai = null;
+        if (lanjut) lanjut(hasil);
+    }
+
+    function batal() {
+        if (!bolehBatal) return;
+        tutup(modeInput ? null : false);
+    }
+
+    okEl.addEventListener('click', function () {
+        if (!modeInput) {
+            tutup(true);
+            return;
+        }
+
+        var nilai = inputEl.value.trim();
+        if (!nilai && kotak.dataset.wajib) {
+            galatEl.textContent = kotak.dataset.wajib;
+            galatEl.classList.remove('hidden');
+            inputEl.focus();
+            return;
+        }
+        tutup(nilai);
+    });
+
+    batalEl.addEventListener('click', batal);
+    tutupEl.addEventListener('click', batal);
+
+    inputEl.addEventListener('keydown', function (kejadian) {
+        if (kejadian.key === 'Enter' && !kejadian.shiftKey) {
+            kejadian.preventDefault();
+            okEl.click();
+        }
+    });
+
+    document.addEventListener('keydown', function (kejadian) {
+        if (kejadian.key === 'Escape' && !kotak.classList.contains('hidden')) {
+            kejadian.preventDefault();
+            batal();
+        }
+    });
+
+    window.TokoDialog = {
+        konfirmasi: function (opsi) {
+            return new Promise(function (selesaiKan) {
+                selesai = selesaiKan;
+                buka(opsi || {});
+            });
+        },
+        pesan: function (opsi) {
+            return new Promise(function (selesaiKan) {
+                selesai = selesaiKan;
+                buka(Object.assign({ tanpaBatal: true, ikon: 'peringatan' }, opsi || {}));
+            });
+        },
+        tanyaTeks: function (opsi) {
+            opsi = opsi || {};
+
+            if (opsi.wajib) {
+                kotak.dataset.wajib = opsi.pesanWajib || 'Wajib diisi.';
+            } else {
+                delete kotak.dataset.wajib;
+            }
+
+            return new Promise(function (selesaiKan) {
+                selesai = selesaiKan;
+                buka(Object.assign({ mode: 'input' }, opsi));
+            });
+        },
+    };
+})();
+
+//
+// Intersep pengiriman form yang butuh konfirmasi: alihkan popup bawaan ke
+// dialog kustom. Form ber-atribut data-konfirmasi dikirim ulang hanya setelah
+// pengguna menyetujui, sehingga umpan balik "Proses" di bawah tetap jalan.
+(function () {
+    'use strict';
+
+    document.addEventListener('submit', function (kejadian) {
+        var form = kejadian.target;
+        if (!form || form.nodeName !== 'FORM') return;
+
+        var pesan = form.getAttribute('data-konfirmasi');
+        if (!pesan || form.dataset.dikonfirmasi === '1') return;
+
+        kejadian.preventDefault();
+
+        window.TokoDialog.konfirmasi({
+            judul: form.getAttribute('data-konfirmasi-judul') || 'Konfirmasi',
+            pesan: pesan,
+            labelOk: form.getAttribute('data-konfirmasi-tombol') || 'Lanjut',
+            bahaya: form.hasAttribute('data-konfirmasi-bahaya'),
+        }).then(function (setuju) {
+            if (!setuju) return;
+
+            form.dataset.dikonfirmasi = '1';
+
+            var tombol = kejadian.submitter;
+            if (tombol && tombol.type === 'submit' && tombol.form === form) {
+                form.requestSubmit(tombol);
+            } else {
+                form.requestSubmit();
+            }
+        });
+    });
+})();
+
+//
 // Umpan balik tombol proses: begitu form dikirim, tombol yang memicunya
 // berubah menjadi spinner + label "Proses" agar tidak terklik dua kali dan
 // pengguna tahu ada yang sedang berjalan. Pengiriman GET (mis. filter)
@@ -388,7 +596,10 @@ document.addEventListener('click', function (event) {
         })
         .catch(function (galat) {
             console.error(galat);
-            window.alert('Gagal mengunduh kartu. Coba lagi ya.');
+            window.TokoDialog.pesan({
+                judul: 'Unduh gagal',
+                pesan: 'Gagal mengunduh kartu. Coba lagi ya.',
+            });
         })
         .finally(function () {
             tombol.disabled = false;

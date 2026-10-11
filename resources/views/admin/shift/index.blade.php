@@ -93,9 +93,11 @@
                         </a>
 
                         @can('shift.kelola')
-                            <form method="POST"
-                                  action="{{ route('admin.shift.destroy', $t) }}"
-                                  onsubmit="return confirm('Hapus template &quot;{{ $t->nama }}&quot; beserta slot dan penugasannya? Riwayat absensi lama tidak berubah, tetapi karyawan yang memakai template ini akan kehilangan jam kerjanya.')">
+                                    <form method="POST" action="{{ route('admin.shift.destroy', $t) }}"
+                                          data-konfirmasi="Hapus template &quot;{{ $t->nama }}&quot; beserta slot dan penugasannya? Riwayat absensi lama tidak berubah, tetapi karyawan yang memakai template ini akan kehilangan jam kerjanya."
+                                          data-konfirmasi-judul="Hapus template?"
+                                          data-konfirmasi-tombol="Hapus"
+                                          data-konfirmasi-bahaya>
                                 @csrf @method('DELETE')
                                 <button class="rounded-lg border border-merah-300 px-3 py-1.5 text-sm font-medium text-merah-600 hover:bg-merah-50">
                                     Hapus

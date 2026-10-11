@@ -43,7 +43,10 @@
                                 <div class="flex shrink-0 items-center gap-3">
                                     <a href="{{ route('kas.kategori.edit', $k) }}" class="text-sm font-medium text-brand-600 hover:underline">Ubah</a>
                                     <form method="POST" action="{{ route('kas.kategori.destroy', $k) }}"
-                                          onsubmit="return confirm('Hapus kategori {{ $k->nama }}? Kategori yang masih dipakai akan dinonaktifkan.')">
+                                          data-konfirmasi="Hapus kategori {{ $k->nama }}? Kategori yang masih dipakai akan dinonaktifkan."
+                                          data-konfirmasi-judul="Hapus kategori?"
+                                          data-konfirmasi-tombol="Hapus"
+                                          data-konfirmasi-bahaya>
                                         @csrf
                                         @method('DELETE')
                                         <button class="text-sm font-medium text-merah-600 hover:underline">Hapus</button>

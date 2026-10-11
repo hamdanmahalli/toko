@@ -35,6 +35,7 @@
         </main>
     </div>
 
+    @include('layouts.dialog')
     @stack('scripts')
 </body>
 </html>

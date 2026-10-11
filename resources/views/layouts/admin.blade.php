@@ -80,6 +80,7 @@
             @include('layouts.admin-sidebar')
         </div>
     </div>
+    @include('layouts.dialog')
     @stack('kaki')
 </body>
 </html>

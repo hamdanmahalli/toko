@@ -207,7 +207,10 @@
                 </form>
 
                 <form method="POST" action="{{ route('admin.karyawan.destroy', $karyawan) }}"
-                      onsubmit="return confirm('Nonaktifkan {{ $karyawan->nama }}?')">
+                      data-konfirmasi="Nonaktifkan {{ $karyawan->nama }}? Karyawan ini tidak lagi muncul sebagai pilihan aktif."
+                      data-konfirmasi-judul="Nonaktifkan karyawan?"
+                      data-konfirmasi-tombol="Nonaktifkan"
+                      data-konfirmasi-bahaya>
                     @csrf
                     @method('DELETE')
                     <button class="rounded-lg border border-merah-300 px-3 py-2 text-sm font-medium text-merah-700 hover:bg-merah-50">

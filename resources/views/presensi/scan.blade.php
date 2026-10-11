@@ -110,7 +110,10 @@
                             inp.form.submit();
                         }
                     }).catch(function (e) {
-                        alert(e && e.message ? e.message : 'Pemindaian gagal.');
+                        window.TokoDialog.pesan({
+                            judul: 'Pemindaian gagal',
+                            pesan: e && e.message ? e.message : 'Pemindaian gagal.',
+                        });
                     }).finally(function () {
                         tombol.disabled = false;
                     });

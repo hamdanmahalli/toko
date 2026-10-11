@@ -72,7 +72,10 @@
                                 @if ($j->employees_count === 0 && $j->aktif)
                                     <span class="px-1 text-slate-300">|</span>
                                     <form method="POST" action="{{ route('admin.jabatan.destroy', $j) }}" class="inline"
-                                          onsubmit="return confirm('Hapus jabatan {{ $j->nama }}?')">
+                                          data-konfirmasi="Hapus jabatan {{ $j->nama }}?"
+                                          data-konfirmasi-judul="Hapus jabatan?"
+                                          data-konfirmasi-tombol="Hapus"
+                                          data-konfirmasi-bahaya>
                                         @csrf
                                         @method('DELETE')
                                         <button class="text-sm font-medium text-merah-600 hover:underline">Hapus</button>
