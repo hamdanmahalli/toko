@@ -2,14 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Models\Employee;
 use App\Models\User;
 use App\Models\UserDevice;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -197,92 +194,6 @@ class ProfilTest extends TestCase
         $this->actingAs($user)->post('/profil/username', [
             'username' => 'siti.sama',
         ])->assertRedirect()->assertSessionHas('pesan');
-    }
-
-    public function test_halaman_profil_menampilkan_tombol_unggah_foto_untuk_karyawan(): void
-    {
-        $user = $this->akun();
-        Employee::factory()->denganAkun($user)->create();
-
-        $this->actingAs($user)
-            ->get('/profil')
-            ->assertOk()
-            ->assertSee('id="foto-profil"', false)
-            ->assertSee(route('profil.foto'), false);
-    }
-
-    public function test_unggah_foto_profil_karyawan(): void
-    {
-        Storage::fake('public');
-        $user = $this->akun();
-        $employee = Employee::factory()->denganAkun($user)->create();
-
-        $this->actingAs($user)
-            ->post('/profil/foto', ['foto' => UploadedFile::fake()->image('wajah.jpg')])
-            ->assertRedirect()
-            ->assertSessionHas('sukses');
-
-        $employee->refresh();
-        $this->assertNotNull($employee->foto);
-        Storage::disk('public')->assertExists($employee->foto);
-    }
-
-    public function test_ganti_foto_profil_menghapus_berkas_lama(): void
-    {
-        Storage::fake('public');
-        $user = $this->akun();
-        $employee = Employee::factory()->denganAkun($user)->create(['foto' => 'karyawan/lama.jpg']);
-        Storage::disk('public')->put('karyawan/lama.jpg', 'isi lama');
-
-        $this->actingAs($user)
-            ->post('/profil/foto', ['foto' => UploadedFile::fake()->image('baru.jpg')])
-            ->assertSessionHas('sukses');
-
-        $baru = $employee->fresh()->foto;
-
-        $this->assertNotSame('karyawan/lama.jpg', $baru);
-        Storage::disk('public')->assertMissing('karyawan/lama.jpg');
-        Storage::disk('public')->assertExists($baru);
-    }
-
-    public function test_hapus_foto_profil(): void
-    {
-        Storage::fake('public');
-        $user = $this->akun();
-        $employee = Employee::factory()->denganAkun($user)->create(['foto' => 'karyawan/lama.jpg']);
-        Storage::disk('public')->put('karyawan/lama.jpg', 'isi');
-
-        $this->actingAs($user)
-            ->delete('/profil/foto')
-            ->assertRedirect()
-            ->assertSessionHas('sukses');
-
-        $this->assertNull($employee->fresh()->foto);
-        Storage::disk('public')->assertMissing('karyawan/lama.jpg');
-    }
-
-    public function test_unggah_foto_bukan_gambar_ditolak(): void
-    {
-        Storage::fake('public');
-        $user = $this->akun();
-        Employee::factory()->denganAkun($user)->create();
-
-        $this->actingAs($user)
-            ->post('/profil/foto', ['foto' => UploadedFile::fake()->create('dokumen.pdf', 10)])
-            ->assertSessionHasErrors('foto');
-    }
-
-    public function test_akun_tanpa_karyawan_tidak_bisa_unggah_foto(): void
-    {
-        Storage::fake('public');
-        $user = $this->akun();
-
-        $this->actingAs($user)
-            ->post('/profil/foto', ['foto' => UploadedFile::fake()->image('wajah.jpg')])
-            ->assertRedirect()
-            ->assertSessionHas('galat');
-
-        $this->assertSame(0, Employee::count());
     }
 
     public function test_cabut_perangkat_sendiri(): void

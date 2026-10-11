@@ -88,8 +88,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profil/keamanan', [ProfilController::class, 'keamanan'])->name('profil.keamanan');
     Route::post('/profil/username', [ProfilController::class, 'gantiUsername'])->name('profil.username');
     Route::post('/profil/password', [ProfilController::class, 'gantiPassword'])->name('profil.password');
-    Route::post('/profil/foto', [ProfilController::class, 'unggahFoto'])->name('profil.foto');
-    Route::delete('/profil/foto', [ProfilController::class, 'hapusFoto'])->name('profil.foto-hapus');
     Route::post('/profil/biometrik', [ProfilController::class, 'biometrik'])->name('profil.biometrik');
     Route::post('/profil/perangkat/{perangkat}/cabut', [ProfilController::class, 'cabutPerangkat'])
         ->name('profil.perangkat-cabut');
