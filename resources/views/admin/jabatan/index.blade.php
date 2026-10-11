@@ -3,16 +3,23 @@
 @section('judul', 'Jabatan')
 
 @section('konten')
-    <div class="mb-4 flex items-center justify-between gap-3">
-        <div>
-            <h1 class="font-display text-xl text-slate-900">Jabatan</h1>
-            <p class="text-xs text-slate-500">Berlaku untuk seluruh toko. Aturan jam kerja diatur lewat template shift.</p>
-        </div>
-        <a href="{{ route('admin.jabatan.create') }}"
-           class="shrink-0 rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-700">
-            Tambah jabatan
-        </a>
-    </div>
+    <x-page-header class="mb-4" judul="Jabatan"
+                   sub="Berlaku untuk seluruh toko. Aturan jam kerja diatur lewat template shift.">
+        <x-slot:ikon>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M4 7h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Zm0 5h16"/>
+            </svg>
+        </x-slot:ikon>
+        <x-slot:aksi>
+            <a href="{{ route('admin.jabatan.create') }}"
+               class="flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:brightness-105 active:scale-[.99]">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
+                </svg>
+                Tambah jabatan
+            </a>
+        </x-slot:aksi>
+    </x-page-header>
 
     <form method="GET" class="mb-3 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
         <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari nama atau kode jabatan"

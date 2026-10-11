@@ -3,10 +3,15 @@
 @section('judul', 'Ajukan Lembur')
 
 @section('konten')
-    <h1 class="mb-1 font-display text-xl text-slate-900">Ajukan lembur</h1>
-    <p class="mb-4 text-xs text-slate-500">
-        Isi jam kerja tambahan di luar jadwal. Total dihitung dari tarif jam karyawan.
-    </p>
+    <x-page-header class="mb-4" judul="Ajukan lembur"
+                   sub="Isi jam kerja tambahan di luar jadwal. Total dihitung dari tarif jam karyawan.">
+        <x-slot:ikon>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8.25"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5V12l3 1.75M19.5 3.5v4M17.5 5.5h4"/>
+            </svg>
+        </x-slot:ikon>
+    </x-page-header>
 
     <form method="POST" action="{{ route('pengajuan.lembur.store') }}"
           class="space-y-4 card p-5">

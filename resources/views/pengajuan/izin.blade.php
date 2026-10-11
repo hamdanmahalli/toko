@@ -3,10 +3,15 @@
 @section('judul', 'Ajukan Izin / Cuti')
 
 @section('konten')
-    <h1 class="mb-1 font-display text-xl text-slate-900">Ajukan izin, sakit, cuti, atau dinas</h1>
-    <p class="mb-4 text-xs text-slate-500">
-        Pengajuan langsung terkirim ke atasan. Cuti dan dinas tidak memotong gaji.
-    </p>
+    <x-page-header class="mb-4" judul="Ajukan izin, sakit, cuti, atau dinas"
+                   sub="Pengajuan langsung terkirim ke atasan. Cuti dan dinas tidak memotong gaji.">
+        <x-slot:ikon>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 3h8l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 3v5h5M8.5 13h7M8.5 16.5h4"/>
+            </svg>
+        </x-slot:ikon>
+    </x-page-header>
 
     <form method="POST" action="{{ route('pengajuan.izin.store') }}"
           class="space-y-4 card p-5">

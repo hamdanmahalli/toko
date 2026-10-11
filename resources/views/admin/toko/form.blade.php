@@ -3,9 +3,8 @@
 @section('judul', $toko->exists ? 'Ubah Toko' : 'Tambah Toko')
 
 @section('konten')
-    <h1 class="mb-4 font-display text-xl text-slate-900">
-        {{ $toko->exists ? 'Ubah toko' : 'Tambah toko' }}
-    </h1>
+    <x-page-header class="mb-4" :kembali="route('admin.toko.index')"
+                   judul="{{ $toko->exists ? 'Ubah toko' : 'Tambah toko' }}" />
 
     <form method="POST"
           action="{{ $toko->exists ? route('admin.toko.update', $toko) : route('admin.toko.store') }}"

@@ -3,21 +3,25 @@
 @section('judul', 'Kas')
 
 @section('konten')
-    <div class="mb-4 flex items-end justify-between gap-3">
-        <div>
-            <h1 class="font-display text-xl text-slate-900">Buku Kas</h1>
-            <p class="mt-0.5 text-xs text-slate-500">Catatan uang masuk dan keluar usahamu.</p>
-        </div>
-        @can('kas.buat')
-            <a href="{{ route('kas.create') }}"
-               class="flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:brightness-105 active:scale-[.99]">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
-                </svg>
-                Buku baru
-            </a>
-        @endcan
-    </div>
+    <x-page-header class="mb-4" judul="Buku Kas" sub="Catatan uang masuk dan keluar usahamu.">
+        <x-slot:ikon>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8V7a2 2 0 0 1 2-2h11M16 12h2"/>
+            </svg>
+        </x-slot:ikon>
+        <x-slot:aksi>
+            @can('kas.buat')
+                <a href="{{ route('kas.create') }}"
+                   class="flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:brightness-105 active:scale-[.99]">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
+                    </svg>
+                    Buku baru
+                </a>
+            @endcan
+        </x-slot:aksi>
+    </x-page-header>
 
     <div class="mb-3 flex items-center justify-between gap-3 rounded-[24px] bg-gradient-to-br from-brand-600 to-brand-700 px-5 py-4 text-white shadow-md shadow-brand-900/20">
         <div class="min-w-0">

@@ -3,10 +3,13 @@
 @section('judul', 'Pengajuan')
 
 @section('konten')
-    <div class="mb-4">
-        <h1 class="font-display text-xl text-slate-900">Pengajuan</h1>
-        <p class="mt-0.5 text-xs text-slate-500">Izin, cuti, dinas, dan lembur yang kamu ajukan.</p>
-    </div>
+    <x-page-header class="mb-4" judul="Pengajuan" sub="Izin, cuti, dinas, dan lembur yang kamu ajukan.">
+        <x-slot:ikon>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.5 20 5l-7 15-2.2-6.3L4.5 12.5Z"/>
+            </svg>
+        </x-slot:ikon>
+    </x-page-header>
 
     <div class="mb-4 grid grid-cols-2 gap-2">
         {{-- Tanpa JavaScript tautan tetap membuka halaman form; dengan JavaScript

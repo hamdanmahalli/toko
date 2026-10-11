@@ -8,10 +8,15 @@
 @section('judul', $ubah ? 'Ubah buku kas' : 'Buku kas baru')
 
 @section('konten')
-    <div class="mb-4">
-        <h1 class="font-display text-xl text-slate-900">{{ $ubah ? 'Ubah buku kas' : 'Buku kas baru' }}</h1>
-        <p class="mt-0.5 text-xs text-slate-500">Beri nama buku supaya mudah dibedakan.</p>
-    </div>
+    <x-page-header class="mb-4" :judul="$ubah ? 'Ubah buku kas' : 'Buku kas baru'"
+                   sub="Beri nama buku supaya mudah dibedakan.">
+        <x-slot:ikon>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8V7a2 2 0 0 1 2-2h11M16 12h2"/>
+            </svg>
+        </x-slot:ikon>
+    </x-page-header>
 
     <form method="POST" action="{{ $ubah ? route('kas.update', $buku) : route('kas.store') }}" class="space-y-4">
         @csrf

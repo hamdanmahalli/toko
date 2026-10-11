@@ -3,13 +3,22 @@
 @section('judul', 'Karyawan')
 
 @section('konten')
-    <div class="mb-4 flex items-center justify-between gap-3">
-        <h1 class="font-display text-xl text-slate-900">Karyawan</h1>
-        <a href="{{ route('admin.karyawan.create') }}"
-           class="rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-700">
-            Tambah karyawan
-        </a>
-    </div>
+    <x-page-header class="mb-4" judul="Karyawan">
+        <x-slot:ikon>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.1a7.5 7.5 0 0 1 15 0v.15H4.5V20.1Z"/>
+            </svg>
+        </x-slot:ikon>
+        <x-slot:aksi>
+            <a href="{{ route('admin.karyawan.create') }}"
+               class="flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:brightness-105 active:scale-[.99]">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
+                </svg>
+                Tambah karyawan
+            </a>
+        </x-slot:aksi>
+    </x-page-header>
 
     <form method="GET" class="mb-3 grid gap-2 sm:grid-cols-[1fr_auto_auto_auto]">
         <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari nama, NIP, atau telepon"

@@ -8,18 +8,8 @@
 @section('judul', $ubah ? 'Ubah kategori' : 'Kategori baru')
 
 @section('konten')
-    <div class="mb-4 flex items-center gap-2">
-        <a href="{{ route('kas.kategori.index') }}" aria-label="Kembali"
-           class="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 6l-6 6 6 6"/>
-            </svg>
-        </a>
-        <div class="min-w-0 flex-1">
-            <h1 class="truncate font-display text-xl text-slate-900">{{ $ubah ? 'Ubah kategori' : 'Kategori baru' }}</h1>
-            <p class="truncate text-xs text-slate-500">Kategori ini hanya berlaku untuk akunmu.</p>
-        </div>
-    </div>
+    <x-page-header class="mb-4" :judul="$ubah ? 'Ubah kategori' : 'Kategori baru'"
+                   sub="Kategori ini hanya berlaku untuk akunmu." :kembali="route('kas.kategori.index')" />
 
     <form method="POST" action="{{ $ubah ? route('kas.kategori.update', $kategori) : route('kas.kategori.store') }}" class="space-y-4">
         @csrf

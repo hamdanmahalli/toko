@@ -4,12 +4,15 @@
 
 @section('konten')
     <div class="space-y-5">
-        <section>
-            <h1 class="font-display text-xl text-slate-900">{{ now()->translatedFormat('l, d F Y') }}</h1>
-            <p class="mt-0.5 text-xs text-slate-500">
-                {{ auth()->user()->shops()->exists() ? 'Toko yang Anda awasi' : 'Seluruh toko' }}
-            </p>
-        </section>
+        <x-page-header judul="{{ now()->translatedFormat('l, d F Y') }}"
+                       sub="{{ auth()->user()->shops()->exists() ? 'Toko yang Anda awasi' : 'Seluruh toko' }}">
+            <x-slot:ikon>
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 3v3m8-3v3M4.5 9h15M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.5 13h7M8.5 16.5h4"/>
+                </svg>
+            </x-slot:ikon>
+        </x-page-header>
 
         <section class="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <div class="card p-4">

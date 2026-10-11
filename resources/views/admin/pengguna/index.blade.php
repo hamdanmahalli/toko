@@ -3,9 +3,13 @@
 @section('judul', 'Pengguna')
 
 @section('konten')
-    <div class="mb-4 flex items-center justify-between gap-3">
-        <h1 class="font-display text-xl text-slate-900">Pengguna</h1>
-    </div>
+    <x-page-header class="mb-4" judul="Pengguna" sub="Akun, peran, dan perangkat yang terhubung.">
+        <x-slot:ikon>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 7.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM5 19.5a4.5 4.5 0 0 1 9 0M17 10.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM15.5 19.5a3.5 3.5 0 0 0-1-2.45"/>
+            </svg>
+        </x-slot:ikon>
+    </x-page-header>
 
     @can('pengguna.kelola')
         <details class="group card mb-4 overflow-hidden">

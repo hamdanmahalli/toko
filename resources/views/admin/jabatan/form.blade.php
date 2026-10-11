@@ -3,9 +3,8 @@
 @section('judul', $jabatan->exists ? 'Ubah Jabatan' : 'Tambah Jabatan')
 
 @section('konten')
-    <h1 class="mb-4 font-display text-xl text-slate-900">
-        {{ $jabatan->exists ? 'Ubah jabatan' : 'Tambah jabatan' }}
-    </h1>
+    <x-page-header class="mb-4" :kembali="route('admin.jabatan.index')"
+                   judul="{{ $jabatan->exists ? 'Ubah jabatan' : 'Tambah jabatan' }}" />
 
     <form method="POST"
           action="{{ $jabatan->exists ? route('admin.jabatan.update', $jabatan) : route('admin.jabatan.store') }}"

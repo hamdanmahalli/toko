@@ -24,10 +24,13 @@
     @endphp
 
     <div class="space-y-4">
-        <div>
-            <h1 class="font-display text-2xl font-bold text-slate-900">Profil Saya</h1>
-            <p class="mt-0.5 text-xs text-slate-500">Identitas dan keamanan akun.</p>
-        </div>
+        <x-page-header judul="Profil Saya" sub="Identitas dan keamanan akun.">
+            <x-slot:ikon>
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.1a7.5 7.5 0 0 1 15 0v.15H4.5V20.1Z"/>
+                </svg>
+            </x-slot:ikon>
+        </x-page-header>
 
         {{-- Kartu identitas utama. --}}
         <div class="card p-5">

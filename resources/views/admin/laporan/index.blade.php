@@ -3,24 +3,25 @@
 @section('judul', 'Laporan')
 
 @section('konten')
-    <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
-        <div>
-            <h1 class="font-display text-xl text-slate-900">Laporan durasi kerja</h1>
-            <p class="text-sm text-slate-500">
-                Dihitung dari absensi yang tercatat, jadi angka bulan lalu tidak ikut berubah
-                saat aturan shift diubah.
-            </p>
-        </div>
+    <x-page-header class="mb-4" judul="Laporan durasi kerja"
+                   sub="Dihitung dari absensi yang tercatat, jadi angka bulan lalu tidak ikut berubah saat aturan shift diubah.">
+        <x-slot:ikon>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5m0 14h16M8 19v-6m4 6V9m4 10v-3"/>
+            </svg>
+        </x-slot:ikon>
 
         {{-- Hanya tampil di APK: cetak ringkasan ke printer thermal Bluetooth. --}}
-        <button type="button" id="cetak-thermal" hidden
-                class="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm font-medium text-brand-700 transition hover:bg-brand-50">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/>
-            </svg>
-            Cetak struk
-        </button>
-    </div>
+        <x-slot:aksi>
+            <button type="button" id="cetak-thermal" hidden
+                    class="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm font-medium text-brand-700 transition hover:bg-brand-50">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/>
+                </svg>
+                Cetak struk
+            </button>
+        </x-slot:aksi>
+    </x-page-header>
 
     @if ($errors->any())
         <div class="mb-3 rounded-lg bg-merah-50 px-3 py-2 text-sm text-merah-700 ring-1 ring-merah-200">

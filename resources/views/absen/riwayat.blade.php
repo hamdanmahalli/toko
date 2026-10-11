@@ -6,15 +6,19 @@
 @inject('geo', 'App\Services\GeoService')
 
 <div class="space-y-4">
-    <div class="flex items-center justify-between gap-3">
-        <div>
-            <h1 class="font-display text-xl text-slate-900">Riwayat absen</h1>
-            <p class="mt-0.5 text-xs text-slate-500">Kehadiranmu dari waktu ke waktu.</p>
-        </div>
-        <span class="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-700 ring-1 ring-brand-100">
-            {{ $riwayat->total() }} hari
-        </span>
-    </div>
+    <x-page-header judul="Riwayat absen" sub="Kehadiranmu dari waktu ke waktu.">
+        <x-slot:ikon>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8.25"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5V12l3 1.75"/>
+            </svg>
+        </x-slot:ikon>
+        <x-slot:aksi>
+            <span class="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-700 ring-1 ring-brand-100">
+                {{ $riwayat->total() }} hari
+            </span>
+        </x-slot:aksi>
+    </x-page-header>
 
     <div class="card masuk p-5">
         @if ($riwayat->isEmpty())

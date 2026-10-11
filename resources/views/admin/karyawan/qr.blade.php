@@ -3,7 +3,8 @@
 @section('judul', 'Kartu Absensi')
 
 @section('konten')
-    <h1 class="mb-4 font-display text-xl text-slate-900 print:hidden">Kartu {{ $karyawan->nama }}</h1>
+    <x-page-header class="mb-4 print:hidden" :kembali="route('admin.karyawan.index')"
+                   judul="Kartu {{ $karyawan->nama }}" />
 
     <div class="grid gap-4 lg:grid-cols-2">
         <div>

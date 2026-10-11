@@ -3,9 +3,8 @@
 @section('judul', $karyawan->exists ? 'Ubah Karyawan' : 'Tambah Karyawan')
 
 @section('konten')
-    <h1 class="mb-4 font-display text-xl text-slate-900">
-        {{ $karyawan->exists ? 'Ubah karyawan' : 'Tambah karyawan' }}
-    </h1>
+    <x-page-header class="mb-4" :kembali="route('admin.karyawan.index')"
+                   judul="{{ $karyawan->exists ? 'Ubah karyawan' : 'Tambah karyawan' }}" />
 
     <form method="POST"
           action="{{ $karyawan->exists ? route('admin.karyawan.update', $karyawan) : route('admin.karyawan.store') }}"

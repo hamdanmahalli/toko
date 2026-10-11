@@ -7,36 +7,27 @@
 @section('judul', $buku->nama)
 
 @section('konten')
-    <div class="mb-4 flex items-center gap-2">
-        <a href="{{ route('kas.index') }}" aria-label="Kembali"
-           class="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 6l-6 6 6 6"/>
-            </svg>
-        </a>
-        <div class="min-w-0 flex-1">
-            <h1 class="truncate font-display text-xl text-slate-900">{{ $buku->nama }}</h1>
-            @if ($buku->keterangan)
-                <p class="truncate text-xs text-slate-500">{{ $buku->keterangan }}</p>
-            @endif
-        </div>
-        @can('kas.buat')
-            <div class="flex shrink-0 items-center gap-1">
-                <a href="{{ route('kas.laporan', ['buku' => $buku->id]) }}" aria-label="Laporan buku ini"
-                   class="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100">
-                    <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5m0 14h16M8 19v-6m4 6V9m4 10v-3"/>
-                    </svg>
-                </a>
-                <a href="{{ route('kas.edit', $buku) }}" aria-label="Ubah buku"
-                   class="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100">
-                    <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/>
-                    </svg>
-                </a>
-            </div>
-        @endcan
-    </div>
+    <x-page-header class="mb-4" :judul="$buku->nama" :sub="$buku->keterangan"
+                   :kembali="route('kas.index')">
+        <x-slot:aksi>
+            @can('kas.buat')
+                <div class="flex shrink-0 items-center gap-1">
+                    <a href="{{ route('kas.laporan', ['buku' => $buku->id]) }}" aria-label="Laporan buku ini"
+                       class="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100">
+                        <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5m0 14h16M8 19v-6m4 6V9m4 10v-3"/>
+                        </svg>
+                    </a>
+                    <a href="{{ route('kas.edit', $buku) }}" aria-label="Ubah buku"
+                       class="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100">
+                        <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/>
+                        </svg>
+                    </a>
+                </div>
+            @endcan
+        </x-slot:aksi>
+    </x-page-header>
 
     <div class="mb-4 rounded-[24px] bg-gradient-to-br from-brand-600 to-brand-700 px-5 py-4 text-white shadow-md shadow-brand-900/20">
         <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70">Saldo saat ini</p>

@@ -5,12 +5,15 @@
 @section('judul', 'Window Shift')
 
 @section('konten')
-    <div class="mb-4">
-        <h1 class="font-display text-xl text-slate-900">Window Shift</h1>
-        <p class="text-xs text-slate-500">
-            Pita jam dalam sehari. Jam datang seorang karyawan yang menentukan dia masuk shift mana.
-        </p>
-    </div>
+    <x-page-header class="mb-4" judul="Window Shift"
+                   sub="Pita jam dalam sehari. Jam datang seorang karyawan yang menentukan dia masuk shift mana.">
+        <x-slot:ikon>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8.25"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5V12l3 1.75"/>
+            </svg>
+        </x-slot:ikon>
+    </x-page-header>
 
     <div class="mb-4 rounded-2xl border border-brand-200 bg-brand-50 p-4 text-xs leading-relaxed text-brand-900">
         <p class="font-semibold">Berlaku untuk kasir dan pramuniaga.</p>

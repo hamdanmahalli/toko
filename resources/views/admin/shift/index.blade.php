@@ -3,16 +3,24 @@
 @section('judul', 'Shift')
 
 @section('konten')
-    <div class="mb-4 flex items-center justify-between gap-3">
-        <div>
-            <h1 class="font-display text-xl text-slate-900">Template Shift</h1>
-            <p class="text-xs text-slate-500">Pola jam kerja per hari beserta batas toleransi telat.</p>
-        </div>
-        <a href="{{ route('admin.shift.create') }}"
-           class="shrink-0 rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-700">
-            Tambah template
-        </a>
-    </div>
+    <x-page-header class="mb-4" judul="Template Shift"
+                   sub="Pola jam kerja per hari beserta batas toleransi telat.">
+        <x-slot:ikon>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 3v3m8-3v3M4.5 9h15M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 13h2M9 16.5h2M13 13h2"/>
+            </svg>
+        </x-slot:ikon>
+        <x-slot:aksi>
+            <a href="{{ route('admin.shift.create') }}"
+               class="flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:brightness-105 active:scale-[.99]">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
+                </svg>
+                Tambah template
+            </a>
+        </x-slot:aksi>
+    </x-page-header>
 
     <div class="mb-4 rounded-2xl border border-brand-200 bg-brand-50 p-4 text-xs leading-relaxed text-brand-900">
         <p class="font-semibold">Hanya untuk jabatan yang wajib memakai template.</p>

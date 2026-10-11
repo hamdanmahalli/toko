@@ -3,16 +3,20 @@
 @section('judul', 'Pengajuan')
 
 @section('konten')
-    <div class="mb-4">
-        <h1 class="font-display text-xl text-slate-900">Pengajuan</h1>
-        <p class="text-xs text-slate-500">
+    <x-page-header class="mb-4" judul="Pengajuan">
+        <x-slot:ikon>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.5 20 5l-7 15-2.2-6.3L4.5 12.5Z"/>
+            </svg>
+        </x-slot:ikon>
+        <x-slot:sub>
             @if ($jumlahPending > 0)
                 <span class="tabular font-medium text-merah-600">{{ $jumlahPending }}</span> pengajuan menunggu keputusan.
             @else
                 Tidak ada pengajuan yang menunggu keputusan.
             @endif
-        </p>
-    </div>
+        </x-slot:sub>
+    </x-page-header>
 
     <form method="GET" class="mb-4 grid gap-2 sm:grid-cols-[1fr_auto_auto_auto_auto]">
         <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari nama atau NIP karyawan"

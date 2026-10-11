@@ -3,27 +3,20 @@
 @section('judul', 'Kategori kas')
 
 @section('konten')
-    <div class="mb-4 flex items-center gap-2">
-        <a href="{{ route('kas.index') }}" aria-label="Kembali"
-           class="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 6l-6 6 6 6"/>
-            </svg>
-        </a>
-        <div class="min-w-0 flex-1">
-            <h1 class="truncate font-display text-xl text-slate-900">Kategori</h1>
-            <p class="truncate text-xs text-slate-500">Atur pilihan kategori saat mencatat transaksi.</p>
-        </div>
-        @can('kas.buat')
-            <a href="{{ route('kas.kategori.create') }}"
-               class="flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-3.5 py-2 text-sm font-semibold text-white transition hover:brightness-105 active:scale-[.99]">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
-                </svg>
-                Tambah
-            </a>
-        @endcan
-    </div>
+    <x-page-header class="mb-4" judul="Kategori" sub="Atur pilihan kategori saat mencatat transaksi."
+                   :kembali="route('kas.index')">
+        <x-slot:aksi>
+            @can('kas.buat')
+                <a href="{{ route('kas.kategori.create') }}"
+                   class="flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-3.5 py-2 text-sm font-semibold text-white transition hover:brightness-105 active:scale-[.99]">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
+                    </svg>
+                    Tambah
+                </a>
+            @endcan
+        </x-slot:aksi>
+    </x-page-header>
 
     @foreach ([['label' => 'Pemasukan', 'items' => $masuk], ['label' => 'Pengeluaran', 'items' => $keluar]] as $grup)
         <section class="mb-4">

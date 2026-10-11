@@ -4,18 +4,8 @@
 
 @section('konten')
     <div class="space-y-4">
-        <div class="flex items-center gap-3">
-            <a href="{{ route('profil.index') }}" aria-label="Kembali ke profil"
-               class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-slate-600 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 active:scale-95">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 6l-6 6 6 6"/>
-                </svg>
-            </a>
-            <div>
-                <h1 class="font-display text-xl text-slate-900">Keamanan akun</h1>
-                <p class="mt-0.5 text-xs text-slate-500">Kelola cara masuk ke akun ini.</p>
-            </div>
-        </div>
+        <x-page-header judul="Keamanan akun" sub="Kelola cara masuk ke akun ini."
+                       :kembali="route('profil.index')" />
 
         {{-- Kelompok 1: kredensial login (username + password). --}}
         <div class="card overflow-hidden">

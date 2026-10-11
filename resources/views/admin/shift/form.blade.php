@@ -6,13 +6,9 @@
 @section('judul', $template->exists ? 'Ubah Template Shift' : 'Tambah Template Shift')
 
 @section('konten')
-    <h1 class="mb-1 font-display text-xl text-slate-900">
-        {{ $template->exists ? 'Ubah template shift' : 'Tambah template shift' }}
-    </h1>
-    <p class="mb-4 text-xs text-slate-500">
-        Isi jam kerjanya sesuai tipe shift. Tipe tetap memakai jadwal per hari, shift fleksibel memakai jam datang dan pulang,
-        sedangkan shift interval memakai daftar sesi jam kerja.
-    </p>
+    <x-page-header class="mb-4" :kembali="route('admin.shift.index')"
+                   judul="{{ $template->exists ? 'Ubah template shift' : 'Tambah template shift' }}"
+                   sub="Isi jam kerjanya sesuai tipe shift. Tipe tetap memakai jadwal per hari, shift fleksibel memakai jam datang dan pulang, sedangkan shift interval memakai daftar sesi jam kerja." />
 
     <form method="POST"
           action="{{ $template->exists ? route('admin.shift.update', $template) : route('admin.shift.store') }}"

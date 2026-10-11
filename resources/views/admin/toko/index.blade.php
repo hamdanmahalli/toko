@@ -3,13 +3,22 @@
 @section('judul', 'Toko')
 
 @section('konten')
-    <div class="mb-4 flex items-center justify-between gap-3">
-        <h1 class="font-display text-xl text-slate-900">Toko</h1>
-        <a href="{{ route('admin.toko.create') }}"
-           class="rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-700">
-            Tambah toko
-        </a>
-    </div>
+    <x-page-header class="mb-4" judul="Toko">
+        <x-slot:ikon>
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 9.5 5.6 5A1 1 0 0 1 6.5 4h11a1 1 0 0 1 .9.6L20 9.5M4 9.5h16M4 9.5a2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7M10 20v-5h4v5"/>
+            </svg>
+        </x-slot:ikon>
+        <x-slot:aksi>
+            <a href="{{ route('admin.toko.create') }}"
+               class="flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:brightness-105 active:scale-[.99]">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
+                </svg>
+                Tambah toko
+            </a>
+        </x-slot:aksi>
+    </x-page-header>
 
     <form method="GET" class="mb-3">
         <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari nama atau kode toko"
