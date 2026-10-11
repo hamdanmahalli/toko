@@ -47,25 +47,6 @@
         </div>
     </div>
 
-    @can('kas.buat')
-        <div class="mb-4 flex gap-2">
-            <a href="{{ route('kas.transaksi.create', $buku) }}"
-               class="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-105 active:scale-[.99]">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
-                </svg>
-                Catat transaksi
-            </a>
-            <a href="{{ route('kas.kategori.index') }}"
-               class="flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10"/>
-                </svg>
-                Kategori
-            </a>
-        </div>
-    @endcan
-
     <section>
         <h2 class="mb-2 font-display text-[15px] text-slate-900">Transaksi</h2>
 
@@ -103,4 +84,14 @@
             </div>
         @endif
     </section>
+
+    @can('kas.buat')
+        <a href="{{ route('kas.transaksi.create', $buku) }}"
+           class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-4 py-3 text-sm font-semibold text-white transition hover:brightness-105 active:scale-[.99]">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
+            </svg>
+            Catat transaksi
+        </a>
+    @endcan
 @endsection

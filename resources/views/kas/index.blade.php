@@ -19,29 +19,36 @@
         @endcan
     </div>
 
-    <div class="mb-4 flex items-center justify-between gap-3 rounded-[24px] bg-gradient-to-br from-brand-600 to-brand-700 px-5 py-4 text-white shadow-md shadow-brand-900/20">
-        <div>
+    <div class="mb-3 flex items-center justify-between gap-3 rounded-[24px] bg-gradient-to-br from-brand-600 to-brand-700 px-5 py-4 text-white shadow-md shadow-brand-900/20">
+        <div class="min-w-0">
             <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70">Total saldo</p>
             <p class="tabular mt-1 text-2xl font-bold">{{ \App\Support\Rupiah::format($totalSaldo) }}</p>
         </div>
-        <div class="flex shrink-0 items-center gap-2">
-            @can('kas.buat')
-                <a href="{{ route('kas.kategori.index') }}"
-                   class="flex items-center gap-1.5 rounded-xl bg-white/15 px-3 py-2.5 text-sm font-medium ring-1 ring-white/20 transition hover:bg-white/25">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10"/>
-                    </svg>
-                    Kategori
-                </a>
-            @endcan
-            <a href="{{ route('kas.laporan') }}"
-               class="flex shrink-0 items-center gap-1.5 rounded-xl bg-white/15 px-3.5 py-2.5 text-sm font-medium ring-1 ring-white/20 transition hover:bg-white/25">
+        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20" aria-hidden="true">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8V7a2 2 0 0 1 2-2h11M16 12h2"/>
+            </svg>
+        </span>
+    </div>
+
+    <div class="mb-4 flex gap-2">
+        @can('kas.buat')
+            <a href="{{ route('kas.kategori.index') }}"
+               class="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5m0 14h16M8 19v-6m4 6V9m4 10v-3"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10"/>
                 </svg>
-                Laporan
+                Kategori
             </a>
-        </div>
+        @endcan
+        <a href="{{ route('kas.laporan') }}"
+           class="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5m0 14h16M8 19v-6m4 6V9m4 10v-3"/>
+            </svg>
+            Laporan
+        </a>
     </div>
 
     @if ($buku->isEmpty())
