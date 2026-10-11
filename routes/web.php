@@ -144,6 +144,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('/kas/{buku}', [KasController::class, 'destroy'])->whereNumber('buku')->name('kas.destroy');
         Route::post('/kas/{buku}/transaksi', [KasController::class, 'storeTransaksi'])
             ->whereNumber('buku')->name('kas.transaksi.store');
+        Route::get('/kas/{buku}/transaksi/{transaksi}/ubah', [KasController::class, 'editTransaksi'])
+            ->whereNumber('buku')->whereNumber('transaksi')->name('kas.transaksi.edit');
+        Route::put('/kas/{buku}/transaksi/{transaksi}', [KasController::class, 'updateTransaksi'])
+            ->whereNumber('buku')->whereNumber('transaksi')->name('kas.transaksi.update');
         Route::delete('/kas/{buku}/transaksi/{transaksi}', [KasController::class, 'destroyTransaksi'])
             ->whereNumber('buku')->whereNumber('transaksi')->name('kas.transaksi.destroy');
     });

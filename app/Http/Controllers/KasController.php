@@ -143,6 +143,7 @@ class KasController extends Controller
         return view('kas.transaksi', [
             'employee' => $employee,
             'buku' => $this->milik($employee, $buku),
+            'transaksi' => null,
             'masuk' => $this->kategori->opsi($employee, JenisKas::Masuk),
             'keluar' => $this->kategori->opsi($employee, JenisKas::Keluar),
         ]);
@@ -155,21 +156,11 @@ class KasController extends Controller
 
         $request->merge(['jumlah' => $this->angka($request->input('jumlah'))]);
 
-        $data = $request->validate([
-            'jenis' => ['required', Rule::enum(JenisKas::class)],
-            'kategori' => ['required', 'string', 'max:40'],
-            'tanggal' => ['required', 'date'],
-            'jumlah' => ['required', 'numeric', 'min:1'],
-            'keterangan' => ['nullable', 'string', 'max:500'],
-        ], [], ['jumlah' => 'nominal']);
-
+        $data = $this->validasiTransaksi($request);
         $jenis = JenisKas::from($data['jenis']);
+        $kategori = $this->kategoriValid($employee, $data['kategori'], $jenis);
 
-        $kategori = $employee->cashCategories()
-            ->where('kode', $data['kategori'])
-            ->first();
-
-        if ($kategori === null || ! $kategori->aktif || $kategori->jenis !== $jenis) {
+        if ($kategori === null) {
             return back()
                 ->withInput()
                 ->withErrors(['kategori' => 'Kategori tidak sesuai dengan jenis transaksi yang dipilih.']);
@@ -186,6 +177,67 @@ class KasController extends Controller
         return redirect()
             ->route('kas.show', $buku)
             ->with('sukses', $jenis->label().' '.Rupiah::format($data['jumlah']).' tercatat.');
+    }
+
+    public function editTransaksi(Request $request, int $buku, int $transaksi): View
+    {
+        $employee = $this->employee($request);
+        $buku = $this->milik($employee, $buku);
+        $trx = $buku->transactions()->whereKey($transaksi)->firstOrFail();
+
+        $masuk = $this->kategori->opsi($employee, JenisKas::Masuk);
+        $keluar = $this->kategori->opsi($employee, JenisKas::Keluar);
+
+        // Kategori transaksi tetap ditampilkan walau sudah dinonaktifkan, supaya
+        // menyimpan ulang tidak diam-diam mengganti kategorinya.
+        $milik = $trx->jenis === JenisKas::Masuk ? $masuk : $keluar;
+
+        if ($milik->doesntContain('kode', $trx->kategori)) {
+            $kategoriLama = $employee->cashCategories()->where('kode', $trx->kategori)->first();
+
+            if ($kategoriLama !== null) {
+                $milik->push($kategoriLama);
+            }
+        }
+
+        return view('kas.transaksi', [
+            'employee' => $employee,
+            'buku' => $buku,
+            'transaksi' => $trx,
+            'masuk' => $masuk,
+            'keluar' => $keluar,
+        ]);
+    }
+
+    public function updateTransaksi(Request $request, int $buku, int $transaksi): RedirectResponse
+    {
+        $employee = $this->employee($request);
+        $buku = $this->milik($employee, $buku);
+        $trx = $buku->transactions()->whereKey($transaksi)->firstOrFail();
+
+        $request->merge(['jumlah' => $this->angka($request->input('jumlah'))]);
+
+        $data = $this->validasiTransaksi($request);
+        $jenis = JenisKas::from($data['jenis']);
+        $kategori = $this->kategoriValid($employee, $data['kategori'], $jenis);
+
+        if ($kategori === null) {
+            return back()
+                ->withInput()
+                ->withErrors(['kategori' => 'Kategori tidak sesuai dengan jenis transaksi yang dipilih.']);
+        }
+
+        $trx->update([
+            'jenis' => $jenis->value,
+            'kategori' => $kategori->kode,
+            'tanggal' => $data['tanggal'],
+            'jumlah' => $data['jumlah'],
+            'keterangan' => $data['keterangan'] ?? null,
+        ]);
+
+        return redirect()
+            ->route('kas.show', $buku)
+            ->with('sukses', 'Transaksi berhasil diperbarui.');
     }
 
     public function destroyTransaksi(Request $request, int $buku, int $transaksi): RedirectResponse
@@ -372,6 +424,30 @@ class KasController extends Controller
         $data['aktif'] = $request->boolean('aktif', true);
 
         return $data;
+    }
+
+    /** @return array<string, mixed> */
+    private function validasiTransaksi(Request $request): array
+    {
+        return $request->validate([
+            'jenis' => ['required', Rule::enum(JenisKas::class)],
+            'kategori' => ['required', 'string', 'max:40'],
+            'tanggal' => ['required', 'date'],
+            'jumlah' => ['required', 'numeric', 'min:1'],
+            'keterangan' => ['nullable', 'string', 'max:500'],
+        ], [], ['jumlah' => 'nominal']);
+    }
+
+    /** Kategori aktif milik karyawan dengan jenis yang cocok, atau null. */
+    private function kategoriValid(Employee $employee, string $kode, JenisKas $jenis): ?CashCategory
+    {
+        $kategori = $employee->cashCategories()->where('kode', $kode)->first();
+
+        if ($kategori === null || ! $kategori->aktif || $kategori->jenis !== $jenis) {
+            return null;
+        }
+
+        return $kategori;
     }
 
     private function milik(Employee $employee, int $buku): CashBook

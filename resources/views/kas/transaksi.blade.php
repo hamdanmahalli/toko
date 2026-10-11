@@ -1,14 +1,16 @@
 @extends('layouts.app')
 
 @php
+    $ubah = $transaksi?->exists ?? false;
     $semua = $masuk
         ->map(fn ($k) => ['kode' => $k->kode, 'nama' => $k->nama, 'jenis' => 'masuk'])
         ->concat($keluar->map(fn ($k) => ['kode' => $k->kode, 'nama' => $k->nama, 'jenis' => 'keluar']))
         ->values();
-    $jenisAwal = old('jenis', 'masuk');
+    $jenisAwal = old('jenis', $transaksi?->jenis?->value ?? 'masuk');
+    $kategoriAwal = old('kategori', $transaksi?->kategori);
 @endphp
 
-@section('judul', 'Catat transaksi')
+@section('judul', $ubah ? 'Ubah transaksi' : 'Catat transaksi')
 
 @section('konten')
     <div class="mb-4 flex items-center gap-2">
@@ -19,13 +21,16 @@
             </svg>
         </a>
         <div class="min-w-0 flex-1">
-            <h1 class="truncate font-display text-xl text-slate-900">Catat transaksi</h1>
+            <h1 class="truncate font-display text-xl text-slate-900">{{ $ubah ? 'Ubah transaksi' : 'Catat transaksi' }}</h1>
             <p class="truncate text-xs text-slate-500">{{ $buku->nama }}</p>
         </div>
     </div>
 
-    <form method="POST" action="{{ route('kas.transaksi.store', $buku) }}" class="space-y-4">
+    <form method="POST" action="{{ $ubah ? route('kas.transaksi.update', [$buku, $transaksi]) : route('kas.transaksi.store', $buku) }}" class="space-y-4">
         @csrf
+        @if ($ubah)
+            @method('PUT')
+        @endif
 
         <div>
             <span class="mb-1.5 block text-sm font-medium text-slate-700">Jenis</span>
@@ -58,12 +63,12 @@
                     class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
                 <optgroup label="Pemasukan">
                     @foreach ($masuk as $k)
-                        <option value="{{ $k->kode }}" data-jenis="masuk" @selected(old('kategori') === $k->kode)>{{ $k->nama }}</option>
+                        <option value="{{ $k->kode }}" data-jenis="masuk" @selected($kategoriAwal === $k->kode)>{{ $k->nama }}</option>
                     @endforeach
                 </optgroup>
                 <optgroup label="Pengeluaran">
                     @foreach ($keluar as $k)
-                        <option value="{{ $k->kode }}" data-jenis="keluar" @selected(old('kategori') === $k->kode)>{{ $k->nama }}</option>
+                        <option value="{{ $k->kode }}" data-jenis="keluar" @selected($kategoriAwal === $k->kode)>{{ $k->nama }}</option>
                     @endforeach
                 </optgroup>
             </select>
@@ -72,7 +77,7 @@
         <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700" for="tanggal">Tanggal</label>
             <input id="tanggal" name="tanggal" type="date" required
-                   value="{{ old('tanggal', now()->toDateString()) }}"
+                   value="{{ old('tanggal', $ubah ? $transaksi->tanggal->toDateString() : now()->toDateString()) }}"
                    class="tabular w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
         </div>
 
@@ -81,7 +86,7 @@
             <div class="relative">
                 <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">Rp</span>
                 <input id="jumlah" name="jumlah" type="text" inputmode="numeric" autocomplete="off" required
-                       data-format-ribuan value="{{ old('jumlah') }}" placeholder="0"
+                       data-format-ribuan value="{{ old('jumlah', $ubah ? (int) $transaksi->jumlah : '') }}" placeholder="0"
                        class="tabular w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-12 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
                 <button type="button" data-kalkulator-buka="jumlah" aria-label="Buka kalkulator"
                         class="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
@@ -94,7 +99,7 @@
 
         <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700" for="keterangan">Keterangan</label>
-            <input id="keterangan" name="keterangan" type="text" maxlength="500" value="{{ old('keterangan') }}"
+            <input id="keterangan" name="keterangan" type="text" maxlength="500" value="{{ old('keterangan', $ubah ? $transaksi->keterangan : '') }}"
                    placeholder="Opsional"
                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
         </div>
@@ -105,10 +110,21 @@
                 Batal
             </a>
             <button class="flex-1 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-105 active:scale-[.99]">
-                Simpan
+                {{ $ubah ? 'Simpan perubahan' : 'Simpan' }}
             </button>
         </div>
     </form>
+
+    @if ($ubah)
+        <form method="POST" action="{{ route('kas.transaksi.destroy', [$buku, $transaksi]) }}" class="mt-4"
+              onsubmit="return confirm('Hapus transaksi ini?')">
+            @csrf
+            @method('DELETE')
+            <button class="w-full rounded-xl border border-merah-100 bg-merah-50 px-4 py-2.5 text-sm font-medium text-merah-700 transition hover:bg-merah-100">
+                Hapus transaksi
+            </button>
+        </form>
+    @endif
 
     @include('components.kalkulator')
     @include('components.format-ribuan')

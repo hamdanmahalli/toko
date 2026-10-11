@@ -55,43 +55,67 @@
                 Belum ada transaksi pada buku ini.
             </p>
         @else
-            <div class="space-y-2">
-                @foreach ($transaksi as $t)
-                    @php $masuk = $t->jenis === JenisKas::Masuk; @endphp
-                    <div class="card flex items-start justify-between gap-3 p-3.5">
-                        <div class="min-w-0">
-                            <p class="text-sm font-medium text-slate-800">{{ $t->labelKategori($petaKategori) }}</p>
-                            <p class="tabular mt-0.5 text-[11px] text-slate-500">{{ $t->tanggal->format('d/m/Y') }}</p>
-                            @if ($t->keterangan)
-                                <p class="mt-0.5 truncate text-xs text-slate-500">{{ $t->keterangan }}</p>
-                            @endif
-                        </div>
-                        <div class="shrink-0 text-right">
-                            <p class="tabular text-sm font-semibold {{ $masuk ? 'text-brand-700' : 'text-merah-600' }}">
-                                {{ $masuk ? '+' : '−' }} {{ \App\Support\Rupiah::format($t->jumlah) }}
-                            </p>
+            @foreach ($transaksi->groupBy(fn ($t) => $t->tanggal->toDateString()) as $tanggal => $items)
+                @php
+                    $tgl = \Illuminate\Support\Carbon::parse($tanggal);
+                    $labelTanggal = $tgl->isToday()
+                        ? 'Hari ini'
+                        : ($tgl->isYesterday() ? 'Kemarin' : $tgl->translatedFormat('l, d F Y'));
+                @endphp
+
+                <div class="mb-3">
+                    <p class="mb-1.5 px-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{{ $labelTanggal }}</p>
+
+                    <div class="space-y-2">
+                        @foreach ($items as $t)
+                            @php
+                                $masuk = $t->jenis === JenisKas::Masuk;
+                                $label = $t->labelKategori($petaKategori);
+                            @endphp
+
                             @can('kas.buat')
-                                <form method="POST" action="{{ route('kas.transaksi.destroy', [$buku, $t]) }}" class="mt-1"
-                                      onsubmit="return confirm('Hapus transaksi ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="text-[11px] font-medium text-slate-400 transition hover:text-merah-600">Hapus</button>
-                                </form>
+                                <a href="{{ route('kas.transaksi.edit', [$buku, $t]) }}"
+                                   class="card flex items-center justify-between gap-3 p-3.5 transition hover:bg-brand-50/40">
+                            @else
+                                <div class="card flex items-center justify-between gap-3 p-3.5">
                             @endcan
-                        </div>
+                                    <div class="min-w-0">
+                                        @if ($t->keterangan)
+                                            <p class="truncate text-sm font-medium text-slate-800">{{ $t->keterangan }}</p>
+                                            <p class="mt-0.5 truncate text-xs text-slate-500">{{ $label }}</p>
+                                        @else
+                                            <p class="truncate text-sm font-medium text-slate-800">{{ $label }}</p>
+                                        @endif
+                                    </div>
+                                    <p class="tabular shrink-0 text-sm font-semibold {{ $masuk ? 'text-brand-700' : 'text-merah-600' }}">
+                                        {{ $masuk ? '+' : '−' }} {{ \App\Support\Rupiah::format($t->jumlah) }}
+                                    </p>
+                            @can('kas.buat')
+                                </a>
+                            @else
+                                </div>
+                            @endcan
+                        @endforeach
                     </div>
-                @endforeach
-            </div>
+                </div>
+            @endforeach
         @endif
     </section>
 
     @can('kas.buat')
-        <a href="{{ route('kas.transaksi.create', $buku) }}"
-           class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-4 py-3 text-sm font-semibold text-white transition hover:brightness-105 active:scale-[.99]">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
-            </svg>
-            Catat transaksi
-        </a>
+        <div class="h-16 sm:hidden"></div>
+
+        <div class="fixed inset-x-0 z-10 px-4 sm:static sm:mb-4 sm:px-0"
+             style="bottom: calc(env(safe-area-inset-bottom) + 4.5rem)">
+            <div class="mx-auto max-w-5xl">
+                <a href="{{ route('kas.transaksi.create', $buku) }}"
+                   class="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-900/20 transition hover:brightness-105 active:scale-[.99]">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
+                    </svg>
+                    Catat transaksi
+                </a>
+            </div>
+        </div>
     @endcan
 @endsection

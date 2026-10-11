@@ -340,6 +340,43 @@ class KasTest extends TestCase
         $this->assertSame(0.0, $buku->fresh()->saldoSaatIni());
     }
 
+    public function test_transaksi_bisa_diubah(): void
+    {
+        $karyawan = $this->karyawan();
+        $buku = CashBook::factory()->untuk($karyawan)->create(['saldo_awal' => 0]);
+        $trx = CashBookTransaction::factory()->untuk($buku)->masuk()->create([
+            'kategori' => KategoriKas::Penjualan->value,
+            'tanggal' => '2026-03-01',
+            'jumlah' => 5000,
+        ]);
+
+        $this->actingAs($karyawan->user)
+            ->get("/kas/{$buku->id}/transaksi/{$trx->id}/ubah")
+            ->assertOk()
+            ->assertSee('Ubah transaksi')
+            ->assertSee('Hapus transaksi');
+
+        $this->lanjut($karyawan);
+
+        $this->actingAs($karyawan->user)
+            ->put("/kas/{$buku->id}/transaksi/{$trx->id}", [
+                'jenis' => 'keluar',
+                'kategori' => KategoriKas::Belanja->value,
+                'tanggal' => '2026-03-05',
+                'jumlah' => '12.000',
+                'keterangan' => 'Belanja bahan',
+            ])
+            ->assertRedirect(route('kas.show', $buku));
+
+        $this->assertDatabaseHas('cash_book_transactions', [
+            'id' => $trx->id,
+            'jenis' => 'keluar',
+            'kategori' => KategoriKas::Belanja->value,
+            'jumlah' => 12000,
+            'keterangan' => 'Belanja bahan',
+        ]);
+    }
+
     public function test_buku_karyawan_lain_tidak_ditemukan(): void
     {
         $milik = $this->karyawan();
