@@ -94,6 +94,41 @@
             const input = document.getElementById('token');
             if (input) {
                 input.focus();
+
+                const formScan = input.closest('form');
+                if (formScan) {
+                    let terkirim = false;
+                    input.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (terkirim || !input.value.trim()) return;
+                            terkirim = true;
+                            if (formScan.requestSubmit) {
+                                formScan.requestSubmit();
+                            } else {
+                                formScan.submit();
+                            }
+                        }
+                    });
+
+                    let timerAuto;
+                    input.addEventListener('input', function () {
+                        clearTimeout(timerAuto);
+                        const v = input.value.trim();
+                        if (v.length >= 4 && !terkirim) {
+                            timerAuto = setTimeout(function () {
+                                if (!terkirim && input.value.trim() === v) {
+                                    terkirim = true;
+                                    if (formScan.requestSubmit) {
+                                        formScan.requestSubmit();
+                                    } else {
+                                        formScan.submit();
+                                    }
+                                }
+                            }, 80);
+                        }
+                    });
+                }
             }
 
             // Di dalam APK, tampilkan pemindai kamera sebagai alternatif

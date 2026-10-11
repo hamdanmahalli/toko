@@ -100,8 +100,8 @@ class PresensiTest extends TestCase
         $response = $this->get(route('presensi.form', $this->shop->kode));
 
         $response->assertOk();
-        $response->assertSee('Login presensi');
-        $response->assertDontSee('Pindai kartu');
+        $response->assertSee('Pindai kartu');
+        $response->assertDontSee('Login presensi');
     }
 
     public function test_kode_toko_tidak_dikenal_diberi_404(): void
@@ -219,7 +219,7 @@ class PresensiTest extends TestCase
             ])
             ->assertSessionHas('galat');
 
-        $this->get(route('presensi.form', $this->shop->kode))->assertSee('Login presensi');
+        $this->get(route('presensi.form', $this->shop->kode))->assertSee('Pindai kartu');
     }
 
     public function test_user_kosong_ditolak_lewat_validasi(): void
@@ -289,7 +289,7 @@ class PresensiTest extends TestCase
         // yang dipakai controller.
         $this->withSession(['presensi_terbuka.'.$this->shop->id => time() - (31 * 60)])
             ->get(route('presensi.form', $this->shop->kode))
-            ->assertSee('Login presensi');
+            ->assertSee('Pindai kartu');
     }
 
     public function test_perangkat_masih_terbuka_selama_masih_dipakai(): void
@@ -338,7 +338,7 @@ class PresensiTest extends TestCase
         $this->post(route('presensi.keluar', $this->shop->kode))
             ->assertRedirect(route('presensi.form', $this->shop->kode));
 
-        $this->get(route('presensi.form', $this->shop->kode))->assertSee('Login presensi');
+        $this->get(route('presensi.form', $this->shop->kode))->assertSee('Pindai kartu');
     }
 
     // ------------------------------------------------------------------

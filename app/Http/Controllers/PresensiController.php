@@ -62,7 +62,7 @@ class PresensiController extends Controller
         }
 
         if (! $this->terbuka($request, $shop)) {
-            return view('presensi.login', ['shop' => $shop]);
+            $this->sentuh($request, $shop);
         }
 
         $this->sentuh($request, $shop);
