@@ -201,9 +201,13 @@
     if (formLogin) {
         var inputLogin = formLogin.querySelector('input[name="login"]');
 
-        if (inputLogin && !inputLogin.value && baca(KUNCI_INGAT) === '1') {
-            var tersimpan = baca(KUNCI_LOGIN) || '';
-            if (tersimpan) inputLogin.value = tersimpan;
+        if (inputLogin && baca(KUNCI_INGAT) === '1') {
+            var tersimpan = inputLogin.value || baca(KUNCI_LOGIN) || '';
+            if (tersimpan) {
+                inputLogin.value = tersimpan;
+                var barisLogin = document.getElementById('baris-login');
+                if (barisLogin) barisLogin.style.display = 'none';
+            }
         }
 
         formLogin.addEventListener('submit', function () {

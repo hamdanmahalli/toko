@@ -368,7 +368,7 @@
                     @csrf
                     <input type="hidden" name="device_id">
 
-                    <div>
+                    <div id="baris-login">
                         <label for="login" class="sr-only">Email atau username</label>
                         <div class="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 transition focus-within:border-brand-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-brand-100">
                             <svg class="h-[18px] w-[18px] shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">

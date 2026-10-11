@@ -75,7 +75,7 @@
             <label class="flex cursor-pointer items-center justify-between gap-4 border-b border-slate-100 p-4">
                 <span class="min-w-0">
                     <span class="block text-[13px] font-medium text-slate-700">Simpan nama user</span>
-                    <span class="block text-[11px] text-slate-400">Isi otomatis username di halaman login perangkat ini.</span>
+                    <span class="block text-[11px] text-slate-400">Sembunyikan kolom username di halaman login perangkat ini; cukup isi sandi.</span>
                 </span>
                 <input type="checkbox" id="ingat-toggle" class="peer sr-only">
                 <span class="relative h-6 w-11 shrink-0 rounded-full bg-slate-200 transition-all peer-checked:bg-brand-600
