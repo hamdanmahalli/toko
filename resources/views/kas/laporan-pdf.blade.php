@@ -20,6 +20,12 @@
         tr.total td { background: #f8fafc; font-weight: bold; }
         .masuk { color: #2b7a53; }
         .keluar { color: #b23a2e; }
+        .lampiran { width: 100%; border-collapse: collapse; }
+        .lampiran td { border: 1px solid #e2e8f0; padding: 8px 10px; vertical-align: top; }
+        .lampiran td.thumb { width: 210px; }
+        .lampiran img { width: 190px; max-height: 150px; }
+        .lampiran .judul { font-weight: bold; font-size: 11px; color: #334155; }
+        .lampiran .muted { color: #64748b; font-size: 9px; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -92,5 +98,48 @@
             </tfoot>
         @endif
     </table>
+
+    @php
+        $lampiran = array_values(array_filter($rekap['baris'], fn ($b) => ! empty($b['gambar'])));
+    @endphp
+    @if (! empty($lampiran))
+        <div style="page-break-before: always;">
+            <h1>Lampiran Bukti</h1>
+            <p class="sub">
+                {{ $employee->nama }} &middot;
+                Periode {{ $dari->format('d/m/Y') }} &ndash; {{ $sampai->format('d/m/Y') }}
+                &middot; {{ count($lampiran) }} bukti
+            </p>
+
+            <table class="lampiran">
+                @foreach ($lampiran as $b)
+                    @php $uri = \App\Support\Gambar::dataUri($b['gambar']); @endphp
+                    <tr>
+                        <td class="thumb">
+                            @if ($uri)
+                                <img src="{{ $uri }}" alt="Bukti transaksi">
+                            @else
+                                <span class="muted">Gambar tidak tersedia</span>
+                            @endif
+                        </td>
+                        <td>
+                            <div class="judul">{{ $b['kategori'] }} &middot; {{ $b['buku'] }}</div>
+                            <div class="muted">
+                                {{ \Illuminate\Support\Carbon::parse($b['tanggal'])->format('d/m/Y') }}
+                                @if ($b['keterangan']) &middot; {{ $b['keterangan'] }} @endif
+                            </div>
+                            <div class="muted" style="margin-top: 4px;">
+                                @if ($b['masuk'])
+                                    Masuk {{ \App\Support\Rupiah::format($b['masuk']) }}
+                                @else
+                                    Keluar {{ \App\Support\Rupiah::format($b['keluar']) }}
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            </table>
+        </div>
+    @endif
 </body>
 </html>

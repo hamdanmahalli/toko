@@ -72,8 +72,7 @@
                             @endcan
                                     <div class="flex min-w-0 items-center gap-3">
                                         @if ($t->gambar)
-                                            <img src="{{ $t->gambarUrl() }}" alt="Bukti transaksi"
-                                                 class="h-11 w-11 shrink-0 rounded-lg object-cover ring-1 ring-slate-100">
+                                            <x-bukti-transaksi :url="$t->gambarUrl()" :keterangan="$t->keterangan ?: $label" />
                                         @endif
                                         <div class="min-w-0">
                                             @if ($t->keterangan)
@@ -115,4 +114,6 @@
             </div>
         </div>
     @endcan
+
+    {{-- Modal pratinjau dirender lewat komponen x-bukti-transaksi. --}}
 @endsection

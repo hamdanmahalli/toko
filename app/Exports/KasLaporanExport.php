@@ -29,7 +29,7 @@ class KasLaporanExport implements FromArray, WithColumnWidths, WithHeadings, Wit
     /** @return array<int, string> */
     public function headings(): array
     {
-        return ['Tanggal', 'Buku', 'Kategori', 'Jenis', 'Keterangan', 'Masuk', 'Keluar', 'Saldo'];
+        return ['Tanggal', 'Buku', 'Kategori', 'Jenis', 'Keterangan', 'Bukti', 'Masuk', 'Keluar', 'Saldo'];
     }
 
     /** @return array<int, array<int, mixed>> */
@@ -42,6 +42,7 @@ class KasLaporanExport implements FromArray, WithColumnWidths, WithHeadings, Wit
                 $b['kategori'],
                 $b['jenis'],
                 $b['keterangan'] ?? '-',
+                $b['gambar'] ?? '-',
                 $b['masuk'] ? (float) $b['masuk'] : null,
                 $b['keluar'] ? (float) $b['keluar'] : null,
                 (float) $b['saldo'],
@@ -58,9 +59,10 @@ class KasLaporanExport implements FromArray, WithColumnWidths, WithHeadings, Wit
             'C' => 18,
             'D' => 13,
             'E' => 32,
-            'F' => 16,
+            'F' => 28,
             'G' => 16,
-            'H' => 18,
+            'H' => 16,
+            'I' => 18,
         ];
     }
 
@@ -71,7 +73,7 @@ class KasLaporanExport implements FromArray, WithColumnWidths, WithHeadings, Wit
 
         return [
             1 => ['font' => ['bold' => true]],
-            "F2:H{$barisTerakhir}" => ['numberFormat' => ['formatCode' => '#,##0']],
+            "G2:I{$barisTerakhir}" => ['numberFormat' => ['formatCode' => '#,##0']],
         ];
     }
 }

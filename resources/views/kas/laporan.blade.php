@@ -86,6 +86,7 @@
                         <th class="px-3 py-2.5 font-medium">Tanggal</th>
                         <th class="px-3 py-2.5 font-medium">Buku</th>
                         <th class="px-3 py-2.5 font-medium">Kategori</th>
+                        <th class="px-3 py-2.5 font-medium">Bukti</th>
                         <th class="px-3 py-2.5 text-right font-medium">Masuk</th>
                         <th class="px-3 py-2.5 text-right font-medium">Keluar</th>
                         <th class="px-3 py-2.5 text-right font-medium">Saldo</th>
@@ -102,6 +103,13 @@
                                     <span class="block text-[11px] text-slate-400">{{ $b['keterangan'] }}</span>
                                 @endif
                             </td>
+                            <td class="px-3 py-2.5">
+                                @if ($b['gambar_url'])
+                                    <x-bukti-transaksi :url="$b['gambar_url']" :keterangan="$b['keterangan'] ?: $b['kategori']" />
+                                @else
+                                    <span class="text-slate-300">&mdash;</span>
+                                @endif
+                            </td>
                             <td class="tabular px-3 py-2.5 text-right text-brand-700">{{ $b['masuk'] ? \App\Support\Rupiah::format($b['masuk']) : '-' }}</td>
                             <td class="tabular px-3 py-2.5 text-right text-merah-600">{{ $b['keluar'] ? \App\Support\Rupiah::format($b['keluar']) : '-' }}</td>
                             <td class="tabular px-3 py-2.5 text-right font-medium text-slate-800">{{ \App\Support\Rupiah::format($b['saldo']) }}</td>
@@ -110,7 +118,7 @@
                 </tbody>
                 <tfoot class="border-t border-slate-100 text-sm font-semibold text-slate-800">
                     <tr>
-                        <td class="px-3 py-2.5" colspan="3">Total</td>
+                        <td class="px-3 py-2.5" colspan="4">Total</td>
                         <td class="tabular px-3 py-2.5 text-right text-brand-700">{{ \App\Support\Rupiah::format($rekap['ringkasan']['masuk']) }}</td>
                         <td class="tabular px-3 py-2.5 text-right text-merah-600">{{ \App\Support\Rupiah::format($rekap['ringkasan']['keluar']) }}</td>
                         <td class="tabular px-3 py-2.5 text-right text-slate-900">{{ \App\Support\Rupiah::format($rekap['ringkasan']['saldo_akhir']) }}</td>

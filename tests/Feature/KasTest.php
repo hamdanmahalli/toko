@@ -404,6 +404,25 @@ class KasTest extends TestCase
         Storage::disk('public')->assertExists($trx->gambar);
     }
 
+    public function test_bukti_transaksi_bisa_dipratinjau(): void
+    {
+        Storage::fake('public');
+
+        $karyawan = $this->karyawan();
+        $buku = CashBook::factory()->untuk($karyawan)->create();
+        $trx = CashBookTransaction::factory()->untuk($buku)->create([
+            'gambar' => 'kas/bukti.jpg',
+            'keterangan' => 'Bukti pembelian',
+        ]);
+
+        $this->actingAs($karyawan->user)
+            ->get("/kas/{$buku->id}")
+            ->assertOk()
+            ->assertSee('js-preview', false)
+            ->assertSee('modal-gambar', false)
+            ->assertSee($trx->gambarUrl(), false);
+    }
+
     public function test_gambar_transaksi_harus_berupa_gambar(): void
     {
         Storage::fake('public');
@@ -493,6 +512,56 @@ class KasTest extends TestCase
         $this->actingAs($karyawan->user)
             ->get('/kas/laporan/excel?dari=2026-02-01&sampai=2026-02-28')
             ->assertOk();
+    }
+
+    public function test_laporan_menampilkan_pratinjau_bukti(): void
+    {
+        Storage::fake('public');
+
+        $karyawan = $this->karyawan();
+        $buku = CashBook::factory()->untuk($karyawan)->create();
+
+        CashBookTransaction::factory()->untuk($buku)->masuk()->create([
+            'tanggal' => '2026-02-05',
+            'gambar' => 'kas/bukti.jpg',
+        ]);
+
+        $this->actingAs($karyawan->user)
+            ->get('/kas/laporan?dari=2026-02-01&sampai=2026-02-28')
+            ->assertOk()
+            ->assertSee('Bukti')
+            ->assertSee('js-preview', false)
+            ->assertSee('/media/kas/bukti.jpg', false);
+    }
+
+    public function test_laporan_pdf_menyertakan_lampiran_bukti(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('kas/bukti.jpg', $this->bytesGambar());
+
+        $karyawan = $this->karyawan();
+        $buku = CashBook::factory()->untuk($karyawan)->create();
+
+        CashBookTransaction::factory()->untuk($buku)->masuk()->create([
+            'tanggal' => '2026-02-05',
+            'gambar' => 'kas/bukti.jpg',
+        ]);
+
+        $this->actingAs($karyawan->user)
+            ->get('/kas/laporan/pdf?dari=2026-02-01&sampai=2026-02-28')
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
+    private function bytesGambar(): string
+    {
+        $gambar = imagecreatetruecolor(20, 20);
+        ob_start();
+        imagejpeg($gambar);
+        $bytes = ob_get_clean();
+        imagedestroy($gambar);
+
+        return $bytes;
     }
 
     public function test_enum_kategori_menurunkan_jenis(): void

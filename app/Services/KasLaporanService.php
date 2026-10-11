@@ -77,6 +77,8 @@ class KasLaporanService
                 'masuk' => $masuk,
                 'keluar' => $keluar,
                 'saldo' => $saldoBerjalan[$trx->cash_book_id],
+                'gambar' => $trx->gambar,
+                'gambar_url' => $trx->gambar ? $trx->gambarUrl() : null,
             ];
         }
 
