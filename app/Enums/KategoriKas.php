@@ -64,4 +64,24 @@ enum KategoriKas: string
             ->mapWithKeys(fn (self $case) => [$case->value => $case->label()])
             ->all();
     }
+
+    /**
+     * Kategori bawaan yang disemai ke setiap karyawan. Nilai `kode` sengaja
+     * sama dengan nilai enum supaya transaksi lama (yang tersimpan sebagai
+     * string enum) langsung cocok tanpa migrasi data.
+     *
+     * @return array<int, array{kode: string, nama: string, jenis: JenisKas, urutan: int}>
+     */
+    public static function defaults(): array
+    {
+        return collect(self::cases())
+            ->values()
+            ->map(fn (self $case, int $i) => [
+                'kode' => $case->value,
+                'nama' => $case->label(),
+                'jenis' => $case->jenis(),
+                'urutan' => $i,
+            ])
+            ->all();
+    }
 }

@@ -139,7 +139,7 @@
             pemicu.addEventListener('click', () => {
                 target = document.getElementById(pemicu.getAttribute('data-kalkulator-buka'));
                 if (!target) return;
-                expr = (target.value || '').replace(/[^\d+\-*/.]/g, '');
+                expr = (target.value || '').replace(/[^\d+\-*/]/g, '');
                 tampil();
                 if (typeof dialog.showModal === 'function') dialog.showModal();
             });
@@ -148,7 +148,8 @@
         document.getElementById('kalkulator-pakai')?.addEventListener('click', () => {
             if (target) {
                 const nilai = hitung(expr);
-                target.value = String(Math.round(Number.isFinite(nilai) ? nilai : 0));
+                const bulat = Math.round(Number.isFinite(nilai) ? nilai : 0);
+                target.value = bulat.toLocaleString('id-ID');
             }
             dialog.close();
         });

@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Enums\JenisKas;
 use App\Enums\PayrollStatus;
 use App\Models\AuditLog;
+use App\Models\CashCategory;
 use App\Models\Employee;
 use App\Models\PayrollDetail;
 use App\Models\PayrollRun;
@@ -98,5 +100,19 @@ class FactoryTest extends TestCase
 
         $this->assertCount(1, $found);
         $this->assertSame('employee', $found->first()->entitas);
+    }
+
+    public function test_cash_category_factory_berfungsi(): void
+    {
+        $karyawan = Employee::factory()->create();
+        $kategori = CashCategory::factory()->untuk($karyawan)->create();
+
+        $this->assertTrue($kategori->exists);
+        $this->assertSame($karyawan->id, $kategori->employee_id);
+        $this->assertSame(JenisKas::Masuk, $kategori->jenis);
+        $this->assertTrue($kategori->aktif);
+
+        $this->assertSame(JenisKas::Keluar, CashCategory::factory()->untuk($karyawan)->keluar()->create()->jenis);
+        $this->assertFalse(CashCategory::factory()->untuk($karyawan)->nonaktif()->create()->aktif);
     }
 }

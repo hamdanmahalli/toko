@@ -52,6 +52,12 @@ class KasTest extends TestCase
         ]);
     }
 
+    /** Setiap request HTTP memakai session id baru; bersihkan agar tidak dianggap perangkat lain. */
+    private function lanjut(Employee $karyawan): void
+    {
+        $karyawan->user->forceFill(['active_session_id' => null])->save();
+    }
+
     public function test_halaman_kas_karyawan_tampil(): void
     {
         $karyawan = $this->karyawan();
@@ -100,12 +106,13 @@ class KasTest extends TestCase
 
         $this->actingAs($karyawan->user)
             ->post("/kas/{$buku->id}/transaksi", [
+                'jenis' => JenisKas::Masuk->value,
                 'kategori' => KategoriKas::Penjualan->value,
                 'tanggal' => '2026-03-01',
                 'jumlah' => '25.000',
                 'keterangan' => 'Jualan pagi',
             ])
-            ->assertRedirect(route('kas.show', $buku))
+            ->assertRedirect()
             ->assertSessionHas('sukses');
 
         $this->assertDatabaseHas('cash_book_transactions', [
@@ -125,6 +132,7 @@ class KasTest extends TestCase
 
         $this->actingAs($karyawan->user)
             ->post("/kas/{$buku->id}/transaksi", [
+                'jenis' => 'keluar',
                 'kategori' => KategoriKas::Belanja->value,
                 'tanggal' => '2026-03-02',
                 'jumlah' => '40000',
@@ -148,6 +156,7 @@ class KasTest extends TestCase
 
         $this->actingAs($karyawan->user)
             ->post("/kas/{$buku->id}/transaksi", [
+                'jenis' => 'masuk',
                 'kategori' => KategoriKas::Penjualan->value,
                 'tanggal' => '2026-03-01',
                 'jumlah' => '',
@@ -164,11 +173,157 @@ class KasTest extends TestCase
 
         $this->actingAs($karyawan->user)
             ->post("/kas/{$buku->id}/transaksi", [
+                'jenis' => 'masuk',
                 'kategori' => 'entah',
                 'tanggal' => '2026-03-01',
                 'jumlah' => '1000',
             ])
             ->assertSessionHasErrors('kategori');
+    }
+
+    public function test_halaman_input_transaksi_terpisah(): void
+    {
+        $karyawan = $this->karyawan();
+        $buku = CashBook::factory()->untuk($karyawan)->create();
+
+        $this->actingAs($karyawan->user)
+            ->get("/kas/{$buku->id}/transaksi/tambah")
+            ->assertOk()
+            ->assertSee('Catat transaksi')
+            ->assertSee('Uang masuk')
+            ->assertSee('Uang keluar')
+            ->assertSee('Penjualan')
+            ->assertSee('Belanja');
+    }
+
+    public function test_kategori_bawaan_disemai_untuk_karyawan(): void
+    {
+        $karyawan = $this->karyawan();
+
+        $this->assertDatabaseCount('cash_categories', 0);
+
+        $this->actingAs($karyawan->user)->get('/kas')->assertOk();
+
+        $this->assertDatabaseCount('cash_categories', count(KategoriKas::cases()));
+        $this->assertDatabaseHas('cash_categories', [
+            'employee_id' => $karyawan->id,
+            'kode' => KategoriKas::Penjualan->value,
+            'nama' => KategoriKas::Penjualan->label(),
+            'jenis' => JenisKas::Masuk->value,
+        ]);
+    }
+
+    public function test_kategori_harus_sesuai_jenis(): void
+    {
+        $karyawan = $this->karyawan();
+        $buku = CashBook::factory()->untuk($karyawan)->create();
+
+        $this->actingAs($karyawan->user)
+            ->post("/kas/{$buku->id}/transaksi", [
+                'jenis' => 'masuk',
+                'kategori' => KategoriKas::Belanja->value,
+                'tanggal' => '2026-03-01',
+                'jumlah' => '1000',
+            ])
+            ->assertSessionHasErrors('kategori');
+
+        $this->assertDatabaseCount('cash_book_transactions', 0);
+    }
+
+    public function test_kategori_nonaktif_tidak_bisa_dipakai(): void
+    {
+        $karyawan = $this->karyawan();
+        $buku = CashBook::factory()->untuk($karyawan)->create();
+
+        $this->actingAs($karyawan->user)->get('/kas')->assertOk();
+
+        $karyawan->cashCategories()->where('kode', KategoriKas::Penjualan->value)->update(['aktif' => false]);
+
+        $this->lanjut($karyawan);
+
+        $this->actingAs($karyawan->user)
+            ->post("/kas/{$buku->id}/transaksi", [
+                'jenis' => 'masuk',
+                'kategori' => KategoriKas::Penjualan->value,
+                'tanggal' => '2026-03-01',
+                'jumlah' => '1000',
+            ])
+            ->assertSessionHasErrors('kategori');
+    }
+
+    public function test_kategori_bisa_ditambah_diubah_dan_dihapus(): void
+    {
+        $karyawan = $this->karyawan();
+
+        $this->actingAs($karyawan->user)
+            ->post('/kas/kategori', ['nama' => 'Beli stok', 'jenis' => 'keluar', 'urutan' => 3, 'aktif' => '1'])
+            ->assertRedirect(route('kas.kategori.index'));
+
+        $kategori = $karyawan->cashCategories()->where('nama', 'Beli stok')->firstOrFail();
+        $this->assertSame('beli_stok', $kategori->kode);
+        $this->assertSame(JenisKas::Keluar, $kategori->jenis);
+
+        $this->lanjut($karyawan);
+
+        $this->actingAs($karyawan->user)
+            ->put("/kas/kategori/{$kategori->id}", ['nama' => 'Belanja stok', 'jenis' => 'keluar', 'urutan' => 1, 'aktif' => '1'])
+            ->assertRedirect(route('kas.kategori.index'));
+
+        $kategori->refresh();
+        $this->assertSame('Belanja stok', $kategori->nama);
+        $this->assertSame('beli_stok', $kategori->kode, 'Kode tidak berubah saat nama diubah.');
+
+        $this->lanjut($karyawan);
+
+        $this->actingAs($karyawan->user)
+            ->delete("/kas/kategori/{$kategori->id}")
+            ->assertRedirect(route('kas.kategori.index'));
+
+        $this->assertDatabaseMissing('cash_categories', ['id' => $kategori->id]);
+    }
+
+    public function test_kategori_terpakai_atau_bawaan_dinonaktifkan_bukan_dihapus(): void
+    {
+        $karyawan = $this->karyawan();
+        $buku = CashBook::factory()->untuk($karyawan)->create(['saldo_awal' => 0]);
+
+        // Sentuh /kas dulu supaya kategori bawaan tersemai.
+        $this->actingAs($karyawan->user)->get('/kas')->assertOk();
+
+        $bawaan = $karyawan->cashCategories()->where('kode', KategoriKas::Penjualan->value)->firstOrFail();
+
+        $this->lanjut($karyawan);
+
+        $this->actingAs($karyawan->user)
+            ->delete("/kas/kategori/{$bawaan->id}")
+            ->assertRedirect(route('kas.kategori.index'));
+
+        $this->assertDatabaseHas('cash_categories', ['id' => $bawaan->id, 'aktif' => false]);
+    }
+
+    public function test_laporan_memakai_nama_kategori_dari_tabel(): void
+    {
+        $karyawan = $this->karyawan();
+        $buku = CashBook::factory()->untuk($karyawan)->create();
+
+        $this->actingAs($karyawan->user)->get('/kas')->assertOk();
+
+        $karyawan->cashCategories()
+            ->where('kode', KategoriKas::Penjualan->value)
+            ->update(['nama' => 'Omzet harian']);
+
+        CashBookTransaction::factory()->untuk($buku)->masuk()->create([
+            'kategori' => KategoriKas::Penjualan->value,
+            'tanggal' => '2026-02-05',
+            'jumlah' => 9000,
+        ]);
+
+        $this->lanjut($karyawan);
+
+        $this->actingAs($karyawan->user)
+            ->get('/kas/laporan?dari=2026-02-01&sampai=2026-02-28')
+            ->assertOk()
+            ->assertSee('Omzet harian');
     }
 
     public function test_transaksi_menghapus_saldo_kembali(): void

@@ -24,13 +24,24 @@
             <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70">Total saldo</p>
             <p class="tabular mt-1 text-2xl font-bold">{{ \App\Support\Rupiah::format($totalSaldo) }}</p>
         </div>
-        <a href="{{ route('kas.laporan') }}"
-           class="flex shrink-0 items-center gap-1.5 rounded-xl bg-white/15 px-3.5 py-2.5 text-sm font-medium ring-1 ring-white/20 transition hover:bg-white/25">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5m0 14h16M8 19v-6m4 6V9m4 10v-3"/>
-            </svg>
-            Laporan
-        </a>
+        <div class="flex shrink-0 items-center gap-2">
+            @can('kas.buat')
+                <a href="{{ route('kas.kategori.index') }}"
+                   class="flex items-center gap-1.5 rounded-xl bg-white/15 px-3 py-2.5 text-sm font-medium ring-1 ring-white/20 transition hover:bg-white/25">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10"/>
+                    </svg>
+                    Kategori
+                </a>
+            @endcan
+            <a href="{{ route('kas.laporan') }}"
+               class="flex shrink-0 items-center gap-1.5 rounded-xl bg-white/15 px-3.5 py-2.5 text-sm font-medium ring-1 ring-white/20 transition hover:bg-white/25">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5m0 14h16M8 19v-6m4 6V9m4 10v-3"/>
+                </svg>
+                Laporan
+            </a>
+        </div>
     </div>
 
     @if ($buku->isEmpty())

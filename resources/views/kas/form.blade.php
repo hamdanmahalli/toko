@@ -31,7 +31,7 @@
             <div class="relative">
                 <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">Rp</span>
                 <input id="saldo_awal" name="saldo_awal" type="text" inputmode="numeric" autocomplete="off"
-                       value="{{ $angkaAwal }}" placeholder="0"
+                       data-format-ribuan value="{{ $angkaAwal }}" placeholder="0"
                        class="tabular w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-12 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
                 <button type="button" data-kalkulator-buka="saldo_awal" aria-label="Buka kalkulator"
                         class="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
@@ -79,4 +79,5 @@
     @endif
 
     @include('components.kalkulator')
+    @include('components.format-ribuan')
 @endsection

@@ -122,12 +122,23 @@ Route::middleware('auth')->group(function () {
         Route::get('/kas/laporan', [KasController::class, 'laporan'])->name('kas.laporan');
         Route::get('/kas/laporan/pdf', [KasController::class, 'laporanPdf'])->name('kas.laporan.pdf');
         Route::get('/kas/laporan/excel', [KasController::class, 'laporanExcel'])->name('kas.laporan.excel');
+        Route::get('/kas/kategori', [KasController::class, 'kategoriIndex'])->name('kas.kategori.index');
+        Route::get('/kas/{buku}/transaksi/tambah', [KasController::class, 'createTransaksi'])
+            ->whereNumber('buku')->name('kas.transaksi.create');
         Route::get('/kas/{buku}', [KasController::class, 'show'])->whereNumber('buku')->name('kas.show');
     });
 
     Route::middleware('permission:kas.buat')->group(function () {
         Route::get('/kas/tambah', [KasController::class, 'create'])->name('kas.create');
         Route::post('/kas', [KasController::class, 'store'])->name('kas.store');
+        Route::get('/kas/kategori/tambah', [KasController::class, 'kategoriCreate'])->name('kas.kategori.create');
+        Route::post('/kas/kategori', [KasController::class, 'kategoriStore'])->name('kas.kategori.store');
+        Route::get('/kas/kategori/{kategori}/ubah', [KasController::class, 'kategoriEdit'])
+            ->whereNumber('kategori')->name('kas.kategori.edit');
+        Route::put('/kas/kategori/{kategori}', [KasController::class, 'kategoriUpdate'])
+            ->whereNumber('kategori')->name('kas.kategori.update');
+        Route::delete('/kas/kategori/{kategori}', [KasController::class, 'kategoriDestroy'])
+            ->whereNumber('kategori')->name('kas.kategori.destroy');
         Route::get('/kas/{buku}/ubah', [KasController::class, 'edit'])->whereNumber('buku')->name('kas.edit');
         Route::put('/kas/{buku}', [KasController::class, 'update'])->whereNumber('buku')->name('kas.update');
         Route::delete('/kas/{buku}', [KasController::class, 'destroy'])->whereNumber('buku')->name('kas.destroy');

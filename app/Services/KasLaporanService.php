@@ -8,6 +8,7 @@ use App\Models\CashBookTransaction;
 use App\Models\Employee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 /**
  * Rekap laporan kas.
@@ -43,6 +44,7 @@ class KasLaporanService
         }
 
         $namaBuku = $buku->pluck('nama', 'id');
+        $namaKategori = $employee->cashCategories()->pluck('nama', 'kode')->all();
         $saldoAwalBuku = $this->saldoAwalPeriode($buku, $dari);
         $saldoBerjalan = $saldoAwalBuku;
 
@@ -69,7 +71,7 @@ class KasLaporanService
             $baris[] = [
                 'tanggal' => $trx->tanggal->toDateString(),
                 'buku' => $namaBuku[$trx->cash_book_id] ?? '-',
-                'kategori' => $trx->kategori->label(),
+                'kategori' => $namaKategori[$trx->kategori] ?? Str::headline((string) $trx->kategori),
                 'jenis' => $trx->jenis->label(),
                 'keterangan' => $trx->keterangan,
                 'masuk' => $masuk,

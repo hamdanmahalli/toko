@@ -3,12 +3,12 @@
 namespace App\Models;
 
 use App\Enums\JenisKas;
-use App\Enums\KategoriKas;
 use Database\Factories\CashBookTransactionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 #[
     Fillable(['cash_book_id', 'jenis', 'kategori', 'tanggal', 'jumlah', 'keterangan']),
@@ -22,7 +22,6 @@ class CashBookTransaction extends Model
     {
         return [
             'jenis' => JenisKas::class,
-            'kategori' => KategoriKas::class,
             'tanggal' => 'date',
             'jumlah' => 'decimal:2',
         ];
@@ -31,6 +30,18 @@ class CashBookTransaction extends Model
     public function cashBook(): BelongsTo
     {
         return $this->belongsTo(CashBook::class);
+    }
+
+    /**
+     * Nama kategori untuk ditampilkan. `kategori` menyimpan kode; peta nama
+     * diambil dari daftar kategori karyawan, dengan cadangan bila kategori
+     * sudah dihapus.
+     *
+     * @param  array<string, string>  $peta
+     */
+    public function labelKategori(array $peta): string
+    {
+        return $peta[$this->kategori] ?? Str::headline((string) $this->kategori);
     }
 
     /** Nilai bertanda: pemasukan positif, pengeluaran negatif. */

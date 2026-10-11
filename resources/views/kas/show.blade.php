@@ -2,7 +2,6 @@
 
 @php
     use App\Enums\JenisKas;
-    use App\Enums\KategoriKas;
 @endphp
 
 @section('judul', $buku->nama)
@@ -49,61 +48,22 @@
     </div>
 
     @can('kas.buat')
-        <form method="POST" action="{{ route('kas.transaksi.store', $buku) }}" class="card mb-4 space-y-3 p-4">
-            @csrf
-
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="mb-1.5 block text-xs font-medium text-slate-600" for="kategori">Kategori</label>
-                    <select id="kategori" name="kategori" required
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
-                        <optgroup label="Pemasukan">
-                            @foreach (KategoriKas::optionsFor(JenisKas::Masuk) as $value => $label)
-                                <option value="{{ $value }}" @selected(old('kategori') === $value)>{{ $label }}</option>
-                            @endforeach
-                        </optgroup>
-                        <optgroup label="Pengeluaran">
-                            @foreach (KategoriKas::optionsFor(JenisKas::Keluar) as $value => $label)
-                                <option value="{{ $value }}" @selected(old('kategori') === $value)>{{ $label }}</option>
-                            @endforeach
-                        </optgroup>
-                    </select>
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-xs font-medium text-slate-600" for="tanggal">Tanggal</label>
-                    <input id="tanggal" name="tanggal" type="date" required
-                           value="{{ old('tanggal', now()->toDateString()) }}"
-                           class="tabular w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
-                </div>
-            </div>
-
-            <div>
-                <label class="mb-1.5 block text-xs font-medium text-slate-600" for="jumlah">Nominal</label>
-                <div class="relative">
-                    <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">Rp</span>
-                    <input id="jumlah" name="jumlah" type="text" inputmode="numeric" autocomplete="off" required
-                           value="{{ old('jumlah') }}" placeholder="0"
-                           class="tabular w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-12 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
-                    <button type="button" data-kalkulator-buka="jumlah" aria-label="Buka kalkulator"
-                            class="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
-                        <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm2.5 4h7M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h.01M15.5 18h.01"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div>
-                <label class="mb-1.5 block text-xs font-medium text-slate-600" for="keterangan">Keterangan</label>
-                <input id="keterangan" name="keterangan" type="text" maxlength="500" value="{{ old('keterangan') }}"
-                       placeholder="Opsional"
-                       class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
-            </div>
-
-            <button class="w-full rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-105 active:scale-[.99]">
+        <div class="mb-4 flex gap-2">
+            <a href="{{ route('kas.transaksi.create', $buku) }}"
+               class="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-105 active:scale-[.99]">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
+                </svg>
                 Catat transaksi
-            </button>
-        </form>
+            </a>
+            <a href="{{ route('kas.kategori.index') }}"
+               class="flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10"/>
+                </svg>
+                Kategori
+            </a>
+        </div>
     @endcan
 
     <section>
@@ -119,7 +79,7 @@
                     @php $masuk = $t->jenis === JenisKas::Masuk; @endphp
                     <div class="card flex items-start justify-between gap-3 p-3.5">
                         <div class="min-w-0">
-                            <p class="text-sm font-medium text-slate-800">{{ $t->kategori->label() }}</p>
+                            <p class="text-sm font-medium text-slate-800">{{ $t->labelKategori($petaKategori) }}</p>
                             <p class="tabular mt-0.5 text-[11px] text-slate-500">{{ $t->tanggal->format('d/m/Y') }}</p>
                             @if ($t->keterangan)
                                 <p class="mt-0.5 truncate text-xs text-slate-500">{{ $t->keterangan }}</p>
@@ -143,6 +103,4 @@
             </div>
         @endif
     </section>
-
-    @include('components.kalkulator')
 @endsection
