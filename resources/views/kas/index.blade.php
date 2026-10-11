@@ -12,12 +12,11 @@
         </x-slot:ikon>
         <x-slot:aksi>
             @can('kas.buat')
-                <a href="{{ route('kas.create') }}"
-                   class="flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:brightness-105 active:scale-[.99]">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <a href="{{ route('kas.create') }}" aria-label="Buku baru" title="Buku baru"
+                   class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-sm shadow-brand-600/20 transition hover:brightness-105 active:scale-[.99]">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/>
                     </svg>
-                    Buku baru
                 </a>
             @endcan
         </x-slot:aksi>
