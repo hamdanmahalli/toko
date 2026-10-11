@@ -112,9 +112,45 @@
     animation: naik 0.45s ease-out both;
 }
 
+/* Kursor ketik di ujung nominal: berkedip tegas seperti caret asli. */
+@keyframes kursor {
+    0%,
+    49% {
+        opacity: 1;
+    }
+    50%,
+    100% {
+        opacity: 0;
+    }
+}
+
+.kursor {
+    animation: kursor 1s steps(1, end) infinite;
+}
+
+/* Getar singkat saat nominal belum diisi ketika menekan Simpan. */
+@keyframes getar {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-6px);
+    }
+    75% {
+        transform: translateX(6px);
+    }
+}
+
+.getar {
+    animation: getar 0.3s ease-in-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .kedip,
-    .masuk {
+    .masuk,
+    .kursor,
+    .getar {
         animation: none;
     }
 }

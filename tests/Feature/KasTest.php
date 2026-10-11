@@ -190,10 +190,12 @@ class KasTest extends TestCase
             ->get("/kas/{$buku->id}/transaksi/tambah")
             ->assertOk()
             ->assertSee('Catat transaksi')
+            ->assertSee('Total Pemasukan')
             ->assertSee('Uang masuk')
             ->assertSee('Uang keluar')
             ->assertSee('Penjualan')
-            ->assertSee('Belanja');
+            ->assertSee('Belanja')
+            ->assertSee('Simpan');
     }
 
     public function test_kategori_bawaan_disemai_untuk_karyawan(): void
