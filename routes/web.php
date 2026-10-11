@@ -12,11 +12,14 @@ use App\Http\Controllers\Admin\ShiftWindowController;
 use App\Http\Controllers\Admin\ShopController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KasController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\PanduanController;
 use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\PushController;
+use App\Http\Middleware\MenegakkanSatuPerangkat;
+use App\Http\Middleware\PastikanAkunAktif;
 use Illuminate\Support\Facades\Route;
 
 // Halaman sambutan (Get Started). Tamu melihat pengantar masuk;
@@ -28,6 +31,18 @@ Route::get('/', function () {
 // Panduan dibiarkan terbuka tanpa login supaya orang yang sedang lupa
 // password masih bisa membacanya.
 Route::get('/panduan', [PanduanController::class, 'index'])->name('panduan');
+
+// Berkas unggahan (foto karyawan, bukti transaksi kas) disajikan lewat aplikasi
+// supaya tidak bergantung pada symlink `public/storage` yang sering gagal di
+// shared hosting. Nama berkas acak, jadi aman dibuka tanpa login — sama seperti
+// akses `public/storage` sebelumnya.
+//
+// Middleware akun/perangkat sengaja dilewati: menyajikan gambar tidak perlu
+// sesi, dan kalau ikut jalan, tiap permintaan berkas bisa menendang sesi login.
+Route::get('/media/{path}', [MediaController::class, 'tampil'])
+    ->where('path', '.*')
+    ->withoutMiddleware([PastikanAkunAktif::class, MenegakkanSatuPerangkat::class])
+    ->name('media');
 
 // Perangkat presensi karyawan untuk karyawan yang tidak memakai HP. Tidak
 // memakai akun karyawan: satu user dan satu password per toko dipakai

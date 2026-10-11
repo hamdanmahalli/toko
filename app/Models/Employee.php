@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Storage;
 
 #[
     Fillable([
@@ -107,10 +106,10 @@ class Employee extends Model
         return $query->where('shop_id', $shop instanceof Shop ? $shop->id : $shop);
     }
 
-    /** URL foto karyawan di disk publik; null bila belum ada foto. */
+    /** URL foto karyawan lewat route media; null bila belum ada foto. */
     public function fotoUrl(): ?string
     {
-        return $this->foto ? Storage::disk('public')->url($this->foto) : null;
+        return $this->foto ? route('media', ['path' => $this->foto], false) : null;
     }
 
     public function initials(): string

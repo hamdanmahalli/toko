@@ -123,6 +123,14 @@ class AdminKaryawanTest extends TestCase
 
         $this->assertNotNull($karyawan->foto);
         Storage::disk('public')->assertExists($karyawan->foto);
+
+        // Foto disajikan lewat route /media (tidak menyematkan host), dan
+        // benar-benar bisa dibuka sebagai gambar.
+        $url = $karyawan->fotoUrl();
+        $this->assertStringStartsWith('/media/', $url);
+
+        $respon = $this->get($url)->assertOk();
+        $this->assertStringContainsString('image', (string) $respon->headers->get('content-type'));
     }
 
     public function test_ganti_foto_menghapus_foto_lama(): void

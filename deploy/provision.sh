@@ -50,9 +50,16 @@ fi
 echo "== php artisan migrate --force..."
 php artisan migrate --force
 
-# 4. Tautan storage (gambar/logo milik publik)
+# 4. Tautan storage (gambar/logo milik publik). Aplikasi menyajikan berkas
+#    unggahan lewat route /media, jadi kegagalan symlink di sini bukan lagi
+#    masalah fatal — tetapi tetap dilaporkan supaya ketahuan.
 echo "== php artisan storage:link..."
-php artisan storage:link >/dev/null 2>&1 || true
+if php artisan storage:link >/dev/null 2>&1; then
+    echo "   OK: public/storage tersedia."
+else
+    echo "   !! GAGAL membuat public/storage (hosting mungkin melarang symlink)."
+    echo "      Tidak masalah: foto & bukti transaksi tetap disajikan lewat /media."
+fi
 
 # 5. Cache konfigurasi + view (route:cache dimatikan kalau ada closure)
 echo "== Cache config & view..."
